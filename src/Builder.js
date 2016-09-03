@@ -289,7 +289,8 @@
 
     function spacesChanged(event){
         debug ? console.debug(arguments.callee.name) : '';
-        vgrid_spaces = $("#builder_hgrid_spaces").val();
+        vgrid_spaces = $("#builder_vgrid_spaces").val();
+        hgrid_spaces = $("#builder_hgrid_spaces").val();
         imageLoaded();
     }
 
