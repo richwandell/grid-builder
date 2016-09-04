@@ -49,6 +49,7 @@ table#builder_table{
     margin: 0;
     position: fixed;
     right: 0;
+    top: 0;
     height: 100%;
     overflow: auto;
 }

@@ -10,7 +10,7 @@ module.exports = function (grunt) {
                     expand: true
                 },{
                     cwd: 'src/',
-                    src: '*',
+                    src: '**/*.*',
                     dest: 'dist/',
                     expand: true
                 }]
@@ -26,13 +26,28 @@ module.exports = function (grunt) {
         },
         watch: {
             dev: {
-                files: ['src/*'],
-                tasks: ['copy:dev']
+                files: ['src/**/*.*'],
+                tasks: ['clean', 'copy:dev', 'concat', 'clean:html']
             }
         },
-
+        clean: {
+            temp: ['dist/**'],
+            html: ['dist/html/']
+        },
+        concat: {
+            desktop: {
+                src: ['src/html/builder.html', 'src/html/bm1.html', 'src/html/scripts.html'],
+                dest: 'dist/desktop.html'
+            },
+            android: {
+                src: ['src/html/builder.html', 'src/html/bm2.html', 'src/html/scripts.html'],
+                dest: 'dist/android.html'
+            }
+        }
     });
 
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-contrib-concat');
 };

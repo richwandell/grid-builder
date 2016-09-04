@@ -13,7 +13,6 @@
 
         $("#builder_canvas_container").css("maxWidth", $(window).width());
 
-
         if(builder_mode && builder_mode == 1) {
             //Request our db and set event handlers
             var dbrequest = window.indexedDB.open("BuilderDatabase", 6);
@@ -51,6 +50,16 @@
         $(overlay).click(canvasClicked);
     }
 
+    function showLoader(){
+        $("#builder_table").hide();
+        $("#builder_loading").show();
+    }
+
+    function hideLoader(){
+        $("#builder_table").show();
+        $("#builder_loading").hide();
+    }
+
     function bindTouchEvents(){
         debug ? console.debug(arguments.callee.name) : '';
         $(overlay).off();
@@ -84,6 +93,7 @@
     function builderToggleGridLines(toggle){
         debug ? console.debug(arguments.callee.name) : '';
         grid_lines_enabled = toggle;
+
         redraw();
         bindTouchEvents();
     }
@@ -113,11 +123,11 @@
             var dbrequest = window.indexedDB.open("BuilderDatabase", 6);
             dbrequest.onsuccess = function(event){
                 database = event.target.result;
-                var req = database.transaction(["layout_images"], "readwrite")
-                    .objectStore("layout_images")
-                    .get(8);
+                var os = database.transaction(["layout_images"], "readwrite")
+                    .objectStore("layout_images");
+                var req = os.openCursor();
                 req.onsuccess = function(event){
-                    bd = event.target.result;
+                    bd = event.target.result.value;
                     loadbd(bd);
                 }
             };
@@ -180,14 +190,15 @@
         debug ? console.debug(arguments.callee.name) : '';
         if(selected_grid.length > 0) {
             $("#builder_selected_box").show();
+            var sboxname = selected_grid.filter(function(i){
+                return i ? true : false;
+            }).map(function(i){
+                return i;
+            });
         }else{
             $("#builder_selected_box").hide();
         }
-        var sboxname = selected_grid.filter(function(i){
-            return i ? true : false;
-        }).map(function(i){
-            return i;
-        });
+
 
         drawGrid();
     }
@@ -197,6 +208,9 @@
         selected_grid = [];
         selected_grid[x] = [];
         selected_grid[x][y] = data;
+        $("#builder_selected_box").show();
+        $("#builder_selected_box_coords").html("x: " + x + " y: " + y);
+        $("#builder_selected_box_name").val(data);
     }
 
     function setHoverGrid(x, y, data){
@@ -238,13 +252,13 @@
                     full_grid[i] = [];
                 }
                 var y = 0;
-                for(var j = 0; j < selected_grid[i].length; j++){
-                    if(selected_grid[i][j]){
-                        y = j;
+                for(var y = 0; y < selected_grid[i].length; y++){
+                    if(selected_grid[i][y] || selected_grid[i][y] === ""){
                         break;
                     }
                 }
-                full_grid[i][y] = $("#builder_selected_box_name").val();
+                var name = $("#builder_selected_box_name").val();
+                full_grid[i][y] = name;
             }
         }
         selected_grid = [];
@@ -265,10 +279,13 @@
 
         var ysize = he / v;
         var y = Math.floor(cy / ysize);
-        $("#builder_selected_box").show();
-        $("#builder_selected_box_coords").html("x: " + x + " y: " + y);
 
         var n = $("#builder_selected_box_name").val();
+        if(full_grid[x]){
+            if(full_grid[x][y] || full_grid[x][y] === ""){
+                n = full_grid[x][y];
+            }
+        }
         setSelectedGrid(x, y, n);
         redraw();
     }
@@ -518,10 +535,14 @@
         for(var x = 0; x < full_grid.length; x++){
             if(full_grid[x]){
                 for(var y = 0; y < full_grid[x].length; y++){
-                    if(full_grid[x][y]){
+                    if(full_grid[x][y] || full_grid[x][y] === ""){
                         var name = full_grid[x][y];
+                        if(name.trim() == ""){
+                            name = "no name";
+                        }
                         $("#builder_named_grid_spaces").append("<tr>" +
                             "<td data-x='"+ x +"' data-y='" + y + "'>" + name + "</td>" +
+                            "<td>X: " + x + " Y: " + y + "</td>" +
                             "</tr>");
                     }
                 }

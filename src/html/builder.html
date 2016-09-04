@@ -1,7 +1,11 @@
 <!Doctype html>
 
-<link rel="stylesheet" href="builder.css" />
-<meta name="viewport" content="width=360, initial-scale=1">
+<head>
+    <link rel="stylesheet" href="builder.css" />
+    <meta name="viewport" content="width=360, initial-scale=1">
+    <title>Grid Builder</title>
+</head>
+
 
 <body>
     <table id="builder_table">
@@ -21,7 +25,7 @@
                 <div id="builder_container">
                     <form onsubmit="return false">
                         <fieldset>
-                            <h1>Indoor Mobile Phone Localization Floorplan Configurator</h1>
+                            <h1>Grid Builder</h1>
                         </fieldset>
                         <fieldset>
                             <table>
@@ -94,7 +98,7 @@
                                         </td>
                                         <td></td>
                                     </tr>
-                                    <tr>
+                                    <tr id="grid_color_tr">
                                         <td>
                                             <label for="builder_grid_color">Grid Color</label>
                                         </td>
@@ -142,8 +146,4 @@
     </table>
 
 </body>
-<script>
-    var builder_mode = 1;
-</script>
-<script src="scripts/jquery.min.js"></script>
-<script src="Builder.js"></script>
+
