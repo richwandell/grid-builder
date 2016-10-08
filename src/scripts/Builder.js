@@ -1,15 +1,18 @@
 ;(function($){
-    var canvas, overlay, database, debug = true, image_name,
-        selected_grid = [], full_grid = [], hover_grid = [], image_width,
-        image_height, image, vgrid_spaces, hgrid_spaces, floorplanname, selected_id,
-        touch_cx, touch_cy, grid_lines_enabled = true;
+    var canvas, overlay, database, debug = true, super_debug = false, image_name,
+        selected_grid = [], full_grid = [], hover_grid = [], multi_selected_grid = [],
+        image_width, image_height, image, vgrid_spaces, hgrid_spaces, floorplanname,
+        selected_id, touch_cx, touch_cy, grid_lines_enabled = true, canvas_context,
+        overlay_context, mouse_down = false, m_x_start = false, m_y_start = false;
 
     function init(){
         debug ? console.debug(arguments.callee.name) : '';
 
         //Grab and save our canvas
         canvas = $("#builder_canvas")[0];
+        canvas_context = canvas.getContext('2d');
         overlay = $("#builder_canvas_overlay")[0];
+        overlay_context = overlay.getContext('2d');
 
         $("#builder_canvas_container").css("maxWidth", $(window).width());
 
@@ -21,8 +24,8 @@
             dbrequest.onerror = dbonerror;
         }else if(builder_mode && builder_mode == 2){
             if(typeof Android != "undefined" && Android.getData) {
-                var s = Android.getData(1);
-                loadBuilderData(JSON.parse(s));
+                // var s = Android.getData("fplan-11.json");
+                // loadBuilderData(JSON.parse(s));
             }else{
                 loadBuilderData();
             }
@@ -30,7 +33,6 @@
             $("#builder_canvas_container").height($(window).height());
             return;
         }
-
 
         //Setup events for elements
         $("#builder_image_input").change(imageChanged);
@@ -45,20 +47,118 @@
         bngs.on("click", "tr", selectGridFromList);
         bngs.on("mouseenter", "tr", hoverGridFromList);
         bngs.on("mouseleave", "tr", removeHoverGridFromList);
+        bngs.on("click", "tr ul", toggleSpaceDisplay);
         $("#save_floorplan").click(saveFloorplan);
         $("#builder_download").click(downloadFloorplan);
-        $(overlay).click(canvasClicked);
+
+        $(overlay).on({
+            "mousedown": overlayMouseDown,
+            "mouseup": overlayMouseUp,
+            "mousemove": overlayMouseMove,
+            "click": overlayClicked
+        });
     }
 
-    function showLoader(){
-        $("#builder_table").hide();
-        $("#builder_loading").show();
+    window.builderGetFloorPlans = function(cb){
+        var req = database.transaction(["layout_images"], "readwrite")
+            .objectStore("layout_images")
+            .getAll();
+        req.onsuccess = cb;
+    };
+
+    function builderClearSelection(){
+        multi_selected_grid = [];
+        selected_grid = [];
+        redraw();
     }
 
-    function hideLoader(){
-        $("#builder_table").show();
-        $("#builder_loading").hide();
+    window.builderClearSelection = builderClearSelection;
+
+    function toggleSpaceDisplay(event){
+        $(event.currentTarget).toggleClass("builder_space_list_open");
     }
+
+    function overlayMouseDown(event){
+        super_debug ? console.debug(arguments.callee.name) : '';
+        mouse_down = true;
+        var results = getCanvasMouseXandY();
+
+        m_x_start = results[0];
+        m_y_start = results[1];
+        $(canvas).css("opacity", ".7");
+        $(overlay).css("opacity", "1");
+    }
+
+    function overlayMouseUp(event){
+        super_debug ? console.debug(arguments.callee.name) : '';
+        mouse_down = false;
+        $(canvas).css("opacity", "1");
+        $(overlay).css("opacity", ".2");
+        var results = getCanvasMouseXandY();
+        var start = getGridXandY(m_x_start, m_y_start);
+        var end = getGridXandY(results[0], results[1]);
+        console.log(start, end);
+        var sx, ex;
+        if(start[0] > end[0]) {
+            sx = end[0];
+            ex = start[0];
+        }else{
+            sx = start[0];
+            ex = end[0];
+        }
+        var sy, ey;
+        if(start[1] > end[1]){
+            sy = end[1];
+            ey = start[1];
+        }else{
+            sy = start[1];
+            ey = end[1];
+        }
+        for(var x = sx; x <= ex; x++){
+            for(var y = sy; y <= ey; y++){
+                if(!multi_selected_grid[x]){
+                    multi_selected_grid[x] = [];
+                }
+                multi_selected_grid[x][y] = "";
+            }
+        }
+    }
+
+    function overlayMouseMove(event){
+        super_debug ? console.debug(arguments.callee.name) : '';
+        if(mouse_down){
+            var results = getCanvasMouseXandY();
+            drawBox(m_x_start, m_y_start, results[0], results[1]);
+        }
+    }
+
+    function overlayClicked(event) {
+        debug ? console.debug(arguments.callee.name) : '';
+        var results = getCanvasMouseXandY();
+        clickCanvas(results[0], results[1]);
+    }
+
+    function drawBox(sx, sy, ex, ey){
+        debug ? console.debug(arguments.callee.name) : '';
+        drawGrid();
+        var xl = ex - sx, yl = ey - sy;
+        overlay_context.rect(sx, sy, xl, yl);
+        overlay_context.stroke();
+    }
+
+    function builderLoadFloorplan(plan){
+        debug ? console.debug(arguments.callee.name) : '';
+        var s = Android.getData(plan);
+        loadBuilderData(JSON.parse(s));
+    }
+
+    window.builderLoadFloorplan = builderLoadFloorplan;
+
+    window.builderLoadFloorplan2 = function(id){
+        debug ? console.debug(arguments.callee.name) : '';
+        var s = Android.getData2(Number(id));
+        loadBuilderData(JSON.parse(s));
+    };
 
     function bindTouchEvents(){
         debug ? console.debug(arguments.callee.name) : '';
@@ -66,15 +166,13 @@
         $(overlay).on({
             "touchstart": function(event){
                 var c = canvas.getContext('2d');
-                var wi = c.canvas.width;
-                var he = c.canvas.height;
 
                 var rect = canvas.getBoundingClientRect();
                 var touch = event.touches[0];
-                var thex = touch.pageX;
+                var thex = touch.clientX;
                 var they = touch.clientY;
-                var cx = (thex - rect.left) / (rect.right-rect.left) * wi;
-                var cy = (they - rect.top) * 2;
+                var cx = (thex - rect.left);
+                var cy = (they - rect.top);
                 touch_cx = cx;
                 touch_cy = cy;
             },
@@ -84,7 +182,10 @@
             },
             "touchend": function(event){
                 if(touch_cx && touch_cy) {
-                    clickCanvas(touch_cx, touch_cy);
+                    var xy = clickCanvas(touch_cx, touch_cy);
+                    if(Android && Android.setSpace){
+                        Android.setSpace(JSON.stringify(xy), $("#builder_selected_box_name").val(), selected_id);
+                    }
                 }
             }
         });
@@ -144,7 +245,7 @@
             var data = event.target.result;
             var element = document.createElement('a');
             element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(data)));
-            element.setAttribute('download', data.floorplanname + ".json");
+            element.setAttribute('download', "fplan-" + data.id + ".json");
 
             element.style.display = 'none';
             document.body.appendChild(element);
@@ -188,7 +289,7 @@
 
     function redraw(){
         debug ? console.debug(arguments.callee.name) : '';
-        if(selected_grid.length > 0) {
+        if(multi_selected_grid.length > 0) {
             $("#builder_selected_box").show();
             var sboxname = selected_grid.filter(function(i){
                 return i ? true : false;
@@ -215,26 +316,36 @@
 
     function setHoverGrid(x, y, data){
         debug ? console.debug(arguments.callee.name) : '';
-        hover_grid = [];
-        hover_grid[x] = [];
+        if(!hover_grid[x]) {
+            hover_grid[x] = [];
+        }
         hover_grid[x][y] = data;
     }
 
     function selectGridFromList(event){
         debug ? console.debug(arguments.callee.name) : '';
-        var x = $(event.target).data("x");
-        var y = $(event.target).data("y");
-        var name = $(event.target).text();
+        // var x = $(event.target).data("x");
+        // var y = $(event.target).data("y");
+        var name = $(event.currentTarget).find(".bngs_name").text();
+
+        var x, y;
+        $.each($(event.currentTarget).find("li"), function(i, o){
+            x = $(o).data("x");
+            y = $(o).data("y");
+        });
         setSelectedGrid(x, y, name);
         redraw();
     }
 
     function hoverGridFromList(event){
         debug ? console.debug(arguments.callee.name) : '';
-        var x = $(event.target).data("x");
-        var y = $(event.target).data("y");
-        var name = $(event.target).text();
-        setHoverGrid(x, y, name);
+        hover_grid = [];
+        $.each($(event.currentTarget).find("li"), function(i, o){
+            var x = $(o).data("x");
+            var y = $(o).data("y");
+            setHoverGrid(x, y, name);
+        });
+
         redraw();
     }
 
@@ -246,40 +357,40 @@
 
     function addSpace(event){
         debug ? console.debug(arguments.callee.name) : '';
-        for(var i = 0; i < selected_grid.length; i++){
-            if(selected_grid[i]){
+        var name = $("#builder_selected_box_name").val();
+        for(var i = 0; i < multi_selected_grid.length; i++){
+            if(multi_selected_grid[i]){
                 if(!full_grid[i]){
                     full_grid[i] = [];
                 }
-                var y = 0;
-                for(var y = 0; y < selected_grid[i].length; y++){
-                    if(selected_grid[i][y] || selected_grid[i][y] === ""){
-                        break;
+                for(var y = 0; y < multi_selected_grid[i].length; y++){
+                    if(multi_selected_grid[i][y] || multi_selected_grid[i][y] === ""){
+                        full_grid[i][y] = name;
                     }
                 }
-                var name = $("#builder_selected_box_name").val();
-                full_grid[i][y] = name;
             }
         }
-        selected_grid = [];
+        multi_selected_grid = [];
         redraw();
         drawFloorPlan();
     }
 
-    function clickCanvas(cx, cy){
-        var c = canvas.getContext('2d');
+    function getGridXandY(cx, cy){
+        var c = canvas_context;
         var wi = c.canvas.width;
         var he = c.canvas.height;
-
-        var h = parseInt($("#builder_hgrid_spaces").val());
-        var v = parseInt($("#builder_vgrid_spaces").val());
-
+        var h = hgrid_spaces;
+        var v = vgrid_spaces;
         var xsize = wi / h;
         var x = Math.floor(cx / xsize);
-
         var ysize = he / v;
         var y = Math.floor(cy / ysize);
+        return [x, y];
+    }
 
+    function clickCanvas(cx, cy){
+        var results = getGridXandY(cx, cy);
+        var x = results[0], y = results[1];
         var n = $("#builder_selected_box_name").val();
         if(full_grid[x]){
             if(full_grid[x][y] || full_grid[x][y] === ""){
@@ -288,20 +399,19 @@
         }
         setSelectedGrid(x, y, n);
         redraw();
+        return [x, y];
     }
 
-    function canvasClicked(event) {
-        debug ? console.debug(arguments.callee.name) : '';
-        var c = canvas.getContext('2d');
+    function getCanvasMouseXandY(){
+        var c = canvas_context;
         var wi = c.canvas.width;
         var he = c.canvas.height;
-
         var rect = canvas.getBoundingClientRect();
         var thex = event.clientX;
         var they = event.clientY;
         var cx = (thex - rect.left) / (rect.right-rect.left) * wi;
         var cy = (they - rect.top) / (rect.bottom-rect.top) * he;
-        clickCanvas(cx, cy);
+        return [cx, cy];
     }
 
     function spacesChanged(event){
@@ -324,11 +434,11 @@
 
     function drawGrid() {
         debug ? console.debug(arguments.callee.name) : '';
-        var c = canvas.getContext('2d');
+        var c = canvas_context;
         c.canvas.width = image_width;
         c.canvas.height = image_height;
         c.drawImage(image, 1, 1, image_width, image_height);
-        var co = overlay.getContext('2d');
+        var co = overlay_context;
         co.canvas.width = image_width;
         co.canvas.height = image_height;
 
@@ -373,37 +483,45 @@
             }
 
             if(selected_grid[i] || selected_grid[i] === ""){
-                var y = 0;
-                for(var j = 0; j < selected_grid[i].length; j++){
-                    if(selected_grid[i][j] || selected_grid[i][j] === ""){
-                        y = j;
-                        break;
+                for(var y = 0; y < selected_grid[i].length; y++){
+                    if(selected_grid[i][y] || selected_grid[i][y] === ""){
+                        c.fillStyle = "green";
+                        c.fillRect(
+                            (wi / ho) * i,
+                            (he / vi) * y,
+                            (wi / ho),
+                            (he / vi)
+                        );
                     }
                 }
-                c.fillStyle = "green";
-                c.fillRect(
-                    (wi / ho) * i,
-                    (he / vi) * y,
-                    (wi / ho),
-                    (he / vi)
-                );
             }
 
             if(hover_grid[i] || hover_grid[i] === ""){
-                var y = 0;
-                for(var j = 0; j < hover_grid[i].length; j++){
-                    if(hover_grid[i][j] || hover_grid[i][j] === ""){
-                        y = j;
-                        break;
+                for(var y = 0; y < hover_grid[i].length; y++){
+                    if(hover_grid[i][y] || hover_grid[i][y] === ""){
+                        co.fillStyle = "gold";
+                        co.fillRect(
+                            (wi / ho) * i,
+                            (he / vi) * y,
+                            (wi / ho),
+                            (he / vi)
+                        );
                     }
                 }
-                co.fillStyle = "gold";
-                co.fillRect(
-                    (wi / ho) * i,
-                    (he / vi) * y,
-                    (wi / ho),
-                    (he / vi)
-                );
+            }
+
+            if(multi_selected_grid[i] || multi_selected_grid[i] === ""){
+                for(var y = 0; y < multi_selected_grid[i].length; y++){
+                    if(multi_selected_grid[i][y] || multi_selected_grid[i][y] === ""){
+                        co.fillStyle = "blue";
+                        co.fillRect(
+                            (wi / ho) * i,
+                            (he / vi) * y,
+                            (wi / ho),
+                            (he / vi)
+                        );
+                    }
+                }
             }
         }
     }
@@ -531,7 +649,9 @@
     }
 
     function drawFloorPlan(){
+        debug ? console.debug(arguments.callee.name) : '';
         $("#builder_named_grid_spaces").html("");
+        var names = {};
         for(var x = 0; x < full_grid.length; x++){
             if(full_grid[x]){
                 for(var y = 0; y < full_grid[x].length; y++){
@@ -540,14 +660,25 @@
                         if(name.trim() == ""){
                             name = "no name";
                         }
-                        $("#builder_named_grid_spaces").append("<tr>" +
-                            "<td data-x='"+ x +"' data-y='" + y + "'>" + name + "</td>" +
-                            "<td>X: " + x + " Y: " + y + "</td>" +
-                            "</tr>");
+                        if(!names[name]){
+                            names[name] = [];
+                        }
+                        names[name].push([x, y]);
                     }
                 }
             }
         }
+        $.each(names, function(k, v){
+            var left = "<td class='bngs_name'>" + k + "</td>";
+            var right = "<td><ul>";
+            for(var i = 0; i < v.length; i++){
+                right += "<li data-x='" + v[i][0] + "' data-y='" + v[i][1] + "'>" +
+                        "X: " + v[i][0] + " Y: " + v[i][1] +
+                        "</li>";
+            }
+            right += "</ul></td>";
+            $("#builder_named_grid_spaces").append("<tr>" + left + right + "</tr>");
+        });
     }
 
     function reloadFromDb(id){
@@ -573,6 +704,11 @@
         debug ? console.debug(arguments.callee.name) : '';
         database = event.target.result;
         reloadFromDb();
+        if(typeof process != "undefined"){
+            if(process.mainModule){
+                process.mainModule.exports.register(the_builder);
+            }
+        }
     }
 
     function dbonerror(event) {
@@ -585,6 +721,8 @@
         database = event.target.result;
         var objectStore = database.createObjectStore("layout_images", { keyPath: "id", autoIncrement: true });
     }
+
+    var the_builder = this;
 
     $(function(){
         window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;

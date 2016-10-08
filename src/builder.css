@@ -6,6 +6,12 @@ body{
     height: 100%;
 }
 
+canvas{
+    transition: opacity .25s ease-in-out;
+    -moz-transition: opacity .25s ease-in-out;
+    -webkit-transition: opacity .25s ease-in-out;
+}
+
 table#builder_table{
     width: 100%;
     font-size: 13px;
@@ -37,10 +43,6 @@ table#builder_table{
 
 #builder_zoom button{
     width: 37px;
-}
-
-#builder_selected_box{
-    display: none;
 }
 
 #builder_container_td{
@@ -76,6 +78,17 @@ table#builder_table{
 
 #builder_download_td{
     text-align: right;
+}
+
+#builder_named_grid_spaces ul:not(.builder_space_list_open){
+    margin: 0;
+    height: 1rem;
+    overflow: hidden;
+}
+
+button#builder_clear_selection{
+    display: none;
+    width: 6rem;
 }
 
 @media only screen and (min-device-width : 320px) and (max-device-width : 480px) {

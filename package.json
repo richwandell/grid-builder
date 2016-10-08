@@ -7,18 +7,23 @@
     "grunt-contrib-coffee": "^1.0.0",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-watch": "^1.0.0",
+    "grunt-nw-builder": "^3.0.0",
     "jquery": "^3.1.0"
   },
   "dependencies": {
-    "nw": "^0.17.0"
+    "node-ssdp": "^2.8.0",
+    "nw": "^0.17.0",
+    "uuid": "^2.0.2",
+    "ws": "^1.1.1"
   },
   "scripts": {
     "start": "nw"
   },
-  "main": "dist/desktop.html",
+  "main": "dist/desktop/desktop.html",
+  "node-main": "dist/desktop/scripts/ssdp.js",
   "window": {
     "title": "Grid Builder",
-    "icon": "link.png",
+    "icon": "dist/desktop/icon24.png",
     "toolbar": true,
     "frame": true,
     "width": 1000,

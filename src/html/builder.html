@@ -6,7 +6,6 @@
     <title>Grid Builder</title>
 </head>
 
-
 <body>
     <table id="builder_table">
         <caption id="builder_title"></caption>
@@ -19,6 +18,7 @@
             </td>
             <td id="builder_container_td">
                 <div id="builder_zoom">
+                    <button id="builder_clear_selection">Clear Selection</button>
                     <button id="builder_zoom_out">-</button>
                     <button id="builder_zoom_in">+</button>
                 </div>
@@ -113,12 +113,12 @@
                         <fieldset>
                             <table>
                                 <caption>
-                                    <h2>Floorplan Spaces</h2>
+                                    <h2>Spaces</h2>
                                 </caption>
                                 <thead id="builder_selected_box">
                                     <tr>
                                         <td>
-                                            <label for="builder_selected_box_name">Position Name</label>
+                                            <label for="builder_selected_box_name">Name</label>
                                         </td>
                                         <td>
                                             <input type="text" id="builder_selected_box_name" />
