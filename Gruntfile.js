@@ -91,4 +91,8 @@ module.exports = function (grunt) {
         var result = exec("zip -r build/grid_builder.nw package.json", { encoding: 'utf8' });
         grunt.log.writeln(result);
     });
+
+    grunt.registerTask('build project', '', function() {
+        grunt.task.run(['clean', 'copy:first', 'copy:second', 'copy:third', 'concat', 'clean:html'])
+    });
 };

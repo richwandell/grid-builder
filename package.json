@@ -1,10 +1,14 @@
 {
   "name": "rw-grid-builder",
+  "description": "Desktop Application for the Indoor Location App",
+  "repository": "https://richwandell@bitbucket.org/richwandell/grid-builder.git",
   "version": "0.0.1",
   "devDependencies": {
+    "bootstrap": "^3.3.7",
     "grunt": "^1.0.1",
     "grunt-contrib-clean": "^1.0.0",
     "grunt-contrib-coffee": "^1.0.0",
+    "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-watch": "^1.0.0",
     "grunt-nw-builder": "^3.0.0",
