@@ -15,8 +15,8 @@
         $("#builder_select_existing").change(this.layout.selectChanged);
         $("#builder_zoom_in").click(this.grid.zoomIn);
         $("#builder_zoom_out").click(this.grid.zoomOut);
-        $("#builder_delete_existing").click(deleteExisting);
-        $("#builder_vgrid_spaces, #builder_hgrid_spaces").change(spacesChanged);
+        $("#builder_delete_existing").click(this.db.deleteExisting);
+        $("#builder_vgrid_spaces, #builder_hgrid_spaces").change(this.layout.spacesChanged);
         $("#builder_add_spaces").click(addSpace);
         $("#builder_grid_color").change(redraw);
         var bngs = $("#builder_named_grid_spaces");

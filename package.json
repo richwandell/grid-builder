@@ -3,6 +3,7 @@
   "description": "Desktop Application for the Indoor Location App",
   "repository": "https://richwandell@bitbucket.org/richwandell/grid-builder.git",
   "version": "0.0.1",
+  "license": "LicenseRef-LICENSE",
   "devDependencies": {
     "bootstrap": "^3.3.7",
     "grunt": "^1.0.1",
@@ -10,17 +11,22 @@
     "grunt-contrib-coffee": "^1.0.0",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-copy": "^1.0.0",
+    "grunt-contrib-less": "^1.4.0",
     "grunt-contrib-watch": "^1.0.0",
     "grunt-nw-builder": "^3.0.0",
+    "grunt-webpack": "^1.0.18",
     "jquery": "^3.1.0"
   },
   "dependencies": {
+    "express": "^4.14.0",
     "node-ssdp": "^2.8.0",
     "nw": "^0.17.0",
+    "sqlite3": "^3.1.8",
     "uuid": "^2.0.2",
     "ws": "^1.1.1"
   },
   "scripts": {
+    "start-server": "node src/server/Server.js",
     "start": "nw"
   },
   "main": "dist/desktop/desktop.html",
@@ -35,5 +41,7 @@
     "position": "mouse",
     "min_width": 500,
     "min_height": 500
-  }
+  },
+  "builder_log_folder": "log",
+  "builder_rest_port": 8888
 }

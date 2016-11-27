@@ -2,7 +2,7 @@
 
 <head>
     <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="../styles/builder.css" />
+    <link rel="stylesheet" href="../src/styles/builder.css" />
     <meta name="viewport" content="width=360, initial-scale=1">
     <title>Grid Builder</title>
 </head>
@@ -15,7 +15,7 @@
                 <canvas id="builder_canvas_overlay"></canvas>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4" id="builder_container_container">
             <div id="builder_zoom">
                 <button class="btn btn-default btn-xs" id="builder_clear_selection">Clear Selection</button>
                 <button class="btn btn-default btn-xs zoom" id="builder_zoom_out">-</button>
@@ -117,12 +117,13 @@
                 </form>
             </div>
         </div>
+
     </div>
 </body>
 
 <script src="../node_modules/jquery/dist/jquery.min.js"></script>
-<script src="../builder/Registry.js"></script>
-<script src="../builder/Db.js"></script>
-<script src="../builder/Grid.js"></script>
-<script src="../builder/LayoutManager.js"></script>
-<script src="../builder/Main.js"></script>
+<script src="../src/builder/Registry.js"></script>
+<script src="../src/builder/Db.js"></script>
+<script src="../src/builder/Grid.js"></script>
+<script src="../src/builder/LayoutManager.js"></script>
+<script src="../src/builder/Main.js"></script>

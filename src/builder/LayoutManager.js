@@ -9,6 +9,8 @@
         registry.debug ? console.debug(arguments.callee.name) : '';
         this.container = container;
         this.image_name = "";
+        this.vgrid_spaces = 0;
+        this.hgrid_spaces = 0;
         $("#builder_canvas_container").css("maxWidth", $(window).width());
     };
     /**
@@ -101,6 +103,13 @@
             }, that.container.db.reloadFromDb);
         };
         reader.readAsDataURL(input.files[0]);
+    };
+
+    L.prototype.spacesChanged = function(event) {
+        registry.debug ? console.debug(arguments.callee.name) : '';
+        this.vgrid_spaces = $("#builder_vgrid_spaces").val();
+        this.hgrid_spaces = $("#builder_hgrid_spaces").val();
+        this.imageLoaded();
     };
 
     classes.LayoutManager = L;

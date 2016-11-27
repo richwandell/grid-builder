@@ -2,3 +2,6 @@
 /dist/
 .uuid
 .idea
+db.sqlite3
+log/ssdp.log
+npm-debug.log

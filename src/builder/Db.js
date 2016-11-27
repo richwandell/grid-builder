@@ -16,6 +16,7 @@
     };
 
     Db.prototype.addLayoutImage = function(data, cb) {
+        registry.debug ? console.debug(arguments.callee.name) : '';
         var t = this.database.transaction(["layout_images"], "readwrite")
             .objectStore("layout_images")
             .add(data);
@@ -23,13 +24,13 @@
     };
 
     Db.prototype.onupgradeneeded = function (event) {
-        debug ? console.debug(arguments.callee.name) : '';
+        registry.debug ? console.debug(arguments.callee.name) : '';
         this.database = event.target.result;
         this.database.createObjectStore("layout_images", {keyPath: "id", autoIncrement: true});
     };
 
     Db.prototype.onsuccess = function (event) {
-        debug ? console.debug(arguments.callee.name) : '';
+        registry.debug ? console.debug(arguments.callee.name) : '';
         this.database = event.target.result;
 
         this.reloadFromDb();
@@ -45,7 +46,7 @@
      * @param {Number} [id]
      */
     Db.prototype.reloadFromDb = function(id){
-        debug ? console.debug(arguments.callee.name) : '';
+        registry.debug ? console.debug(arguments.callee.name) : '';
         var that = this;
         $("#builder_select_existing").html("");
         var req = database.transaction(["layout_images"], "readwrite")
@@ -61,10 +62,26 @@
      * @param {function} cb
      */
     Db.prototype.loadFloorplan = function(id, cb){
+        registry.debug ? console.debug(arguments.callee.name) : '';
         var t = database.transaction(["layout_images"], "readwrite")
             .objectStore("layout_images")
             .get(Number(id));
         t.onsuccess = cb;
+    };
+    /**
+     *
+     * @param event
+     */
+    Db.prototype.deleteExisting = function(event) {
+        registry.debug ? console.debug(arguments.callee.name) : '';
+        var id = parseInt($("#builder_select_existing").val());
+        var t = database.transaction(["layout_images"], "readwrite")
+            .objectStore("layout_images")
+            .delete(id);
+        var that = this;
+        t.onsuccess = function(event){
+            that.reloadFromDb();
+        };
     };
 
     classes.Db = Db;

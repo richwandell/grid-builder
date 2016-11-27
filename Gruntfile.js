@@ -58,12 +58,11 @@ module.exports = function (grunt) {
         watch: {
             dev: {
                 files: ['src/**/*.*'],
-                tasks: ['clean', 'copy:first', 'copy:second', 'copy:third', 'concat', 'clean:html']
+                tasks: ['less:dev']
             }
         },
         clean: {
-            temp: ['dist/**'],
-            html: ['dist/android/html/', 'dist/desktop/html/']
+            temp: ['dist/**']
         },
         concat: {
             desktop: {
@@ -74,6 +73,17 @@ module.exports = function (grunt) {
                 src: ['src/html/builder.html', 'src/html/bm2.html', 'src/html/scripts.html'],
                 dest: 'dist/android/android.html'
             }
+        },
+        less: {
+            dev: {
+                files: [{
+                    expand: true,
+                    cwd: 'src/styles',
+                    src: ['*.less'],
+                    dest: 'src/styles',
+                    ext: '.css'
+                }]
+            }
         }
     });
 
@@ -81,15 +91,16 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-contrib-less');
 
     grunt.registerTask('build-nw', '', function () {
         var exec = require('child_process').execSync;
         var result = exec("zip -r build/grid_builder.nw dist/desktop/*", { encoding: 'utf8' });
-        grunt.log.writeln(result);
+        Log.log.writeln(result);
         var result = exec("zip -r build/grid_builder.nw dist/node_modules/*", { encoding: 'utf8' });
-        grunt.log.writeln(result);
+        Log.log.writeln(result);
         var result = exec("zip -r build/grid_builder.nw package.json", { encoding: 'utf8' });
-        grunt.log.writeln(result);
+        Log.log.writeln(result);
     });
 
     grunt.registerTask('build project', '', function() {
