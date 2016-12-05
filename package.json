@@ -5,32 +5,31 @@
   "version": "0.0.1",
   "license": "LicenseRef-LICENSE",
   "devDependencies": {
-    "bootstrap": "^3.3.7",
     "grunt": "^1.0.1",
     "grunt-contrib-clean": "^1.0.0",
-    "grunt-contrib-coffee": "^1.0.0",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-less": "^1.4.0",
-    "grunt-contrib-watch": "^1.0.0",
-    "grunt-nw-builder": "^3.0.0",
-    "grunt-webpack": "^1.0.18",
-    "jquery": "^3.1.0"
+    "grunt-contrib-uglify": "^2.0.0",
+    "grunt-contrib-watch": "^1.0.0"
   },
   "dependencies": {
+    "bootstrap": "^3.3.7",
+    "jquery": "^3.1.0",
     "express": "^4.14.0",
     "node-ssdp": "^2.8.0",
     "nw": "^0.17.0",
     "sqlite3": "^3.1.8",
     "uuid": "^2.0.2",
-    "ws": "^1.1.1"
+    "ws": "^1.1.1",
+    "body-parser": "latest"
   },
   "scripts": {
     "start-server": "node src/server/Server.js",
     "start": "nw"
   },
-  "main": "dist/desktop/desktop.html",
-  "node-main": "dist/desktop/scripts/ssdp.js",
+  "main": "dist/builder.html",
+  "node-main": "src/NwConnector.js",
   "window": {
     "title": "Grid Builder",
     "icon": "dist/desktop/icon24.png",

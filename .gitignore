@@ -1,7 +1,6 @@
 /node_modules/
-/dist/
 .uuid
 .idea
 db.sqlite3
-log/ssdp.log
+log/*.log
 npm-debug.log

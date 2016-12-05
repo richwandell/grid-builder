@@ -6,6 +6,9 @@ var Utils = require('./Utils.js');
 var exports = {};
 var pjson = require('../../package.json');
 
+
+log = new log("ssdp.log");
+
 exports.register = function(b){
     builder = b;
 };

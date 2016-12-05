@@ -6,72 +6,55 @@ module.exports = function (grunt) {
                 files: [{
                     cwd: 'node_modules/jquery/dist/',
                     src: 'jquery.min.js',
-                    dest: 'dist/scripts/',
+                    dest: 'dist/lib/js/',
                     expand: true
-                },{
+                }, {
+                    cwd: 'node_modules/bootstrap/dist/css/',
+                    src: 'bootstrap.min.css',
+                    dest: 'dist/lib/css/',
+                    expand: true
+                }, {
+                    cwd: 'node_modules/bootstrap/dist/fonts/',
+                    src: '*',
+                    dest: 'dist/lib/fonts/',
+                    expand: true
+                }, {
+                    cwd: 'node_modules/bootstrap/dist/js/',
+                    src: 'bootstrap.min.js',
+                    dest: 'dist/lib/js/',
+                    expand: true
+                }, {
                     cwd: 'src/',
-                    src: '**/*.*',
+                    src: 'builder.html',
                     dest: 'dist/',
                     expand: true
-                },{
-                    cwd: 'test/floorplans/',
-                    src: 'fplan-*.json',
-                    dest: 'dist/floorplans/',
-                    expand: true
-                }]
-            },
-            second: {
-                files: [{
-                    cwd: 'dist/',
-                    src: '**/*.*',
-                    dest: 'dist/android/',
-                    expand: true
-                }]
-            },
-            third: {
-                files: [{
-                    cwd: 'dist/android/',
-                    src: '**/*.*',
-                    dest: 'dist/desktop/',
-                    expand: true
-                },{
-                    cwd: '.',
-                    src: 'node_modules/ws/**/*.*',
-                    dest: 'dist/',
-                    expand: true
-                },{
-                    cwd: '.',
-                    src: 'node_modules/node-ssdp/**/*.*',
-                    dest: 'dist/',
-                    expand: true
-                }]
-            },
-            android: {
-                files: [{
-                    cwd: 'dist/android/',
-                    src: ['**/*.*'],
-                    expand: true,
-                    dest: '/Users/richwandell/AndroidStudioProjects/indoorlocation/app/src/main/assets/'
                 }]
             }
         },
         watch: {
             dev: {
-                files: ['src/**/*.*'],
-                tasks: ['less:dev']
+                files: ['src/**/*.less', 'src/builder/**/*', 'src/builder.html'],
+                tasks: ['clean', 'less:dev', 'copy:first', 'uglify:desktop']
             }
         },
         clean: {
             temp: ['dist/**']
         },
         concat: {
-            desktop: {
-                src: ['src/html/builder.html', 'src/html/bm1.html', 'src/html/scripts.html'],
-                dest: 'dist/desktop/desktop.html'
+            options: {
+                separator: ';'
             },
-            android: {
-                src: ['src/html/builder.html', 'src/html/bm2.html', 'src/html/scripts.html'],
-                dest: 'dist/android/android.html'
+            desktop: {
+                src: [
+                    'src/builder/Registry.js',
+                    'src/ContextMenu.js',
+                    'src/builder/CustomExceptions.js',
+                    'src/builder/Db.js',
+                    'src/builder/Grid.js',
+                    'src/builder/LayoutManager.js',
+                    'src/builder/Main.js'
+                ],
+                dest: 'dist/app.js'
             }
         },
         less: {
@@ -80,9 +63,28 @@ module.exports = function (grunt) {
                     expand: true,
                     cwd: 'src/styles',
                     src: ['*.less'],
-                    dest: 'src/styles',
+                    dest: 'dist/',
                     ext: '.css'
                 }]
+            }
+        },
+        uglify: {
+            desktop: {
+                options: {
+                    sourceMap: true,
+                    sourceMapName: 'dist/app.map'
+                },
+                files: {
+                    'dist/app.js': [
+                        'src/builder/Registry.js',
+                        'src/builder/ContextMenu.js',
+                        'src/builder/CustomExceptions.js',
+                        'src/builder/Db.js',
+                        'src/builder/Grid.js',
+                        'src/builder/LayoutManager.js',
+                        'src/builder/Main.js'
+                    ]
+                }
             }
         }
     });
@@ -92,6 +94,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-less');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
 
     grunt.registerTask('build-nw', '', function () {
         var exec = require('child_process').execSync;

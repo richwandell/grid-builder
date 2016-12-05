@@ -1,21 +1,21 @@
 <!Doctype html>
 
 <head>
-    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="../src/styles/builder.css" />
+    <link rel="stylesheet" href="lib/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="builder.css" />
     <meta name="viewport" content="width=360, initial-scale=1">
     <title>Grid Builder</title>
 </head>
-
 <body>
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-8" id="builder_canvas_container_container">
             <div id="builder_canvas_container">
                 <canvas id="builder_canvas"></canvas>
                 <canvas id="builder_canvas_overlay"></canvas>
             </div>
         </div>
         <div class="col-md-4" id="builder_container_container">
+            <!--<div id="resize_handle"></div>-->
             <div id="builder_zoom">
                 <button class="btn btn-default btn-xs" id="builder_clear_selection">Clear Selection</button>
                 <button class="btn btn-default btn-xs zoom" id="builder_zoom_out">-</button>
@@ -58,11 +58,13 @@
                         <div class="col-sm-6">
                             <input class="form-control" type='file' accept='image/*' id="builder_image_input" />
                         </div>
-                        <div class="col-sm-1">
+                    </div>
+                    <div class="form-group form-group-sm">
+                        <div class="col-sm-7"></div>
+                        <div class="col-sm-3">
                             <button class="btn btn-default btn-xs" type="button" id="builder_download">Download Floorplan</button>
                         </div>
                     </div>
-
                     <div class="page-header">
                         <h2>Grid</h2>
                     </div>
@@ -121,9 +123,5 @@
     </div>
 </body>
 
-<script src="../node_modules/jquery/dist/jquery.min.js"></script>
-<script src="../src/builder/Registry.js"></script>
-<script src="../src/builder/Db.js"></script>
-<script src="../src/builder/Grid.js"></script>
-<script src="../src/builder/LayoutManager.js"></script>
-<script src="../src/builder/Main.js"></script>
+<script src="lib/js/jquery.min.js"></script>
+<script src="app.js"></script>
