@@ -43,7 +43,7 @@ module.exports = function (grunt) {
         },
         watch: {
             dev: {
-                files: ['src/**/*.less', 'src/builder/**/*', 'src/builder.html'],
+                files: ['src/**/*.less', 'src/builder/**/*', 'src/builder.html', 'src/server/*'],
                 tasks: ['clean', 'less:dev', 'copy:first', 'uglify:desktop']
             }
         },

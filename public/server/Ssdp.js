@@ -1,13 +1,18 @@
 var dgram = require('dgram');
 var fs = require("fs");
 var builder = false;
-var log = require('./Log.js');
+var Logger = require('./Log.js');
 var Utils = require('./Utils.js');
 var exports = {};
 var pjson = require('../package.json');
 
 
-log = new log("ssdp.log");
+var log = new Logger({
+    logfolder: pjson.builder_log_folder,
+    filename: "ssdp.log",
+    filesize: 5000000,
+    numfiles: 3
+});
 
 exports.register = function(b){
     builder = b;

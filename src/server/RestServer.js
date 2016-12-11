@@ -1,14 +1,20 @@
 var express = require('express');
 var bodyParser = require('body-parser');
-var pjson = require('../../package.json');
-var log = require('./Log.js');
+var pjson = require('../package.json');
+var Logger = require('./Log.js');
 var db = require('./Db.js');
 var fs = require('fs');
 var Utils = require('./Utils.js');
 var uuid = require('uuid');
 var id = uuid.v4();
 
-log = new log("rest.log");
+
+var log = new Logger({
+    logfolder: pjson.builder_log_folder,
+    filename: "rest.log",
+    filesize: 5000000,
+    numfiles: 3
+});
 
 try {
     var oldUUID = fs.readFileSync(".uuid", "utf8");
@@ -21,7 +27,7 @@ var RestServer = function(){
     this.app = express();
     this.app.use(bodyParser.json({limit: '50mb'}));
     this.app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
-    this.app.use('/builder', express.static('dist'))
+    this.app.use('/builder', express.static('builder'))
 };
 
 RestServer.prototype.startServer = function () {
@@ -72,6 +78,8 @@ RestServer.prototype.startServer = function () {
             db.updateDatabase(cleanData, function(err, rows){
                 res.send({success: true});
             });
+        }else{
+            res.send({success: false});
         }
 
         log.log(req.body);

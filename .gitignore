@@ -4,6 +4,6 @@ node_modules/
 db.sqlite3
 log/*.log
 npm-debug.log
-public/log/*.log
+public/log/*.log*
 cache
 dist

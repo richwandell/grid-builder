@@ -15,12 +15,45 @@
     ContextMenu.prototype.setupMenu = function(){
         // Create an empty menu
         var gui = this.gui;
-        var menu = new gui.Menu();
         var win = gui.Window.get();
-        var menubar = new gui.Menu({type: 'menubar', label: 'Grid Builder'});
         var that = this;
 
 
+        //Setup menubar
+        var menubar = new gui.Menu({
+            type: 'menubar'
+        });
+
+        var sub1 = new gui.Menu();
+        sub1.append(new gui.MenuItem({
+            label: 'Import Floorplan',
+            click: function () {
+                alert("import floorplan");
+            }
+        }));
+
+        sub1.append(new gui.MenuItem({
+            label: 'Export Floorplan',
+            click: function () {
+                alert("export floorplan");
+            }
+        }));
+
+
+
+        menubar.createMacBuiltin("your-app-name", {
+            hideEdit: true,
+            hideWindow: true
+        });
+        menubar.append(new gui.MenuItem({
+            label: 'File',
+            submenu: sub1
+        }));
+        win.menu = menubar;
+
+
+        //Setup context menu
+        var menu = new gui.Menu();
         // Add a item and bind a callback to item
         menu.append(new gui.MenuItem({
             label: 'Clear Selection',
@@ -30,27 +63,14 @@
         }));
 
         // Popup as context menu
-        $("body").on('contextmenu', function (ev) {
+        $("#builder_canvas_overlay").on('contextmenu', function (ev) {
             ev.preventDefault();
             // Popup at place you click
             menu.popup(ev.clientX, ev.clientY);
             return false;
         });
 
-        // Create a menuitem
-        var sub1 = new gui.Menu();
-        sub1.append(new gui.MenuItem({
-            label: 'Broadcast',
-            click: function () {
-                process.mainModule.exports.startBroadcast();
-            }
-        }));
-        //
-        // // You can have submenu!
-        menubar.append(new gui.MenuItem({label: 'Sub1', submenu: sub1}));
-        //
-        // //assign the menubar to window menu
-        win.menu = menubar;
+
         //
         // // add a click event to an existing menuItem
         // menu.items[0].click = function () {
