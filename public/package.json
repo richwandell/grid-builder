@@ -1,0 +1,31 @@
+{
+  "name": "rw-grid-builder",
+  "description": "Desktop Application for the Indoor Location App",
+  "dependencies": {
+    "express": "^4.14.0",
+    "node-ssdp": "^2.8.0",
+    "sqlite3": "^3.1.8",
+    "uuid": "^2.0.2",
+    "ws": "^1.1.1",
+    "body-parser": "latest"
+  },
+  "scripts": {
+    "start-server": "node server/Server.js",
+    "start": "nw"
+  },
+  "main": "builder/builder.html",
+  "node-main": "NwConnector.js",
+  "window": {
+    "title": "Grid Builder",
+    "icon": "desktop/icon24.png",
+    "toolbar": true,
+    "frame": true,
+    "width": 1000,
+    "height": 700,
+    "position": "mouse",
+    "min_width": 500,
+    "min_height": 500
+  },
+  "builder_log_folder": "log",
+  "builder_rest_port": 8888
+}

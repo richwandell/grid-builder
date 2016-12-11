@@ -7,7 +7,13 @@
     <title>Grid Builder</title>
 </head>
 <body>
-    <div class="row">
+    <div class="row" id="top_row">
+        <div class="page-header">
+            <h1>Grid Builder <small></small></h1>
+        </div>
+        <div id="resize_handle_top"></div>
+    </div>
+    <div class="row" id="bottom_row">
         <div class="col-md-8" id="builder_canvas_container_container">
             <div id="builder_canvas_container">
                 <canvas id="builder_canvas"></canvas>
@@ -15,7 +21,7 @@
             </div>
         </div>
         <div class="col-md-4" id="builder_container_container">
-            <!--<div id="resize_handle"></div>-->
+            <div id="resize_handle"></div>
             <div id="builder_zoom">
                 <button class="btn btn-default btn-xs" id="builder_clear_selection">Clear Selection</button>
                 <button class="btn btn-default btn-xs zoom" id="builder_zoom_out">-</button>
@@ -24,11 +30,6 @@
             <div id="builder_container">
 
                 <form onsubmit="return false" class="form-horizontal">
-                    <div class="page-header">
-                        <h1>Grid Builder <small>Subtext for header</small></h1>
-                    </div>
-
-
                     <div class="page-header">
                         <h2>Floorplan</h2>
                     </div>
@@ -124,4 +125,5 @@
 </body>
 
 <script src="lib/js/jquery.min.js"></script>
+<script src="lib/js/md5.min.js"></script>
 <script src="app.js"></script>

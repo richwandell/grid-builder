@@ -65,19 +65,18 @@ h2 {
   overflow: auto;
   height: 100%;
   position: fixed;
-  resize: horizontal;
 }
 
+
 #builder_container_container{
-  //width: 399px;
   position: fixed;
   right: 0;
   padding-right: 0;
-  padding-left: 0;
   overflow: auto;
   height: 100%;
 
   #builder_container {
+    user-select: none;
     form {
       .form-group-sm {
         .col-sm-6 {
@@ -92,7 +91,7 @@ h2 {
     position: fixed;
     background: #f5f5f5;
     width: 15px;
-    margin-left: -15px;
+    margin-left: -30px;
     box-shadow: inset 0px 0px 1px 1px rgba(51, 51, 51, 0.14);
     cursor: col-resize;
   }
@@ -100,6 +99,28 @@ h2 {
   .form-horizontal .form-group{
     width: 100%;
   }
+}
+
+#top_row{
+  margin-right: 0px;
+  margin-left: 0px;
+  height: 100px;
+  position: relative;
+
+  #resize_handle_top{
+    height: 15px;
+    position: absolute;
+    background: #f5f5f5;
+    width: 100%;
+    box-shadow: inset 0px 0px 1px 1px rgba(51, 51, 51, 0.14);
+    cursor: row-resize;
+    bottom: 0;
+  }
+}
+
+#bottom_row{
+  margin-right: 0px;
+  margin-left: 0px;
 }
 
 

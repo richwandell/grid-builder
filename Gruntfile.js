@@ -6,27 +6,37 @@ module.exports = function (grunt) {
                 files: [{
                     cwd: 'node_modules/jquery/dist/',
                     src: 'jquery.min.js',
-                    dest: 'dist/lib/js/',
+                    dest: 'public/builder/lib/js/',
                     expand: true
                 }, {
                     cwd: 'node_modules/bootstrap/dist/css/',
                     src: 'bootstrap.min.css',
-                    dest: 'dist/lib/css/',
+                    dest: 'public/builder/lib/css/',
                     expand: true
                 }, {
                     cwd: 'node_modules/bootstrap/dist/fonts/',
                     src: '*',
-                    dest: 'dist/lib/fonts/',
+                    dest: 'public/builder/lib/fonts/',
                     expand: true
                 }, {
                     cwd: 'node_modules/bootstrap/dist/js/',
                     src: 'bootstrap.min.js',
-                    dest: 'dist/lib/js/',
+                    dest: 'public/builder/lib/js/',
                     expand: true
                 }, {
                     cwd: 'src/',
                     src: 'builder.html',
-                    dest: 'dist/',
+                    dest: 'public/builder/',
+                    expand: true
+                }, {
+                    cwd: 'node_modules/blueimp-md5/js/',
+                    src: 'md5.min.js',
+                    dest: 'public/builder/lib/js/',
+                    expand: true
+                },{
+                    cwd: 'src/server/',
+                    src: '*',
+                    dest: 'public/server/',
                     expand: true
                 }]
             }
@@ -38,24 +48,7 @@ module.exports = function (grunt) {
             }
         },
         clean: {
-            temp: ['dist/**']
-        },
-        concat: {
-            options: {
-                separator: ';'
-            },
-            desktop: {
-                src: [
-                    'src/builder/Registry.js',
-                    'src/ContextMenu.js',
-                    'src/builder/CustomExceptions.js',
-                    'src/builder/Db.js',
-                    'src/builder/Grid.js',
-                    'src/builder/LayoutManager.js',
-                    'src/builder/Main.js'
-                ],
-                dest: 'dist/app.js'
-            }
+            temp: ['public/builder/**', 'public/server/**']
         },
         less: {
             dev: {
@@ -63,7 +56,7 @@ module.exports = function (grunt) {
                     expand: true,
                     cwd: 'src/styles',
                     src: ['*.less'],
-                    dest: 'dist/',
+                    dest: 'public/builder/',
                     ext: '.css'
                 }]
             }
@@ -72,10 +65,10 @@ module.exports = function (grunt) {
             desktop: {
                 options: {
                     sourceMap: true,
-                    sourceMapName: 'dist/app.map'
+                    sourceMapName: 'public/builder/app.map'
                 },
                 files: {
-                    'dist/app.js': [
+                    'public/builder/app.js': [
                         'src/builder/Registry.js',
                         'src/builder/ContextMenu.js',
                         'src/builder/CustomExceptions.js',
@@ -86,27 +79,21 @@ module.exports = function (grunt) {
                     ]
                 }
             }
+        },
+        nwjs: {
+            options: {
+                platforms: ['osx'],
+                buildDir: './dist'
+            },
+            src: ['./public/**/*']
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-clean');
-    grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-nw-builder');
 
-    grunt.registerTask('build-nw', '', function () {
-        var exec = require('child_process').execSync;
-        var result = exec("zip -r build/grid_builder.nw dist/desktop/*", { encoding: 'utf8' });
-        Log.log.writeln(result);
-        var result = exec("zip -r build/grid_builder.nw dist/node_modules/*", { encoding: 'utf8' });
-        Log.log.writeln(result);
-        var result = exec("zip -r build/grid_builder.nw package.json", { encoding: 'utf8' });
-        Log.log.writeln(result);
-    });
-
-    grunt.registerTask('build project', '', function() {
-        grunt.task.run(['clean', 'copy:first', 'copy:second', 'copy:third', 'concat', 'clean:html'])
-    });
 };

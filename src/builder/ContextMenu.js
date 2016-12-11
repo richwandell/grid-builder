@@ -13,8 +13,6 @@
     };
 
     ContextMenu.prototype.setupMenu = function(){
-
-
         // Create an empty menu
         var gui = this.gui;
         var menu = new gui.Menu();

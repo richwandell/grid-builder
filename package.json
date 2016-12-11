@@ -5,42 +5,16 @@
   "version": "0.0.1",
   "license": "LicenseRef-LICENSE",
   "devDependencies": {
+    "blueimp-md5": "^2.6.0",
+    "bootstrap": "^3.3.7",
     "grunt": "^1.0.1",
     "grunt-contrib-clean": "^1.0.0",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-less": "^1.4.0",
     "grunt-contrib-uglify": "^2.0.0",
-    "grunt-contrib-watch": "^1.0.0"
-  },
-  "dependencies": {
-    "bootstrap": "^3.3.7",
-    "jquery": "^3.1.0",
-    "express": "^4.14.0",
-    "node-ssdp": "^2.8.0",
-    "nw": "^0.17.0",
-    "sqlite3": "^3.1.8",
-    "uuid": "^2.0.2",
-    "ws": "^1.1.1",
-    "body-parser": "latest"
-  },
-  "scripts": {
-    "start-server": "node src/server/Server.js",
-    "start": "nw"
-  },
-  "main": "dist/builder.html",
-  "node-main": "src/NwConnector.js",
-  "window": {
-    "title": "Grid Builder",
-    "icon": "dist/desktop/icon24.png",
-    "toolbar": true,
-    "frame": true,
-    "width": 1000,
-    "height": 700,
-    "position": "mouse",
-    "min_width": 500,
-    "min_height": 500
-  },
-  "builder_log_folder": "log",
-  "builder_rest_port": 8888
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-nw-builder": "^3.1.0",
+    "jquery": "^3.1.0"
+  }
 }

@@ -10,24 +10,65 @@
         debug(arguments.callee.name);
         this.container = container;
 
-        $("#builder_canvas_container").css("maxWidth", $(window).width());
+        var window_width = $(window).width();
+        var window_height = $(window).height();
+        var top_row_height = $("#top_row").height();
+        $("#builder_canvas_container").css("maxWidth", window_width);
+        $("#builder_canvas_container, #builder_container_container").height(window_height - top_row_height);
 
-        var mousedown = false;
+
+        var handle_down = false;
         $(window).on({
-            "mousedown": function(){
-                mousedown = true;
+            "mousedown": function(event){
+                if($(event.target).is("#resize_handle")){
+                    handle_down = true;
+                }
             },
-            "mousemove": function(){
-                if(mousedown){
-                    var left_width = $("#builder_canvas_container_container").width();
+            "mousemove": function(event){
+                if(handle_down){
+                    var mouse_x = event.clientX;
+                    $("#builder_canvas_container_container").width(mouse_x - 25);
                     var window_width = $(window).width();
-                    $("#builder_container_container").width(window_width - left_width - 30);
+                    $("#builder_container_container").width(window_width - mouse_x - 20);
                 }
             },
             "mouseup": function(){
-                mousedown = false;
+                handle_down = false;
             }
         });
+
+        var handle_down_top = false;
+        $(window).on({
+            "mousedown": function(event){
+                if($(event.target).is("#resize_handle_top")){
+                    handle_down_top = true;
+                }
+            },
+            "mousemove": function(event){
+                if(handle_down_top){
+                    var mouse_y = event.clientY + 10;
+                    $("#top_row").height(mouse_y);
+                    var window_height = $(window).height();
+                    $("#builder_canvas_container, #builder_container_container").height(window_height - mouse_y);
+                }
+            },
+            "mouseup": function(){
+                handle_down_top = false;
+            }
+        });
+
+        $(window).resize(this.adjustLayout);
+    };
+
+    /**
+     * We are using a dynamic layout that is readjusted based on window resize event
+     */
+    L.prototype.adjustLayout = function(){
+        var window_width = $(window).width();
+        var window_height = $(window).height();
+        var top_row_height = $("#top_row").height();
+        $("#builder_canvas_container").css("maxWidth", window_width);
+        $("#builder_canvas_container, #builder_container_container").height(window_height - top_row_height);
     };
 
     /**
@@ -37,9 +78,11 @@
     L.prototype.setFloorplanName = function(name) {
         debug("LayoutManager.setFloorplanName");
         if(name){
+            $("#top_row .page-header small").text(name);
             $("#builder_floorplan_name").val(name);
         }else{
             $("#builder_floorplan_name").val("");
+            $("#top_row .page-header small").text("");
         }
     };
 
@@ -121,6 +164,7 @@
             imageObj.onload = function(){
                 that.setImageName(input.files[0].name);
                 that.container.db.addLayoutImage({
+                    "id": md5(dataURL),
                     "name": that.container.grid.getImageName(),
                     "image": dataURL,
                     "grid": [],
@@ -260,7 +304,8 @@
     L.prototype.saveFloorplan = function() {
         debug("LayoutManager.saveFloorplan");
         var floorplanname = $("#builder_floorplan_name").val();
-        var id = parseInt($("#builder_select_existing").val());
+        this.setFloorplanName(floorplanname);
+        var id = $("#builder_select_existing").val();
         var hs = parseInt($("#builder_hgrid_spaces").val());
         var vs = parseInt($("#builder_vgrid_spaces").val());
         var grid_color = $("#builder_grid_color").val();

@@ -10,7 +10,6 @@
         this.layout = new classes.LayoutManager(this);
         this.contextMenu = new classes.ContextMenu(this);
         this.setupEvents();
-
         if(typeof process != "undefined"){
             if(process.mainModule){
                 process.mainModule.exports.register(this);

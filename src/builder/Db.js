@@ -2,6 +2,7 @@
     var classes = registry.classes;
     var InvalidArgumentException = classes.InvalidArgumentException;
     var debug = registry.console.debug;
+
     /**
      * Db class handles all database transactions for IndexedDB
      *
@@ -11,8 +12,25 @@
     var Db = function (container) {
         debug(arguments.callee.name);
         this.container = container;
-        this.databaseVersion = 9;
+        this.databaseVersion = 11;
+        this.database_version = 0;
+        this.needsSettings = false;
         this.requestDatabase();
+    };
+
+    Db.prototype.updateDatabaseVersion = function(version){
+        var that = this;
+        var os = that.database.transaction(["settings"], "readwrite")
+            .objectStore("settings");
+
+        var req = os.get(1);
+
+        req.onsuccess = function(event){
+            var settings = event.target.result;
+            settings.database_version = version;
+            that.database_version = version;
+            os.put(settings);
+        };
     };
 
     Db.prototype.requestDatabase = function(version){
@@ -21,31 +39,63 @@
         var dbrequest = window.indexedDB.open("BuilderDatabase", this.databaseVersion);
         dbrequest.onupgradeneeded = function(event) {
             debug("Db.onupgradeneeded");
+
             that.database = event.target.result;
-            if (event.oldVersion == 0){
-                that.database.createObjectStore("layout_images", {keyPath: "id", autoIncrement: true});
+
+            if(!that.database.objectStoreNames.contains("layout_images")){
+                that.database.createObjectStore("layout_images", {keyPath: "id"});
+            }
+
+            if(!that.database.objectStoreNames.contains("settings")){
+                that.database.createObjectStore("settings", {keyPath: "id", autoIncrement: true});
+                that.needsSettings = true;
             }
         };
         dbrequest.onsuccess = function(event){
             debug("Db.onsuccess");
             that.database = event.target.result;
-            that.syncWithServer();
+
+            if(that.needsSettings){
+                var t = that.database.transaction(["settings"], "readwrite")
+                    .objectStore("settings")
+                    .add({
+                        "database_version": that.database_version
+                    });
+                t.onsuccess = function(event){
+                    that.syncWithServer();
+                };
+            }else{
+                that.syncWithServer();
+            }
         };
     };
 
     Db.prototype.syncWithServer = function(){
+        debug("Db.syncWithServer");
         var that = this;
         this.getServerVersion(function(res){
-            console.log(res);
-            if(typeof(res.databaseVersion) != "undefined" && res.databaseVersion < that.databaseVersion){
-                that.sendUpdates();
-            } else {
-                that.getUpdates();
-            }
+            var os = that.database.transaction(["settings"], "readwrite")
+                .objectStore("settings");
+            var req = os.get(1);
+            req.onsuccess = function(event){
+                var dbv = event.target.result.database_version + that.databaseVersion;
+                that.database_version = event.target.result.database_version;
+                var resdb = typeof(res.databaseVersion) != "undefined" ? parseInt(res.databaseVersion) : dbv;
+
+                if(dbv == resdb){
+                    that.reloadFromDb();
+                }else if(resdb < dbv){
+                    that.sendUpdates();
+                } else {
+                    that.updateDatabaseVersion(resdb - that.databaseVersion);
+                    that.getUpdates();
+                }
+            };
         });
     };
 
     Db.prototype.getUpdates = function(){
+        debug("Db.getUpdates");
         var that = this;
         $.ajax({
             url: "http://localhost:8888/rest/floorplans",
@@ -57,7 +107,7 @@
 
                 $.each(res, function(key, val){
                     var data = JSON.parse(val.layout_image);
-                    data.id = parseInt(data.id);
+                    data.id = String(data.id);
                     data.hgrid_spaces = parseInt(data.hgrid_spaces);
                     data.vgrid_spaces = parseInt(data.vgrid_spaces);
                     $.each(data.grid, function(key, val){
@@ -74,7 +124,6 @@
                         .objectStore("layout_images")
                         .add(data);
                     t.onsuccess = function(){
-                        console.log("hi");
                         done++;
                         if(done >= count){
                             that.reloadFromDb();
@@ -92,6 +141,7 @@
     };
 
     Db.prototype.getServerVersion = function(cb){
+        debug("Db.getServerVersion");
         var that = this;
         $.ajax({
             "url": "http://localhost:8888/rest/databaseVersion",
@@ -107,6 +157,7 @@
     };
 
     Db.prototype.sendUpdates = function(){
+        debug("Db.sendUpdates");
         var that = this;
         var req = that.database.transaction(["layout_images"], "readwrite")
             .objectStore("layout_images")
@@ -117,14 +168,34 @@
                 method: "post",
                 dataType: "json",
                 data: {
-                    databaseVersion: that.databaseVersion,
+                    databaseVersion: that.databaseVersion + that.database_version,
                     layout_images: event.target.result
                 },
                 success: function(res){
-                    console.log(res);
+                    if(res.success){
+                        that.reloadFromDb();
+                    }
                 }
             });
         };
+    };
+
+    Db.prototype.sendOneUpdate = function(layout_image){
+        var that = this;
+        $.ajax({
+            url: "http://localhost:8888/rest/updateDatabase",
+            method: "post",
+            dataType: "json",
+            data: {
+                databaseVersion: that.databaseVersion + that.database_version,
+                layout_images: [layout_image]
+            },
+            success: function(res){
+                if(res.success){
+                    console.log(res);
+                }
+            }
+        });
     };
 
     Db.prototype.addLayoutImage = function(data, cb) {
@@ -165,7 +236,7 @@
         debug("Db.loadFloorplan");
         var t = this.database.transaction(["layout_images"], "readwrite")
             .objectStore("layout_images")
-            .get(Number(id));
+            .get(String(id));
         var that = this;
         t.onsuccess = function(event){
             cb.apply(that, arguments);
@@ -192,12 +263,13 @@
         if(typeof(vars) != "object"){
             throw new InvalidArgumentException("saveFloorplan requires an object parameter");
         }
-        if(typeof(vars["id"]) != "number"){
+        if(typeof(vars["id"]) != "string"){
             throw new InvalidArgumentException("saveFloorplan missing id");
         }
         var os = this.database.transaction(["layout_images"], "readwrite")
             .objectStore("layout_images");
         var req = os.get(vars["id"]);
+        var that = this;
 
         req.onsuccess = function(event){
             var data = event.target.result;
@@ -206,14 +278,16 @@
             });
             var requp = os.put(data);
             requp.onsuccess = function(event){
-                $("#builder_title").css({
-                    "background": "darkseagreen"
-                });
-                setTimeout(function(){
-                    $("#builder_title").css({
-                        "background": "white"
-                    });
-                }, 2000);
+                var os = that.database.transaction(["settings"], "readwrite")
+                    .objectStore("settings");
+                var req = os.get(1);
+                req.onsuccess = function(event){
+                    var settings = event.target.result;
+                    settings.database_version++;
+                    that.database_version++;
+                    os.put(settings);
+                    that.sendOneUpdate(data);
+                };
             };
         };
     };
