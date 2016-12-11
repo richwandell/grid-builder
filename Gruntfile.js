@@ -82,8 +82,10 @@ module.exports = function (grunt) {
         },
         nwjs: {
             options: {
-                platforms: ['osx'],
-                buildDir: './dist'
+                platforms: ['osx64'],
+                buildDir: './dist',
+                flavor: 'normal',
+                version: '0.19.1'
             },
             src: ['./public/**/*']
         }

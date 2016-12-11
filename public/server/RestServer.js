@@ -1,6 +1,6 @@
 var express = require('express');
 var bodyParser = require('body-parser');
-var pjson = require('../../package.json');
+var pjson = require('../package.json');
 var log = require('./Log.js');
 var db = require('./Db.js');
 var fs = require('fs');
@@ -72,6 +72,8 @@ RestServer.prototype.startServer = function () {
             db.updateDatabase(cleanData, function(err, rows){
                 res.send({success: true});
             });
+        }else{
+            res.send({success: false});
         }
 
         log.log(req.body);

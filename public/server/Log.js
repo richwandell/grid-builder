@@ -1,6 +1,6 @@
 var exports = {};
 var fs = require('fs');
-var pjson = require('../../package.json');
+var pjson = require('../package.json');
 
 var Console = function(filename){
     this.filename = filename;

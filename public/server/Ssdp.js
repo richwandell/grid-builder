@@ -4,7 +4,7 @@ var builder = false;
 var log = require('./Log.js');
 var Utils = require('./Utils.js');
 var exports = {};
-var pjson = require('../../package.json');
+var pjson = require('../package.json');
 
 
 log = new log("ssdp.log");

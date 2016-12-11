@@ -1,5 +1,6 @@
 {
   "name": "rw-grid-builder",
+  "version": "0.0.1",
   "description": "Desktop Application for the Indoor Location App",
   "dependencies": {
     "express": "^4.14.0",
@@ -11,10 +12,10 @@
   },
   "scripts": {
     "start-server": "node server/Server.js",
-    "start": "nw"
+    "start": "../node_modules/.bin/nw"
   },
   "main": "builder/builder.html",
-  "node-main": "NwConnector.js",
+  "node-main": "server/Server.js",
   "window": {
     "title": "Grid Builder",
     "icon": "desktop/icon24.png",
