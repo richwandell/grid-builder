@@ -39,6 +39,14 @@ module.exports = function (grunt) {
                     dest: 'public/server/',
                     expand: true
                 }]
+            },
+            second: {
+                files: [{
+                    cwd: 'public/builder/',
+                    src: '**/*.*',
+                    dest: '/Users/richwandell/AndroidStudioProjects/indoorlocation/app/src/main/assets/',
+                    expand: true
+                }]
             }
         },
         watch: {

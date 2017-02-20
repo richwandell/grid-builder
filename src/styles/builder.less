@@ -30,13 +30,23 @@ h2 {
   opacity: .5;
 }
 
-#builder_zoom{
+.builder_zoom{
   position: absolute;
   top: 5px;
   right: 15px;
+  &.visible-xs{
+    position: fixed;
+    bottom: 5px;
+    left: 5px;
+    top: auto;
+    button.zoom{
+      width: 42px;
+      height: 37px;
+    }
+  }
 }
 
-#builder_zoom button.zoom{
+.builder_zoom button.zoom{
   width: 37px;
 }
 
@@ -123,6 +133,19 @@ h2 {
   margin-left: 0px;
 }
 
+
+
+@media (max-width: 767px){
+  #builder_container{
+    display: none;
+  }
+  #builder_canvas_container_container{
+    padding: 0px;
+  }
+  #builder_canvas_container{
+    height: 100% !important;
+  }
+}
 
 
 

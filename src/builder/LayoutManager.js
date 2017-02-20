@@ -7,8 +7,9 @@
      * @constructor
      */
     var L = function(container) {
-        debug(arguments.callee.name);
+        debug("LayoutManager.constructor");
         this.container = container;
+        this.floorplanId = false;
 
         var window_width = $(window).width();
         var window_height = $(window).height();
@@ -102,6 +103,7 @@
     L.prototype.displayFloorplan = function(id){
         debug("LayoutManager.displayFloorplan");
         var that = this;
+        that.floorplanId = id;
         this.container.db.loadFloorplan(id, function (event) {
             that.setImageName(event.target.result.name);
             that.setFloorplanName(event.target.result.floorplanname);

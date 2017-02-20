@@ -10,12 +10,27 @@
      * @param {Main} container
      */
     var Db = function (container) {
-        debug(arguments.callee.name);
+        debug("Db.constructor");
         this.container = container;
         this.databaseVersion = 11;
         this.database_version = 0;
         this.needsSettings = false;
-        this.requestDatabase();
+        this.androidFpDatabase = [];
+        this.allFpIds = [];
+        if(!this.container.android){
+            this.requestDatabase();
+        }
+    };
+
+    Db.prototype.addFloorPlan = function(fp){
+        debug("Db.addFloorPlan");
+        if(typeof(fp.id) == "undefined") return false;
+        if(this.allFpIds.indexOf(fp.id) > -1){
+            this.androidFpDatabase[this.allFpIds.indexOf(fp.id)] = fp;
+        }else{
+            this.androidFpDatabase.push(fp);
+            this.allFpIds.push(fp.id);
+        }
     };
 
     Db.prototype.updateDatabaseVersion = function(version){
@@ -34,6 +49,7 @@
     };
 
     Db.prototype.requestDatabase = function(version){
+        debug("Db.requestDatabase");
         var that = this;
         //Request our db and set event handlers
         var dbrequest = window.indexedDB.open("BuilderDatabase", this.databaseVersion);
@@ -106,7 +122,7 @@
                 var done = 0;
 
                 $.each(res, function(key, val){
-                    var data = JSON.parse(val.layout_image);
+                    var data = val.layout_image;
                     data.id = String(data.id);
                     data.hgrid_spaces = parseInt(data.hgrid_spaces);
                     data.vgrid_spaces = parseInt(data.vgrid_spaces);
@@ -234,13 +250,27 @@
      */
     Db.prototype.loadFloorplan = function(id, cb){
         debug("Db.loadFloorplan");
-        var t = this.database.transaction(["layout_images"], "readwrite")
-            .objectStore("layout_images")
-            .get(String(id));
         var that = this;
-        t.onsuccess = function(event){
-            cb.apply(that, arguments);
-        };
+        if(this.container.android){
+            var index = this.allFpIds.indexOf(id);
+            if(index > -1){
+                var fp = this.androidFpDatabase[index].layout_image;
+                var event = {
+                    target: {
+                        result: fp
+                    }
+                };
+                return cb.apply(that, [event]);
+            }
+        }else {
+            var t = this.database.transaction(["layout_images"], "readwrite")
+                .objectStore("layout_images")
+                .get(String(id));
+
+            t.onsuccess = function (event) {
+                cb.apply(that, arguments);
+            };
+        }
     };
     /**
      *
@@ -248,7 +278,7 @@
      */
     Db.prototype.deleteExisting = function(event) {
         debug("Db.deleteExisting");
-        var id = parseInt($("#builder_select_existing").val());
+        var id = $("#builder_select_existing").val();
         var t = this.database.transaction(["layout_images"], "readwrite")
             .objectStore("layout_images")
             .delete(id);

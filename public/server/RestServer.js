@@ -112,6 +112,11 @@ RestServer.prototype.startServer = function () {
         res.header("Access-Control-Allow-Origin", "*");
         res.header('Content-Type', 'application/javascript');
         db.getFloorPlans(function(err, rows){
+            rows.forEach(function(row){
+                if(typeof(row.layout_image) != "undefined"){
+                    row.layout_image = JSON.parse(row.layout_image);
+                }
+            });
             res.send(rows);
         });
     });

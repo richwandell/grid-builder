@@ -3,11 +3,12 @@
 <head>
     <link rel="stylesheet" href="lib/css/bootstrap.min.css" />
     <link rel="stylesheet" href="builder.css" />
-    <meta name="viewport" content="width=360, initial-scale=1">
+    <meta name="viewport" content="width=360, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
     <title>Grid Builder</title>
 </head>
 <body>
-    <div class="row" id="top_row">
+    <div class="row hidden-xs" id="top_row">
         <div class="page-header">
             <h1>Grid Builder <small></small></h1>
         </div>
@@ -19,13 +20,17 @@
                 <canvas id="builder_canvas"></canvas>
                 <canvas id="builder_canvas_overlay"></canvas>
             </div>
+            <div class="builder_zoom visible-xs">
+                <button class="btn btn-default btn-xs zoom builder_zoom_out">-</button>
+                <button class="btn btn-default btn-xs zoom builder_zoom_in">+</button>
+            </div>
         </div>
-        <div class="col-md-4" id="builder_container_container">
+        <div class="col-md-4 hidden-xs" id="builder_container_container">
             <div id="resize_handle"></div>
-            <div id="builder_zoom">
-                <button class="btn btn-default btn-xs" id="builder_clear_selection">Clear Selection</button>
-                <button class="btn btn-default btn-xs zoom" id="builder_zoom_out">-</button>
-                <button class="btn btn-default btn-xs zoom" id="builder_zoom_in">+</button>
+            <div class="builder_zoom">
+                <button class="btn btn-default btn-xs builder_clear_selection">Clear Selection</button>
+                <button class="btn btn-default btn-xs zoom builder_zoom_out">-</button>
+                <button class="btn btn-default btn-xs zoom builder_zoom_in">+</button>
             </div>
             <div id="builder_container">
 
@@ -122,6 +127,7 @@
         </div>
 
     </div>
+    <div style="clear: both;"></div>
 </body>
 
 <script src="lib/js/jquery.min.js"></script>

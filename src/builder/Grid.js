@@ -26,6 +26,7 @@
         this.multi_selected_grid = [];
         this.selected_grid = [];
         this.hover_grid = [];
+        this.fp_grid = [];
         this.vgrid_spaces = parseInt($("#builder_vgrid_spaces").val());
         this.hgrid_spaces = parseInt($("#builder_hgrid_spaces").val());
         this.grid_color = $("#builder_grid_color").val();
@@ -34,6 +35,34 @@
         this.mouse_down = false;
         this.m_x_start = false;
         this.m_y_start = false;
+        this.touch_cx = false;
+        this.touch_cy = false;
+    };
+
+    Grid.prototype.overlayTouchEnd = function(event){
+        if(this.touch_cx && this.touch_cy) {
+            var xy = this.clickCanvas(this.touch_cx, this.touch_cy);
+            if(this.container.android){
+                Android.setSpace(xy[0], xy[1], this.container.layout.floorplanId);
+            }
+        }
+    };
+
+    Grid.prototype.overlayTouchMove = function(event){
+        this.touch_cx = false;
+        this.touch_cy = false;
+    };
+
+    Grid.prototype.overlayTouchStart = function(event){
+        var c = this.canvas.getContext('2d');
+        var rect = this.canvas.getBoundingClientRect();
+        var touch = event.touches[0];
+        var thex = touch.clientX;
+        var they = touch.clientY;
+        var cx = (thex - rect.left);
+        var cy = (they - rect.top);
+        this.touch_cx = cx;
+        this.touch_cy = cy;
     };
 
     Grid.prototype.getFullGrid = function() {
@@ -228,7 +257,12 @@
         var cy = (they - rect.top) / (rect.bottom-rect.top) * he;
         return [cx, cy];
     };
-
+    /**
+     *
+     * @param cx
+     * @param cy
+     * @returns {[*,*]}
+     */
     Grid.prototype.clickCanvas = function(cx, cy) {
         debug("Grid.clickCanvas");
         var results = this.getGridXandY(cx, cy);
@@ -282,6 +316,9 @@
         var selected_grid = this.selected_grid;
         var hover_grid = this.hover_grid;
         var multi_selected_grid = this.multi_selected_grid;
+        var fp_grid = this.fp_grid;
+
+        var android = this.container.android;
 
         if (this.grid_lines_enabled){
             for (i = 0; i < vi; i++) {
@@ -300,9 +337,23 @@
                 c.stroke();
             }
 
-            if(full_grid[i] || full_grid[i] === ""){
+            if(!android && (full_grid[i] || full_grid[i] === "")){
                 for(var y = 0; y < full_grid[i].length; y++){
                     if(full_grid[i][y] || full_grid[i][y] === ""){
+                        co.fillStyle = "red";
+                        co.fillRect(
+                            (wi / ho) * i,
+                            (he / vi) * y,
+                            (wi / ho),
+                            (he / vi)
+                        );
+                    }
+                }
+            }
+
+            if(android && (fp_grid[i] || fp_grid[i] === "")){
+                for(var y = 0; y < fp_grid[i].length; y++){
+                    if(fp_grid[i][y] || fp_grid[i][y] === ""){
                         co.fillStyle = "red";
                         co.fillRect(
                             (wi / ho) * i,
@@ -328,7 +379,7 @@
                 }
             }
 
-            if(hover_grid[i] || hover_grid[i] === ""){
+            if(!android && (hover_grid[i] || hover_grid[i] === "")){
                 for(var y = 0; y < hover_grid[i].length; y++){
                     if(hover_grid[i][y] || hover_grid[i][y] === ""){
                         co.fillStyle = "gold";
@@ -342,7 +393,7 @@
                 }
             }
 
-            if(multi_selected_grid[i] || multi_selected_grid[i] === ""){
+            if(!android && (multi_selected_grid[i] || multi_selected_grid[i] === "")){
                 for(var y = 0; y < multi_selected_grid[i].length; y++){
                     if(multi_selected_grid[i][y] || multi_selected_grid[i][y] === ""){
                         co.fillStyle = "blue";

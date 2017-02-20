@@ -3,7 +3,8 @@
     var debug = registry.console.debug;
 
     var Main = function() {
-        debug(arguments.callee.name);
+        debug("Main.constructor");
+        this.android = typeof(Android) != "undefined";
 
         this.grid = new classes.Grid(this);
         this.db = new classes.Db(this);
@@ -52,10 +53,10 @@
         });
 
         //Next setup grid events
-        $("#builder_zoom_in").click(function(event){
+        $(".builder_zoom_in").click(function(event){
             that.grid.zoomIn(event);
         });
-        $("#builder_zoom_out").click(function(event){
+        $(".builder_zoom_out").click(function(event){
             that.grid.zoomOut(event);
         });
         $("#builder_grid_color").change(function(event){
@@ -63,6 +64,7 @@
             that.grid.redraw(event);
         });
 
+        $(this.grid.getOverlay()).off();
         $(this.grid.getOverlay()).on({
             "mousedown": function(event){
                 that.grid.overlayMouseDown(event);
@@ -75,8 +77,16 @@
             },
             "click": function(event){
                 that.grid.overlayClicked(event);
+            },
+            "touchstart": function(event){
+                that.grid.overlayTouchStart(event);
+            },
+            "touchmove": function(event){
+                that.grid.overlayTouchMove(event);
+            },
+            "touchend": function(event){
+                that.grid.overlayTouchEnd(event);
             }
-
         });
 
         $("#builder_clear_selection").click(function(event){
@@ -111,6 +121,18 @@
         });
     };
 
+    Main.prototype.loadFloorPlan = function(fp){
+        debug("Main.loadFloorPlan");
+        if(this.android){
+            this.floorPlan = JSON.parse(Android.getData2(Number(fp)));
+            this.db.addFloorPlan(this.floorPlan);
+            this.layout.displayFloorplan(this.floorPlan.id);
+        }
+    };
+
     classes.Main = Main;
     objs.Main = [new Main()];
+    window.loadFloorPlan = function(fp){
+        objs.Main[0].loadFloorPlan(fp);
+    };
 })(jQuery, registry, registry.classes, registry.objs);

@@ -18,7 +18,9 @@ module.exports = {
             "CREATE TABLE if not exists layout_images (id TEXT PRIMARY KEY, layout_image TEXT);" +
             "CREATE UNIQUE INDEX if not exists layout_images_id_uindex ON layout_images (id);",
             "create table if not exists settings (key TEXT PRIMARY KEY, value TEXT);",
-            "create unique index if not exists settings_key on settings (key);"
+            "create unique index if not exists settings_key on settings (key);",
+            "CREATE TABLE if not exists scan_results (s_id INTEGER, fp_id TEXT, ap_id TEXT, x INTEGER, " +
+            "y INTEGER, value REAL, orig_values TEXT, PRIMARY KEY (s_id, fp_id, ap_id));"
         ];
         db.serialize(function() {
             creates.forEach(function(create){
