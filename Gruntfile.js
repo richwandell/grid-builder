@@ -52,7 +52,7 @@ module.exports = function (grunt) {
         watch: {
             dev: {
                 files: ['src/**/*.less', 'src/builder/**/*', 'src/builder.html', 'src/server/*'],
-                tasks: ['clean', 'less:dev', 'copy:first', 'uglify:desktop']
+                tasks: ['clean', 'babel', 'less:dev', 'copy:first', 'uglify:desktop']
             }
         },
         clean: {
@@ -96,6 +96,20 @@ module.exports = function (grunt) {
                 version: '0.19.1'
             },
             src: ['./public/**/*']
+        },
+        babel: {
+            options: {
+                sourceMap: true,
+                presets: ['es2015', 'stage-0']
+            },
+            dist: {
+                files: [{
+                    expand: true,
+                    src: ['src/server/*.es6', 'src/builder/*.es6'],
+                    dest: '.',
+                    ext: '.js'
+                }]
+            }
         }
     });
 
@@ -105,5 +119,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-nw-builder');
+    grunt.loadNpmTasks('grunt-babel');
 
 };
