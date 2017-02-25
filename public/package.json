@@ -11,7 +11,7 @@
     "body-parser": "latest"
   },
   "scripts": {
-    "start-server": "node server/Server.js",
+    "start-server": "node --debug server/Server.js",
     "start": "../node_modules/.bin/nw"
   },
   "main": "builder/builder.html",

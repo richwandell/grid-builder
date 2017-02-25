@@ -1,3 +1,5 @@
+import KalmanFilter from './KalmanFilter';
+
 let sqlite3 = require('sqlite3').verbose();
 
 class Db {
@@ -10,6 +12,23 @@ class Db {
     static query_insert_layout = "insert or ignore into layout_images values (?, ?);";
     static query_update_layout = "update layout_images set layout_image = ? where id = ?;";
     static query_insert_scan_results = "insert or ignore into scan_results values (?, ?, ?, ?, ?, ?, ?, ?);";
+    static query_get_scan_results = "select * from scan_results;";
+    static query_get_for_kalman = "SELECT s.fp_id, s.ap_id, s.x, s.y, "
+    + "group_concat(s.value) `values`, "
+    + "case when k.kalman is null then avg(s.value) else k.kalman end `cest`, "
+    + "k.kalman FROM scan_results s left join "
+    + "kalman_estimates k on s.fp_id = k.fp_id and s.ap_id = k.ap_id and s.x = k.x and s.y = k.y "
+    + "GROUP BY s.fp_id, s.ap_id, s.x, s.y;";
+    static query_insert_kalman_estimates = "insert or ignore into kalman_estimates values (?, ?, ?, ?, ?);"
+    static query_update_kalman_estimates = "update kalman_estimates set kalman = ? where fp_id = ? and ap_id = ? and "
+    + " x = ? and y = ?;";
+    static query_update_features = "insert into features "
+    + " select k.fp_id, k.x, k.y, k.ap_id || k1.ap_id as feature, abs(k.kalman - k1.kalman) as value "
+    + " from kalman_estimates k join kalman_estimates k1 on k.fp_id = k1.fp_id and k.x = k1.x and k.y = k1.y "
+    + " where k.kalman != 0 and k1.kalman != 0;";
+
+    static query_get_features = "select f.*, abs(value - :feature_value:) diff from features f "
+    + " where f.feature = ? and f.fp_id = ? order by diff asc;";
 
     static creates = [
         "CREATE TABLE if not exists layout_images (id TEXT PRIMARY KEY, layout_image TEXT);",
@@ -32,13 +51,24 @@ class Db {
         "y INTEGER, value REAL, orig_values TEXT, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, " +
         "PRIMARY KEY (s_id, fp_id, ap_id), " +
         "CONSTRAINT scan_results_layout_images_id_fk FOREIGN KEY (fp_id) REFERENCES layout_images (id));",
-        "create index if not exists x_and_y on scan_results (x, y);"
+        "create index if not exists x_and_y on scan_results (x, y);",
+
+        "CREATE TABLE if not exists kalman_estimates (fp_id TEXT, ap_id TEXT, x INTEGER, "
+        + "y INTEGER, kalman REAL, "
+        + "CONSTRAINT kalman_estimates_fp_id_ap_id_x_y_pk PRIMARY KEY (fp_id, ap_id, x, y),"
+        + "FOREIGN KEY (ap_id, fp_id, x, y) REFERENCES scan_results (ap_id, fp_id, x, y) ON DELETE CASCADE)",
+
+        "CREATE TABLE if not exists features (fp_id TEXT, x INTEGER, y INTEGER, feature TEXT, value REAL, "
+        + " CONSTRAINT features_fp_id_x_y_feature_pk PRIMARY KEY (fp_id, x, y, feature));",
+        "CREATE UNIQUE INDEX if not exists features_feature_index1 ON features(fp_id,feature,x,y);",
+        "CREATE INDEX if not exists features_feature_index2 ON features(feature);"
     ];
 
     static drops = [
         "drop table if exists layout_images;",
         "drop table if exists settings;",
-        "drop table if exists scan_results;"
+        "drop table if exists scan_results;",
+        "drop table if exists kalman_estimates;"
     ];
 
     static migration1 = [
@@ -50,6 +80,10 @@ class Db {
         this.log = log;
         this.db = new sqlite3.Database('db.sqlite3');
         this.log.debug("Db.constructor");
+    }
+
+    getDatabase(){
+        return this.db;
     }
 
     doUpgrade(databaseCodeVersion) {
@@ -69,7 +103,7 @@ class Db {
     /**
      * Creates the sqlite tables
      */
-    createTables(log) {
+    createTables() {
         this.log.debug("Db.createTables");
         let creates = Db.creates;
         let db = this.db;
@@ -148,7 +182,7 @@ class Db {
 
         let stmt = db.prepare(Db.query_insert_scan_results);
 
-        payload.forEach(function (el) {
+        payload.forEach((el) => {
             let s_id = Number(el.s_id);
             let fp_id = el.fp_id;
             let ap_id = el.ap_id;
@@ -161,6 +195,47 @@ class Db {
         });
 
         stmt.finalize();
+        this.updateKalman();
+    }
+
+    updateKalman(){
+        let log = this.log;
+        let db = this.db;
+        let kalman = {};
+
+        db.all(Db.query_get_for_kalman, (err, rows) => {
+            const insert = db.prepare(Db.query_insert_kalman_estimates);
+            const update = db.prepare(Db.query_update_kalman_estimates);
+            log.log(err);
+            if(err) return;
+
+            rows.forEach((row) => {
+                let k = false;
+                if (typeof(kalman[row.fp_id + row.ap_id + row.x + row.y]) == "undefined") {
+                    kalman[row.fp_id + row.ap_id + row.x + row.y] = new KalmanFilter(row.cest);
+                }
+                k = kalman[row.fp_id + row.ap_id + row.x + row.y];
+
+                let values = row.values
+                    .split(",")
+                    .map((el) => { return Number(el); });
+
+                for(let i = 0; i < values.length; i++){
+                    k.addSample(values[i]);
+                }
+                insert.run(row.fp_id, row.ap_id, row.x, row.y, k.getEstimate());
+                update.run(k.getEstimate(), row.fp_id, row.ap_id, row.x, row.y);
+            });
+            insert.finalize();
+            update.finalize();
+
+            const features_delete = db.prepare("delete from features");
+            features_delete.finalize();
+
+            const features_update = db.prepate(Db.query_update_features);
+            features_update.finalize();
+        });
+
     }
 }
 

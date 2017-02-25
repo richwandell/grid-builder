@@ -9,21 +9,9 @@ class ContextMenu {
     constructor(container) {
         debug("ContextMenu");
         this.container = container;
-        let isNode = (typeof process !== "undefined" && typeof require !== "undefined");
-        let isNodeWebkit = false;
-
-        //Is this Node.js?
-        if(isNode) {
-            //If so, test for Node-Webkit
-            try {
-                isNodeWebkit = (typeof require('nw.gui') !== "undefined");
-            } catch(e) {
-                isNodeWebkit = false;
-            }
-            if(isNodeWebkit){
-                // this.gui = require('nw.gui');
-                this.setupMenu();
-            }
+        if(this.container.nodeWebkit){
+            // this.gui = require('nw.gui');
+            this.setupMenu();
         }
     }
 

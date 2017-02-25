@@ -19,6 +19,8 @@ const uuid = require('uuid');
  */
 class RestServer{
 
+
+
     constructor(){
         this.id = uuid.v4();
         try {
@@ -173,7 +175,6 @@ class RestServer{
         const db = this.db;
         const log = this.log;
         const app = this.app;
-        log.log("hi rich");
         db.createTables(log);
 
         app.get('/rest/databaseVersion', (req, res) => {

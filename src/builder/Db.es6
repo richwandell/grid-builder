@@ -87,27 +87,17 @@ class Db {
         }
     }
 
+    deleteExistingLayouts() {
+        let os = this.database.transaction(["layout_images"], "readwrite")
+            .objectStore("layout_images");
+        let req = os.clear();
+    }
+
+
     syncWithServer() {
         debug("Db.syncWithServer");
-        this.getServerVersion((res) => {
-            let os = this.database.transaction(["settings"], "readwrite")
-                .objectStore("settings");
-            let req = os.get(1);
-            req.onsuccess = (event) => {
-                let dbv = event.target.result.database_version + this.databaseVersion;
-                this.database_version = event.target.result.database_version;
-                let resdb = typeof(res.databaseVersion) != "undefined" ? parseInt(res.databaseVersion) : dbv;
-
-                if(dbv == resdb){
-                    this.reloadFromDb();
-                }else if(resdb < dbv){
-                    this.sendUpdates();
-                } else {
-                    this.updateDatabaseVersion(resdb - this.databaseVersion);
-                    this.getUpdates();
-                }
-            };
-        });
+        this.deleteExistingLayouts();
+        this.getUpdates();
     }
 
     getUpdates() {

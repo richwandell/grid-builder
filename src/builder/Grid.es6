@@ -67,8 +67,15 @@ class Grid{
         this.touch_cy = cy;
     }
 
+    /**
+     *
+     * @returns {Array}
+     */
     getFullGrid() {
-        return this.full_grid;
+        if(typeof(this.full_grid) != "undefined") {
+            return this.full_grid;
+        }
+        return [];
     }
 
     getImageName() {
@@ -265,9 +272,10 @@ class Grid{
         let results = this.getGridXandY(cx, cy);
         let x = results[0], y = results[1];
         let n = $("#builder_selected_box_name").val();
-        if(this.full_grid[x]){
-            if(this.full_grid[x][y] || this.full_grid[x][y] === ""){
-                n = this.full_grid[x][y];
+        let full_grid = this.getFullGrid();
+        if(full_grid[x]){
+            if(full_grid[x][y] || full_grid[x][y] === ""){
+                n = full_grid[x][y];
             }
         }
         this.container.layout.setSelectedGrid(x, y, n);
@@ -309,7 +317,7 @@ class Grid{
 
         let color = this.grid_color;
 
-        let full_grid = this.full_grid;
+        let full_grid = this.getFullGrid();
         let selected_grid = this.selected_grid;
         let hover_grid = this.hover_grid;
         let multi_selected_grid = this.multi_selected_grid;

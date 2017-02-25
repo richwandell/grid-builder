@@ -15,16 +15,27 @@ class Main{
     constructor(){
         debug("Main.constructor");
         this.android = typeof(Android) != "undefined";
+        let isNode = (typeof process !== "undefined" && typeof require !== "undefined");
+        this.nodeWebkit = false;
+
+        //Is this Node.js?
+        if(isNode) {
+            //If so, test for Node-Webkit
+            try {
+                this.nodeWebkit = (typeof require('nw.gui') !== "undefined");
+            } catch(e) {
+                this.nodeWebkit = false;
+            }
+        }
 
         this.grid = new Grid(this);
         this.db = new Db(this);
         this.layout = new LayoutManager(this);
         this.contextMenu = new ContextMenu(this);
         this.setupEvents();
-        if(typeof process != "undefined"){
-            if(process.mainModule){
-                process.mainModule.exports.register(this);
-            }
+
+        if(this.nodeWebkit){
+            process.mainModule.exports.register(this);
         }
     }
 
@@ -101,7 +112,7 @@ class Main{
             }
         });
 
-        $("#builder_clear_selection").click((event) => {
+        $(".builder_clear_selection").click((event) => {
             this.grid.clearMultiSelection(event);
         });
 
