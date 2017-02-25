@@ -4,11 +4,6 @@ module.exports = function (grunt) {
         copy: {
             first: {
                 files: [{
-                    cwd: 'node_modules/jquery/dist/',
-                    src: 'jquery.min.js',
-                    dest: 'public/builder/lib/js/',
-                    expand: true
-                }, {
                     cwd: 'node_modules/bootstrap/dist/css/',
                     src: 'bootstrap.min.css',
                     dest: 'public/builder/lib/css/',
@@ -52,7 +47,7 @@ module.exports = function (grunt) {
         watch: {
             dev: {
                 files: ['src/**/*.less', 'src/builder/**/*', 'src/builder.html', 'src/server/*'],
-                tasks: ['clean', 'babel', 'less:dev', 'copy:first', 'uglify:desktop']
+                tasks: ['clean', 'babel', 'webpack', 'less:dev', 'copy:first']
             }
         },
         clean: {
@@ -72,20 +67,38 @@ module.exports = function (grunt) {
         uglify: {
             desktop: {
                 options: {
-                    sourceMap: true,
-                    sourceMapName: 'public/builder/app.map'
+                    mangle: false
                 },
                 files: {
                     'public/builder/app.js': [
-                        'src/builder/Registry.js',
-                        'src/builder/ContextMenu.js',
-                        'src/builder/CustomExceptions.js',
-                        'src/builder/Db.js',
-                        'src/builder/Grid.js',
-                        'src/builder/LayoutManager.js',
-                        'src/builder/Main.js'
+                        'public/builder/app.js'
                     ]
                 }
+            }
+        },
+        webpack: {
+            dist:  {
+                entry: [
+                    './src/builder/Main.es6'
+                ],
+                output: {
+                    filename: './public/builder/app.js'
+                },
+                module: {
+                    loaders: [{
+                        exclude: /node_modules/,
+                        loader: 'babel-loader'
+                    }]
+                },
+                resolve: {
+                    extensions: ['.es6', '.js', '.jsx']
+                },
+                stats: {
+                    colors: true
+                },
+                progress: false,
+                inline: false,
+                devtool: 'source-map'
             }
         },
         nwjs: {
@@ -105,7 +118,7 @@ module.exports = function (grunt) {
             dist: {
                 files: [{
                     expand: true,
-                    src: ['src/server/*.es6', 'src/builder/*.es6'],
+                    src: ['src/server/*.es6'],
                     dest: '.',
                     ext: '.js'
                 }]
@@ -120,5 +133,5 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-nw-builder');
     grunt.loadNpmTasks('grunt-babel');
-
+    grunt.loadNpmTasks('grunt-webpack');
 };

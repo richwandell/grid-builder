@@ -3,8 +3,10 @@
   "description": "Desktop Application for the Indoor Location App",
   "repository": "https://richwandell@bitbucket.org/richwandell/grid-builder.git",
   "version": "0.0.1",
-  "license": "LicenseRef-LICENSE",
+  "license": "GPL-3.0",
   "devDependencies": {
+    "babel-core": "^6.23.1",
+    "babel-loader": "^6.3.2",
     "babel-preset-es2015": "^6.22.0",
     "babel-preset-stage-0": "^6.22.0",
     "blueimp-md5": "^2.6.0",
@@ -18,7 +20,9 @@
     "grunt-contrib-uglify": "^2.0.0",
     "grunt-contrib-watch": "^1.0.0",
     "grunt-nw-builder": "^3.1.0",
+    "grunt-webpack": "^2.0.1",
     "jquery": "^3.1.0",
-    "nw": "^0.19.1"
+    "nw": "^0.19.1",
+    "webpack": "^2.2.1"
   }
 }
