@@ -209,6 +209,7 @@ class Db {
             log.log(err);
             if(err) return;
 
+            let done = 0;
             rows.forEach((row) => {
                 let k = false;
                 if (typeof(kalman[row.fp_id + row.ap_id + row.x + row.y]) == "undefined") {
@@ -223,19 +224,20 @@ class Db {
                 for(let i = 0; i < values.length; i++){
                     k.addSample(values[i]);
                 }
-                insert.run(row.fp_id, row.ap_id, row.x, row.y, k.getEstimate());
-                update.run(k.getEstimate(), row.fp_id, row.ap_id, row.x, row.y);
+                insert.run(row.fp_id, row.ap_id, row.x, row.y, k.getEstimate(), () => {
+                    update.run(k.getEstimate(), row.fp_id, row.ap_id, row.x, row.y, () => {
+                        done++;
+                        if(done >= rows.length){
+                            insert.finalize();
+                            update.finalize();
+                            db.exec("delete from features", () => {
+                                db.exec(Db.query_update_features);
+                            });
+                        }
+                    });
+                });
             });
-            insert.finalize();
-            update.finalize();
-
-            const features_delete = db.prepare("delete from features");
-            features_delete.finalize();
-
-            const features_update = db.prepate(Db.query_update_features);
-            features_update.finalize();
         });
-
     }
 }
 

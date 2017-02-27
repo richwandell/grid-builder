@@ -1,18 +1,11 @@
 import Db from './Db';
 const fs = require('fs');
-const pjson = require('../package.json');
-const Logger = require('./Log.js');
 
 class Test {
     constructor(){
-        let log = new Logger({
-            logfolder: pjson.builder_log_folder,
-            filename: "rest.log",
-            filesize: 5000000,
-            numfiles: 3
+        let database = new Db({
+            debug: () => {}
         });
-        let database = new Db(log);
-        database.createTables();
 
         let db = database.getDatabase();
 
@@ -33,7 +26,7 @@ class Test {
                 features[row[1] + row1[1]] = Math.abs(Number(row[4]) - Number(row1[4]));
             });
         });
-
+        this.start = new Date().getTime();
         let data = [];
         let keys = Object.keys(features);
         let done = 0;
@@ -43,7 +36,7 @@ class Test {
                 data.push(rows);
                 done++;
                 if(done >= keys.length){
-                    console.log(data.length, keys.length);
+                    db.close();
                     this.makeGuess(data);
                 }
             });
@@ -51,6 +44,7 @@ class Test {
     }
 
     makeGuess(data){
+
         let distances = {};
         let knn = [];
 
@@ -75,6 +69,8 @@ class Test {
         knn.sort((a, b) => { return a.distance > b.distance; });
 
         console.log(knn);
+        this.end = new Date().getTime();
+        console.log(this.end - this.start);
     }
 
 }

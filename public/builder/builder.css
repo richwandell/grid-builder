@@ -83,6 +83,12 @@ h2 {
   box-shadow: inset 0px 0px 1px 1px rgba(51, 51, 51, 0.14);
   cursor: col-resize;
 }
+#builder_container_container #compass_image {
+  width: 150px;
+  position: fixed;
+  margin-left: -200px;
+  user-select: none;
+}
 #builder_container_container .form-horizontal .form-group {
   width: 100%;
 }

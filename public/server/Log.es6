@@ -28,10 +28,14 @@ class Log {
         });
 
         fs.appendFile(this.fullpath, "[INFO] log file opened \n", () =>{
-            fs.watch(this.fullpath, (eventType, filename) =>{
+            this.watcher = fs.watch(this.fullpath, (eventType, filename) =>{
                 this.rotate(eventType, filename);
             });
         });
+    }
+
+    close(){
+        this.watcher.close();
     }
 
     rotate(eventType, filename) {
