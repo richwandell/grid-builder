@@ -28,5 +28,7 @@
     "min_height": 500
   },
   "builder_log_folder": "log",
+  "builder_protocol": "http",
+  "builder_host_name": "localhost",
   "builder_rest_port": 8888
 }

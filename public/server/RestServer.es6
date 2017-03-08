@@ -44,26 +44,6 @@ class RestServer{
     }
 
     /**
-     * Request handler for the /rest/databaseVersion endpoint
-     * @param req
-     * @param res
-     */
-    getDatabaseVersion(req, res){
-        const log = this.log;
-        const db = this.db;
-        log.log("/rest/databaseVersion");
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header('Content-Type', 'application/javascript');
-        db.getDatabaseVersion(function(err, rows){
-            if(rows.length > 0){
-                res.send({databaseVersion: rows[0].value, success: true});
-            }else{
-                res.send({databaseVersion: 0, success: true});
-            }
-        });
-    }
-
-    /**
      * Save handler for saving layout images from the UI
      * @param req
      * @param res
@@ -76,22 +56,11 @@ class RestServer{
         let error = false;
 
         log.log("/rest/updateDatabase");
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header('Content-Type', 'application/javascript');
-        log.log(req.body);
+        this.setResponseHeaders(res);
 
-        if(typeof(data.databaseVersion) != "undefined"){
-            if(!isNaN(data.databaseVersion)){
-                cleanData.databaseVersion = data.databaseVersion;
-            }else{
-                error = true;
-            }
-            if(typeof(data.layout_images) != "undefined"){
-                if(data.layout_images.length > 0){
-                    cleanData.layout_images = data.layout_images;
-                }else{
-                    error = true;
-                }
+        if(typeof(data.layout_images) != "undefined"){
+            if(data.layout_images.length > 0){
+                cleanData.layout_images = data.layout_images;
             }else{
                 error = true;
             }
@@ -142,8 +111,7 @@ class RestServer{
         let log = this.log;
         let db = this.db;
         log.log("/rest/floorplans");
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header('Content-Type', 'application/javascript');
+        this.setResponseHeaders(res);
         db.getFloorPlans(function(err, rows){
             rows.forEach(function(row){
                 if(typeof(row.layout_image) != "undefined"){
@@ -157,8 +125,7 @@ class RestServer{
     saveReadings(req, res){
         let log = this.log;
         log.log("/rest/saveReadings");
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header('Content-Type', 'application/javascript');
+        this.setResponseHeaders(res);
         const data = req.body;
         log.log(data);
         if(typeof(data.payload) == "undefined"){
@@ -166,6 +133,25 @@ class RestServer{
         }
         this.db.saveReadings(data.payload);
         res.send({success: true});
+    }
+
+    getLayoutInfo(req, res){
+        let log = this.log;
+        log.log("/rest/layout_info/all");
+        this.setResponseHeaders(res);
+
+        this.db.getLayoutInfo(function(err, rows){
+            res.send({
+                success: true,
+                payload: rows
+            });
+        });
+    }
+
+    setResponseHeaders(res){
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header('Content-Type', 'application/javascript');
+        res.header("Cache-Control", "no-cache");
     }
 
     /**
@@ -176,6 +162,11 @@ class RestServer{
         const log = this.log;
         const app = this.app;
         db.createTables(log);
+
+        app.get('/rest/alive', (req, res) => {
+            this.setResponseHeaders(res);
+            res.send({success: true});
+        });
 
         app.get('/rest/databaseVersion', (req, res) => {
             this.getDatabaseVersion(req, res);

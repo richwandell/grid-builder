@@ -1,6 +1,10 @@
+var webpack = require('webpack');
+
+
 module.exports = function (grunt) {
+    var pkg  = grunt.file.readJSON("public/package.json");
     grunt.initConfig({
-        pkg: grunt.file.readJSON("package.json"),
+        pkg: pkg,
         copy: {
             first: {
                 files: [{
@@ -98,7 +102,14 @@ module.exports = function (grunt) {
                 },
                 progress: false,
                 inline: false,
-                devtool: 'source-map'
+                devtool: 'source-map',
+                plugins: [
+                    new webpack.DefinePlugin({
+                        REST_PORT: JSON.stringify(pkg.builder_rest_port),
+                        HOST_NAME: JSON.stringify(pkg.builder_host_name),
+                        PROTOCOL: JSON.stringify(pkg.builder_protocol)
+                    })
+                ]
             }
         },
         nwjs: {

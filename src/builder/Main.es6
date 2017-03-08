@@ -4,6 +4,10 @@ import Grid from './Grid';
 import Db from './Db';
 import LayoutManager from './LayoutManager';
 import ContextMenu from './ContextMenu';
+import InvalidArgumentException from './CustomExceptions';
+import Compass from './Compass';
+import State from './State';
+
 
 let classes = Registry.classes;
 let debug = Registry.console.debug;
@@ -14,6 +18,9 @@ class Main{
      */
     constructor(){
         debug("Main.constructor");
+        if(!REST_PORT || !HOST_NAME || !PROTOCOL){
+            throw InvalidArgumentException("Missing PORT HOST or PROTOCOL");
+        }
         this.android = typeof(Android) != "undefined";
         let isNode = (typeof process !== "undefined" && typeof require !== "undefined");
         this.nodeWebkit = false;
@@ -28,10 +35,13 @@ class Main{
             }
         }
 
+
+        this.state = new State(this);
         this.grid = new Grid(this);
-        this.db = new Db(this);
+        this.db = new Db(this, PROTOCOL + "://" + HOST_NAME + ":" + REST_PORT);
         this.layout = new LayoutManager(this);
         this.contextMenu = new ContextMenu(this);
+        this.compass = new Compass(this);
         this.setupEvents();
 
         if(this.nodeWebkit){
@@ -69,7 +79,7 @@ class Main{
             this.layout.toggleSpaceDisplay(event);
         });
         $("#save_floorplan").click((event) => {
-            this.layout.saveFloorplan(event);
+            this.db.saveFloorplan(event);
         });
         $("#builder_add_spaces").click((event) => {
             this.layout.addSpace(event);

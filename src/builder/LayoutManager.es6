@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import Registry from './Registry';
 
+
 let debug = Registry.console.debug;
 let superDebug = Registry.console.superDebug;
 
@@ -121,6 +122,7 @@ class LayoutManager {
             that.container.grid.setGridVars({
                 "full_grid": event.target.result.grid
             });
+            that.container.grid.setImageString(event.target.result.image);
 
             that.drawFloorPlan();
         });
@@ -304,24 +306,7 @@ class LayoutManager {
         $(event.currentTarget).toggleClass("builder_space_list_open");
     }
 
-    saveFloorplan = function() {
-        debug("LayoutManager.saveFloorplan");
-        let floorplanname = $("#builder_floorplan_name").val();
-        this.setFloorplanName(floorplanname);
-        let id = $("#builder_select_existing").val();
-        let hs = parseInt($("#builder_hgrid_spaces").val());
-        let vs = parseInt($("#builder_vgrid_spaces").val());
-        let grid_color = $("#builder_grid_color").val();
-        this.container.db.saveFloorplan({
-            "id": id,
-            "name": this.container.grid.getImageName(),
-            "grid": this.container.grid.getFullGrid(),
-            "hgrid_spaces": hs,
-            "vgrid_spaces": vs,
-            "floorplanname": floorplanname,
-            "grid_color": grid_color
-        });
-    }
+
 }
 
 export default LayoutManager;

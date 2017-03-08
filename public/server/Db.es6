@@ -4,13 +4,13 @@ let sqlite3 = require('sqlite3').verbose();
 
 class Db {
 
-    static database_code_version = 0;
+    static database_code_version = 1;
     static query_get_all_floorplans = "select * from layout_images";
     static query_get_database_version = "select value from settings where key = 'database_version';";
     static query_insert_version = "insert or ignore into settings values ('database_version', ?);";
     static query_update_version = "update settings set value = ? where key = 'database_version';";
-    static query_insert_layout = "insert or ignore into layout_images values (?, ?);";
-    static query_update_layout = "update layout_images set layout_image = ? where id = ?;";
+    static query_insert_layout = "insert or ignore into layout_images values (?, ?, ?);";
+    static query_update_layout = "update layout_images set layout_image = ?, floor_plan_name = ? where id = ?;";
     static query_insert_scan_results = "insert or ignore into scan_results values (?, ?, ?, ?, ?, ?, ?, ?);";
     static query_get_scan_results = "select * from scan_results;";
     static query_get_for_kalman = "SELECT s.fp_id, s.ap_id, s.x, s.y, "
@@ -26,7 +26,6 @@ class Db {
     + " select k.fp_id, k.x, k.y, k.ap_id || k1.ap_id as feature, abs(k.kalman - k1.kalman) as value "
     + " from kalman_estimates k join kalman_estimates k1 on k.fp_id = k1.fp_id and k.x = k1.x and k.y = k1.y "
     + " where k.kalman != 0 and k1.kalman != 0;";
-
     static query_get_features = "select f.*, abs(value - :feature_value:) diff from features f "
     + " where f.feature = ? and f.fp_id = ? order by diff asc;";
 
@@ -72,8 +71,8 @@ class Db {
     ];
 
     static migration1 = [
-        "ALTER TABLE scan_results ADD created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL;",
-        "update settings set val = '" + Db.database_code_version + "' where key = 'database_code_version';"
+        "ALTER TABLE layout_images ADD floor_plan_name TEXT NULL;",
+        "update settings set value = '" + Db.database_code_version + "' where key = 'database_code_version';"
     ];
 
     constructor(log){
@@ -114,16 +113,11 @@ class Db {
             });
         });
 
-        let databaseVersion = 0;
         let databaseCodeVersion = 0;
 
         db.all("select * from settings", (err, rows) => {
             rows.forEach(function(row){
                 switch(row.key){
-                    case "database_version":
-                        databaseVersion = Number(row.value);
-                        break;
-
                     case "database_code_version":
                         databaseCodeVersion = Number(row.value);
                         break;
@@ -164,9 +158,10 @@ class Db {
 
             data.layout_images.forEach(function(el){
                 let id = el.id;
+                let floor_plan_name = el.floorplanname;
                 let stringdata = JSON.stringify(el);
-                stmt.run(id, stringdata);
-                upstmt.run(stringdata, id);
+                stmt.run(id, stringdata, floor_plan_name);
+                upstmt.run(stringdata, floor_plan_name, id);
             });
             stmt.finalize();
             upstmt.finalize();

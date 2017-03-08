@@ -12,17 +12,62 @@ class Db {
      * @constructor
      * @param {Main} container
      */
-    constructor(container){
+    constructor(container, DSN){
         debug("Db.constructor");
+        this.DSN = DSN;
         this.container = container;
         this.databaseVersion = 11;
         this.database_version = 0;
         this.needsSettings = false;
         this.androidFpDatabase = [];
         this.allFpIds = [];
+        this.layoutImages = [];
         if(!this.container.android){
-            this.requestDatabase();
+            this.connectToDb();
         }
+    }
+
+    saveFloorplan() {
+        debug("Db.saveFloorplan");
+        let state = this.container.state.getState();
+        this.replaceMemoryIfExists(state);
+        $.ajax({
+            url: this.DSN + "/rest/updateDatabase",
+            dataType: "json",
+            type: "post",
+            data: {layout_images: [state]},
+            success: (res) => {
+                console.log(res);
+            },
+            error: (res) => {
+                console.error(res);
+            }
+        });
+    }
+
+    replaceMemoryIfExists(state){
+        for(let i = 0; i < this.layoutImages; i++){
+            if(this.layoutImages[i].id == state.id){
+                this.layoutImages = this.layoutImages.splice(i, 1);
+                this.layoutImages.push(state);
+                break;
+            }
+        }
+        this.layoutImages.push(state);
+    }
+
+    connectToDb(){
+        $.ajax({
+            url: this.DSN + "/rest/alive",
+            dataType: "json",
+            type: "get",
+            success: (res) => {
+                this.syncWithServer();
+            },
+            error: (res) => {
+                console.error(res);
+            }
+        });
     }
 
     addFloorPlan(fp) {
@@ -36,61 +81,9 @@ class Db {
         }
     }
 
-    updateDatabaseVersion(version) {
-        let os = that.database.transaction(["settings"], "readwrite")
-            .objectStore("settings");
-
-        let req = os.get(1);
-
-        req.onsuccess = (event) => {
-            let settings = event.target.result;
-            settings.database_version = version;
-            this.database_version = version;
-            os.put(settings);
-        };
-    }
-
-    requestDatabase(version) {
-        debug("Db.requestDatabase");
-        //Request our db and set event handlers
-        let dbrequest = window.indexedDB.open("BuilderDatabase", this.databaseVersion);
-        dbrequest.onupgradeneeded = (event) => {
-            debug("Db.onupgradeneeded");
-
-            this.database = event.target.result;
-
-            if(!this.database.objectStoreNames.contains("layout_images")){
-                this.database.createObjectStore("layout_images", {keyPath: "id"});
-            }
-
-            if(!this.database.objectStoreNames.contains("settings")){
-                this.database.createObjectStore("settings", {keyPath: "id", autoIncrement: true});
-                this.needsSettings = true;
-            }
-        };
-        dbrequest.onsuccess = (event) => {
-            debug("Db.onsuccess");
-            this.database = event.target.result;
-
-            if(this.needsSettings){
-                let t = this.database.transaction(["settings"], "readwrite")
-                    .objectStore("settings")
-                    .add({
-                        "database_version": this.database_version
-                    });
-                t.onsuccess = (event) => {
-                    this.syncWithServer();
-                };
-            }else{
-                this.syncWithServer();
-            }
-        }
-    }
 
     deleteExistingLayouts() {
-        let os = this.database.transaction(["layout_images"], "readwrite")
-            .objectStore("layout_images");
-        let req = os.clear();
+        this.layoutImages = [];
     }
 
 
@@ -103,7 +96,7 @@ class Db {
     getUpdates() {
         debug("Db.getUpdates");
         $.ajax({
-            url: "http://localhost:8888/rest/floorplans",
+            url: this.DSN + "/rest/floorplans",
             method: "get",
             dataType: "json",
             success: (res) => {
@@ -112,7 +105,7 @@ class Db {
                 let that = this;
                 $.each(res, function(key, val){
                     let data = val.layout_image;
-                    data.id = String(data.id);
+                    data.id = String(val.id);
                     data.hgrid_spaces = parseInt(data.hgrid_spaces);
                     data.vgrid_spaces = parseInt(data.vgrid_spaces);
                     $.each(data.grid, function(key, val){
@@ -125,22 +118,9 @@ class Db {
                             }
                         });
                     });
-                    let t = that.database.transaction(["layout_images"], "readwrite")
-                        .objectStore("layout_images")
-                        .add(data);
-                    t.onsuccess = function(){
-                        done++;
-                        if(done >= count){
-                            that.reloadFromDb();
-                        }
-                    };
-                    t.onerror = function(){
-                        done++;
-                        if(done >= count){
-                            that.reloadFromDb();
-                        }
-                    }
+                    that.layoutImages.push(data);
                 });
+                that.reloadFromDb();
             }
         });
     }
@@ -158,30 +138,6 @@ class Db {
                 this.reloadFromDb();
             }
         });
-    }
-
-    sendUpdates() {
-        debug("Db.sendUpdates");
-        let that = this;
-        let req = that.database.transaction(["layout_images"], "readwrite")
-            .objectStore("layout_images")
-            .getAll();
-        req.onsuccess = function(event){
-            $.ajax({
-                url: "http://localhost:8888/rest/updateDatabase",
-                method: "post",
-                dataType: "json",
-                data: {
-                    databaseVersion: that.databaseVersion + that.database_version,
-                    layout_images: event.target.result
-                },
-                success: function(res){
-                    if(res.success){
-                        that.reloadFromDb();
-                    }
-                }
-            });
-        };
     }
 
     sendOneUpdate(layout_image) {
@@ -224,12 +180,11 @@ class Db {
         }
         let that = this;
         $("#builder_select_existing").html("");
-        let req = this.database.transaction(["layout_images"], "readwrite")
-            .objectStore("layout_images")
-            .getAll();
-        req.onsuccess = function(event){
-            that.container.layout.resetFromDb(event, id);
-        };
+        that.container.layout.resetFromDb({
+            target:{
+                result: that.layoutImages
+            }
+        });
     }
 
     /**
@@ -252,13 +207,13 @@ class Db {
                 return cb.apply(that, [event]);
             }
         }else {
-            let t = this.database.transaction(["layout_images"], "readwrite")
-                .objectStore("layout_images")
-                .get(String(id));
-
-            t.onsuccess = function (event) {
-                cb.apply(that, arguments);
-            };
+            let event = {target: {}};
+            that.layoutImages.forEach(function(item){
+                if(item.id == id){
+                    event.target.result = item;
+                }
+            });
+            cb.apply(that, [event]);
         }
     }
 
@@ -275,40 +230,6 @@ class Db {
         let that = this;
         t.onsuccess = function(event){
             that.reloadFromDb();
-        };
-    }
-
-    saveFloorplan(vars) {
-        debug("Db.saveFloorplan");
-        if(typeof(vars) != "object"){
-            throw new InvalidArgumentException("saveFloorplan requires an object parameter");
-        }
-        if(typeof(vars["id"]) != "string"){
-            throw new InvalidArgumentException("saveFloorplan missing id");
-        }
-        let os = this.database.transaction(["layout_images"], "readwrite")
-            .objectStore("layout_images");
-        let req = os.get(vars["id"]);
-        let that = this;
-
-        req.onsuccess = function(event){
-            let data = event.target.result;
-            $.each(vars, function(key, value){
-                data[key] = value;
-            });
-            let requp = os.put(data);
-            requp.onsuccess = function(event){
-                let os = that.database.transaction(["settings"], "readwrite")
-                    .objectStore("settings");
-                let req = os.get(1);
-                req.onsuccess = function(event){
-                    let settings = event.target.result;
-                    settings.database_version++;
-                    that.database_version++;
-                    os.put(settings);
-                    that.sendOneUpdate(data);
-                };
-            };
         };
     }
 }

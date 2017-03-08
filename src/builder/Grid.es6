@@ -23,6 +23,7 @@ class Grid{
         this.image_height = 0;
         this.image = null;
         this.image_name = "";
+        this.imageString = "";
 
         this.full_grid = [];
         this.multi_selected_grid = [];
@@ -39,6 +40,14 @@ class Grid{
         this.m_y_start = false;
         this.touch_cx = false;
         this.touch_cy = false;
+    }
+
+    setImageString(image){
+        this.imageString = image;
+    }
+
+    getImageString(){
+        return this.imageString;
     }
 
     overlayTouchEnd(event) {
