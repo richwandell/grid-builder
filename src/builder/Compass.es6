@@ -1,8 +1,12 @@
 import $ from 'jquery';
+import Registry from './Registry';
+let debug = Registry.console.debug;
+let superDebug = Registry.console.superDebug;
 
 class Compass {
 
     constructor(container){
+        debug("Compass.constructor");
         this.compass = $("#compass_image");
         this.rotation = 0;
         this.mouseDown = false;
@@ -35,11 +39,19 @@ class Compass {
         });
     }
 
+    setRotation(rotation){
+        debug("Compass.setRotation");
+        this.rotation = Number(rotation);
+        this.compass.css("transform", "rotate(" + -this.rotation + "deg)");
+    }
+
     getRotation(){
+        superDebug("Compass.getRotation");
         return this.rotation;
     }
 
     adjustRotation(diff){
+        superDebug("Compass.adjustRotation");
         this.rotation += diff;
         this.compass.css("transform", "rotate(" + -this.rotation + "deg)");
     }

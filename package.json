@@ -2,13 +2,22 @@
   "name": "rw-grid-builder",
   "description": "Desktop Application for the Indoor Location App",
   "repository": "https://richwandell@bitbucket.org/richwandell/grid-builder.git",
-  "version": "0.0.1",
+  "version": "v1.0.0",
   "license": "GPL-3.0",
-  "devDependencies": {
+  "dependencies": {
+    "express": "^4.14.0",
+    "node-ssdp": "^2.8.0",
+    "sqlite3": "^3.1.8",
+    "uuid": "^2.0.2",
+    "ws": "^1.1.1",
+    "body-parser": "latest",
     "babel-core": "^6.23.1",
-    "babel-loader": "^6.3.2",
+    "babel-cli": "^6.0.0",
     "babel-preset-es2015": "^6.22.0",
-    "babel-preset-stage-0": "^6.22.0",
+    "babel-preset-stage-0": "^6.22.0"
+  },
+  "devDependencies": {
+    "babel-loader": "^6.3.2",
     "blueimp-md5": "^2.6.0",
     "bootstrap": "^3.3.7",
     "grunt": "^1.0.1",
@@ -25,6 +34,28 @@
     "node-debug": "^0.1.0",
     "node-gyp": "^3.5.0",
     "nw": "^0.19.1",
-    "webpack": "^2.2.1"
-  }
+    "webpack": "^2.2.1",
+    "node-wifi-scanner": "^1.0.0"
+  },
+  "scripts": {
+    "start-server": "node --debug src/server/Server.js -r babel-register",
+    "start": "./node_modules/.bin/nw"
+  },
+  "main": "public/builder/builder.html",
+  "node-main": "src/server/Server.js",
+  "window": {
+    "title": "Grid Builder",
+    "icon": "desktop/icon24.png",
+    "toolbar": true,
+    "frame": true,
+    "width": 1000,
+    "height": 700,
+    "position": "mouse",
+    "min_width": 500,
+    "min_height": 500
+  },
+  "builder_log_folder": "log",
+  "builder_protocol": "http",
+  "builder_host_name": "localhost",
+  "builder_rest_port": 8888
 }

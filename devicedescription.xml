@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root configId="7510685" xmlns="urn:schemas-upnp-org:device-1-0" xmlns:dlna="urn:schemas-dlna-org:device-1-0">
+    <specVersion>
+        <major>1</major>
+        <minor>0</minor>
+    </specVersion>
+    <device>
+        <deviceType>urn:schemas-upnp-org:device:Basic:1</deviceType>
+        <friendlyName>Indoor Location Tracker</friendlyName>
+        <manufacturer>Rich Wandell</manufacturer>
+        <manufacturerURL>http://www.richwandell.com/</manufacturerURL>
+        <modelDescription>location_tracker_server</modelDescription>
+        <modelName>location_tracker_server</modelName>
+        <modelNumber>0.0.1</modelNumber>
+        <modelURL>http://www.richwandell.com/</modelURL>
+        <endPoint>{{END}}</endPoint>
+        <UDN>{{UDN}}</UDN>
+        <iconList>
+            <icon>
+                <mimetype>image/png</mimetype>
+                <width>48</width>
+                <height>48</height>
+                <depth>24</depth>
+                <url>/icon24.png</url>
+            </icon>
+            <icon>
+                <mimetype>image/png</mimetype>
+                <width>120</width>
+                <height>120</height>
+                <depth>24</depth>
+                <url>/icon24.png</url>
+            </icon>
+        </iconList>
+    </device>
+</root>

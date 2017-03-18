@@ -123,6 +123,9 @@ class LayoutManager {
                 "full_grid": event.target.result.grid
             });
             that.container.grid.setImageString(event.target.result.image);
+            if(event.target.result.rotation){
+                that.container.compass.setRotation(event.target.result.rotation);
+            }
 
             that.drawFloorPlan();
         });
@@ -168,14 +171,15 @@ class LayoutManager {
             imageObj.src = dataURL;
             imageObj.onload = function(){
                 that.setImageName(input.files[0].name);
-                that.container.db.addLayoutImage({
+                that.container.db.saveFloorplan({
                     "id": md5(dataURL),
                     "name": that.container.grid.getImageName(),
                     "image": dataURL,
                     "grid": [],
                     "hgrid_spaces": that.container.grid.getHGridSpaces(),
                     "vgrid_spaces": that.container.grid.getVGridSpaces(),
-                    "grid_color": that.container.grid.getGridColor()
+                    "grid_color": that.container.grid.getGridColor(),
+                    "rotation": 0
                 }, that.container.db.reloadFromDb);
             };
 

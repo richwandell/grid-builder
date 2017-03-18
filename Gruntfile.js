@@ -2,7 +2,7 @@ var webpack = require('webpack');
 
 
 module.exports = function (grunt) {
-    var pkg  = grunt.file.readJSON("public/package.json");
+    var pkg  = grunt.file.readJSON("./package.json");
     grunt.initConfig({
         pkg: pkg,
         copy: {
@@ -32,11 +32,6 @@ module.exports = function (grunt) {
                     src: 'md5.min.js',
                     dest: 'public/builder/lib/js/',
                     expand: true
-                },{
-                    cwd: 'src/server/',
-                    src: '*',
-                    dest: 'public/server/',
-                    expand: true
                 }]
             },
             second: {
@@ -55,7 +50,7 @@ module.exports = function (grunt) {
             }
         },
         clean: {
-            temp: ['public/builder/**', 'public/server/**']
+            temp: ['public/builder/**']
         },
         less: {
             dev: {

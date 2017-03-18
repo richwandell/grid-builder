@@ -18,14 +18,14 @@ class Db {
     + "case when k.kalman is null then avg(s.value) else k.kalman end `cest`, "
     + "k.kalman FROM scan_results s left join "
     + "kalman_estimates k on s.fp_id = k.fp_id and s.ap_id = k.ap_id and s.x = k.x and s.y = k.y "
-    + "GROUP BY s.fp_id, s.ap_id, s.x, s.y;";
+    + " where s.fp_id = ? GROUP BY s.fp_id, s.ap_id, s.x, s.y;";
     static query_insert_kalman_estimates = "insert or ignore into kalman_estimates values (?, ?, ?, ?, ?);"
     static query_update_kalman_estimates = "update kalman_estimates set kalman = ? where fp_id = ? and ap_id = ? and "
     + " x = ? and y = ?;";
     static query_update_features = "insert into features "
     + " select k.fp_id, k.x, k.y, k.ap_id || k1.ap_id as feature, abs(k.kalman - k1.kalman) as value "
-    + " from kalman_estimates k join kalman_estimates k1 on k.fp_id = k1.fp_id and k.x = k1.x and k.y = k1.y "
-    + " where k.kalman != 0 and k1.kalman != 0;";
+    + " from kalman_estimates k join kalman_estimates k1 on k.fp_id = k1.fp_id and k.x = k1.x and k.y = k1.y and k.ap_id < k1.ap_id"
+    + " where k.kalman != 0 and k1.kalman != 0 and k.fp_id = ? and k1.fp_id = ?";
     static query_get_features = "select f.*, abs(value - :feature_value:) diff from features f "
     + " where f.feature = ? and f.fp_id = ? order by diff asc;";
 
@@ -107,25 +107,25 @@ class Db {
         let creates = Db.creates;
         let db = this.db;
 
-        db.serialize(function() {
+        db.serialize(() => {
             creates.forEach(function(create){
                 db.run(create);
             });
-        });
 
-        let databaseCodeVersion = 0;
+            let databaseCodeVersion = 0;
 
-        db.all("select * from settings", (err, rows) => {
-            rows.forEach(function(row){
-                switch(row.key){
-                    case "database_code_version":
-                        databaseCodeVersion = Number(row.value);
-                        break;
+            db.all("select * from settings", (err, rows) => {
+                rows.forEach(function(row){
+                    switch(row.key){
+                        case "database_code_version":
+                            databaseCodeVersion = Number(row.value);
+                            break;
+                    }
+                });
+                if(databaseCodeVersion < Db.database_code_version){
+                    this.doUpgrade(databaseCodeVersion);
                 }
             });
-            if(databaseCodeVersion < Db.database_code_version){
-                this.doUpgrade(databaseCodeVersion);
-            }
         });
     }
 
@@ -176,7 +176,7 @@ class Db {
         log.debug("Db.saveReadings");
 
         let stmt = db.prepare(Db.query_insert_scan_results);
-
+        let finished = 0;
         payload.forEach((el) => {
             let s_id = Number(el.s_id);
             let fp_id = el.fp_id;
@@ -186,19 +186,24 @@ class Db {
             let value = Number(el.value);
             let orig_values = el.orig_values;
             let created = el.created;
-            stmt.run(s_id, fp_id, ap_id, x, y, value, orig_values, created);
+            stmt.run(s_id, fp_id, ap_id, x, y, value, orig_values, created, () => {
+                finished++;
+                if(finished >= payload.length){
+                    this.updateKalman(fp_id);
+                }
+            });
         });
 
         stmt.finalize();
-        this.updateKalman();
+
     }
 
-    updateKalman(){
+    updateKalman(fp_id){
         let log = this.log;
         let db = this.db;
         let kalman = {};
 
-        db.all(Db.query_get_for_kalman, (err, rows) => {
+        db.all(Db.query_get_for_kalman, fp_id, (err, rows) => {
             const insert = db.prepare(Db.query_insert_kalman_estimates);
             const update = db.prepare(Db.query_update_kalman_estimates);
             log.log(err);
@@ -225,8 +230,8 @@ class Db {
                         if(done >= rows.length){
                             insert.finalize();
                             update.finalize();
-                            db.exec("delete from features", () => {
-                                db.exec(Db.query_update_features);
+                            db.run("delete from features where fp_id = ?", fp_id, () => {
+                                db.run(Db.query_update_features, fp_id, fp_id);
                             });
                         }
                     });

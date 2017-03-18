@@ -1,11 +1,13 @@
+import Knn from './Knn';
 const express = require('express');
 const bodyParser = require('body-parser');
-const pjson = require('../package.json');
+const pjson = require('../../package.json');
 const Logger = require('./Log.js');
 let Db = require('./Db.js');
 const fs = require('fs');
 const Utils = require('./Utils.js');
 const uuid = require('uuid');
+
 
 /**
  * RestServer class is used to power the rest server that will communicate with the
@@ -162,6 +164,17 @@ class RestServer{
         const log = this.log;
         const app = this.app;
         db.createTables(log);
+
+        app.post('/rest/localize', (req, res) => {
+            log.log('/rest/localize');
+            this.setResponseHeaders(res);
+            const data = req.body;
+            let knn = new Knn(log, db, data.fp_id, data.ap_ids);
+            knn.getNeighbors(5, (knn) => {
+                log.log(knn);
+                res.send({succes: true, knn: knn});
+            });
+        });
 
         app.get('/rest/alive', (req, res) => {
             this.setResponseHeaders(res);

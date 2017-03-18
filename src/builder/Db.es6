@@ -27,9 +27,11 @@ class Db {
         }
     }
 
-    saveFloorplan() {
+    saveFloorplan(state, cb) {
         debug("Db.saveFloorplan");
-        let state = this.container.state.getState();
+        if(!state){
+            state = this.container.state.getState();
+        }
         this.replaceMemoryIfExists(state);
         $.ajax({
             url: this.DSN + "/rest/updateDatabase",
@@ -38,6 +40,13 @@ class Db {
             data: {layout_images: [state]},
             success: (res) => {
                 console.log(res);
+                if(cb){
+                    cb.apply(this, {
+                        target:{
+                            result: state
+                        }
+                    });
+                }
             },
             error: (res) => {
                 console.error(res);
@@ -160,6 +169,7 @@ class Db {
 
     addLayoutImage(data, cb) {
         debug("Db.addLayoutImage");
+        this.saveFloorplan(data)
         let t = this.database.transaction(["layout_images"], "readwrite")
             .objectStore("layout_images")
             .add(data);
