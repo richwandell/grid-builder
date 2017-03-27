@@ -1,4 +1,5 @@
 import Knn from './Knn';
+import KMeans from './KMeans';
 const express = require('express');
 const bodyParser = require('body-parser');
 const pjson = require('../../package.json');
@@ -124,6 +125,17 @@ class RestServer{
         });
     }
 
+    getScannedCoords(req, res){
+        let log = this.log;
+        let db = this.db;
+        const data = req.params;
+        log.log("/rest/getScannedCoords");
+        this.setResponseHeaders(res);
+        db.getScannedCoords(data.fp_id, function(err, rows){
+            res.send(rows);
+        });
+    }
+
     saveReadings(req, res){
         let log = this.log;
         log.log("/rest/saveReadings");
@@ -170,9 +182,15 @@ class RestServer{
             this.setResponseHeaders(res);
             const data = req.body;
             let knn = new Knn(log, db, data.fp_id, data.ap_ids);
-            knn.getNeighbors(5, (knn) => {
+            knn.getNeighbors(9, (knn) => {
                 log.log(knn);
-                res.send({succes: true, knn: knn});
+                let cc = new KMeans(4, knn);
+                res.send({
+                    succes: true,
+                    knn: knn,
+                    clusters: cc[0],
+                    centroids: cc[1]
+                });
             });
         });
 
@@ -205,6 +223,10 @@ class RestServer{
 
         app.post("/rest/saveReadings", (req, res) => {
             this.saveReadings(req, res);
+        });
+
+        app.get("/rest/getScannedCoords/:fp_id", (req, res) => {
+            this.getScannedCoords(req, res);
         });
 
         app.listen(pjson.builder_rest_port, function () {

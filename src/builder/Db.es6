@@ -27,6 +27,23 @@ class Db {
         }
     }
 
+    getScannedCoords(fp_id, cb){
+        debug("Db.getScannedCoords");
+        $.ajax({
+            url: this.DSN + "/rest/getScannedCoords/" + fp_id,
+            type: "get",
+            dataType: "json",
+            success: (res) => {
+                if(cb){
+                    cb(res);
+                }
+            },
+            error: (res) => {
+                console.error(res);
+            }
+        });
+    }
+
     saveFloorplan(state, cb) {
         debug("Db.saveFloorplan");
         if(!state){

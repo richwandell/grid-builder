@@ -6,6 +6,10 @@ class State {
         this.container = container;
     }
 
+    getId(){
+        return $("#builder_select_existing").val()
+    }
+
     getState(){
         return {
             "floorplanname": $("#builder_floorplan_name").val(),
@@ -13,7 +17,7 @@ class State {
             "grid_color": this.container.grid.getGridColor(),
             "hgrid_spaces": this.container.grid.getHGridSpaces(),
             "vgrid_spaces": this.container.grid.getVGridSpaces(),
-            "id": $("#builder_select_existing").val(),
+            "id": this.getId(),
             "image": this.container.grid.getImageString(),
             "name": this.container.grid.getImageName(),
             "rotation": this.container.compass.getRotation()

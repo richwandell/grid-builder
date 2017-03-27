@@ -45,7 +45,7 @@ module.exports = function (grunt) {
         },
         watch: {
             dev: {
-                files: ['src/**/*.less', 'src/builder/**/*', 'src/builder.html', 'src/server/*'],
+                files: ['src/**/*.less', 'src/builder/**/*', 'src/builder.html', 'src/server/*', 'test/*.es6'],
                 tasks: ['clean', 'babel', 'webpack', 'less:dev', 'copy:first']
             }
         },
@@ -125,6 +125,11 @@ module.exports = function (grunt) {
                 files: [{
                     expand: true,
                     src: ['src/server/*.es6'],
+                    dest: '.',
+                    ext: '.js'
+                },{
+                    expand: true,
+                    src: ['test/*.es6'],
                     dest: '.',
                     ext: '.js'
                 }]

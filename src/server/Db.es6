@@ -4,14 +4,14 @@ let sqlite3 = require('sqlite3').verbose();
 
 class Db {
 
-    static database_code_version = 1;
+    static database_code_version = 3;
     static query_get_all_floorplans = "select * from layout_images";
     static query_get_database_version = "select value from settings where key = 'database_version';";
     static query_insert_version = "insert or ignore into settings values ('database_version', ?);";
     static query_update_version = "update settings set value = ? where key = 'database_version';";
     static query_insert_layout = "insert or ignore into layout_images values (?, ?, ?);";
     static query_update_layout = "update layout_images set layout_image = ?, floor_plan_name = ? where id = ?;";
-    static query_insert_scan_results = "insert or ignore into scan_results values (?, ?, ?, ?, ?, ?, ?, ?);";
+    static query_insert_scan_results = "insert into scan_results values (?, ?, ?, ?, ?, ?, ?, ?);";
     static query_get_scan_results = "select * from scan_results;";
     static query_get_for_kalman = "SELECT s.fp_id, s.ap_id, s.x, s.y, "
     + "group_concat(s.value) `values`, "
@@ -22,12 +22,21 @@ class Db {
     static query_insert_kalman_estimates = "insert or ignore into kalman_estimates values (?, ?, ?, ?, ?);"
     static query_update_kalman_estimates = "update kalman_estimates set kalman = ? where fp_id = ? and ap_id = ? and "
     + " x = ? and y = ?;";
-    static query_update_features = "insert into features "
-    + " select k.fp_id, k.x, k.y, k.ap_id || k1.ap_id as feature, abs(k.kalman - k1.kalman) as value "
-    + " from kalman_estimates k join kalman_estimates k1 on k.fp_id = k1.fp_id and k.x = k1.x and k.y = k1.y and k.ap_id < k1.ap_id"
-    + " where k.kalman != 0 and k1.kalman != 0 and k.fp_id = ? and k1.fp_id = ?";
+    static query_update_features = "insert into features select s.fp_id, s.x, s.y, s.ap_id || s1.ap_id as feature,"
+    + " abs(s.value - s1.value) as value, s.s_id from scan_results s join"
+    + " scan_results s1 on s.fp_id = s1.fp_id and s.x = s1.x and s.y = s1.y and s.ap_id < s1.ap_id"
+    + " and s.s_id = s1.s_id where s.fp_id = ? and s1.fp_id = ?;";
+    static query_update_oldest_features = "select k.fp_id, k.x, k.y, k.ap_id || k1.ap_id as feature, "
+    + " abs(k.kalman - k1.kalman) as value, :scan_id: s_id from kalman_estimates k join "
+    + " kalman_estimates k1 on k.fp_id = k1.fp_id and k.x = k1.x and k.y = k1.y and k.ap_id < k1.ap_id where"
+    + " k.kalman != 0 and k1.kalman != 0 and k.fp_id = ? and k1.fp_id = ?;";
     static query_get_features = "select f.*, abs(value - :feature_value:) diff from features f "
     + " where f.feature = ? and f.fp_id = ? order by diff asc;";
+    static query_get_scanned_coords = "select count(*) as num_features, x, y from features where fp_id = ? "
+    + " group by x, y;";
+    static query_get_min_sid = "select min(s_id) from features where fp_id = ?";
+    static query_get_scan_id = "select value + 1 as value from settings where key = 'scan_id';";
+    static query_update_scan_id = "update settings set value = value + 1 where key = 'scan_id';";
 
     static creates = [
         "CREATE TABLE if not exists layout_images (id TEXT PRIMARY KEY, layout_image TEXT);",
@@ -75,6 +84,25 @@ class Db {
         "update settings set value = '" + Db.database_code_version + "' where key = 'database_code_version';"
     ];
 
+    static migration2 = [
+        "ALTER TABLE features ADD s_id INT NULL;",
+        "DROP INDEX features_feature_index1;",
+        "DROP INDEX features_feature_index2;",
+        "CREATE TABLE featuresa8d1 (fp_id TEXT, x INTEGER, y INTEGER, feature TEXT, value REAL, s_id INTEGER,"
+        + " CONSTRAINT features_fp_id_x_y_feature_s_id_pk PRIMARY KEY (fp_id, x, y, feature, s_id));",
+        "CREATE UNIQUE INDEX features_feature_index1 ON featuresa8d1 (fp_id, feature, x, y, s_id);",
+        "INSERT INTO featuresa8d1(fp_id, x, y, feature, value, s_id) SELECT fp_id, x, y, feature, value, s_id FROM features;",
+        "DROP TABLE features;",
+        "ALTER TABLE featuresa8d1 RENAME TO features;",
+        "CREATE INDEX features_feature_index2 ON features(feature);",
+        "update settings set value = '" + Db.database_code_version + "' where key = 'database_code_version';"
+    ];
+
+    static migration3 = [
+        "insert or ignore into settings values ('scan_id', 64);",
+        "update settings set value = '" + Db.database_code_version + "' where key = 'database_code_version';"
+    ];
+
     constructor(log){
         this.log = log;
         this.db = new sqlite3.Database('db.sqlite3');
@@ -90,10 +118,29 @@ class Db {
         let db = this.db;
         switch(databaseCodeVersion){
             case 0:
-                db.serialize(function() {
-                    Db.migration1.forEach(function(mig){
+                db.serialize(() => {
+                    Db.migration1.forEach((mig) => {
                         db.run(mig);
                     });
+                    this.createTables();
+                });
+                break;
+
+            case 1:
+                db.serialize(() => {
+                    Db.migration2.forEach((mig) => {
+                        db.run(mig);
+                    });
+                    this.createTables();
+                });
+                break;
+
+            case 2:
+                db.serialize(() => {
+                    Db.migration3.forEach((mig) => {
+                        db.run(mig);
+                    });
+                    this.createTables();
                 });
                 break;
         }
@@ -127,6 +174,12 @@ class Db {
                 }
             });
         });
+    }
+
+    getScannedCoords(fp_id, cb){
+        this.log.debug("Db.getScannedCoords");
+        let db = this.db;
+        db.all(Db.query_get_scanned_coords, fp_id, cb);
     }
 
     getFloorPlans(cb) {
@@ -177,25 +230,26 @@ class Db {
 
         let stmt = db.prepare(Db.query_insert_scan_results);
         let finished = 0;
-        payload.forEach((el) => {
-            let s_id = Number(el.s_id);
-            let fp_id = el.fp_id;
-            let ap_id = el.ap_id;
-            let x = Number(el.x);
-            let y = Number(el.y);
-            let value = Number(el.value);
-            let orig_values = el.orig_values;
-            let created = el.created;
-            stmt.run(s_id, fp_id, ap_id, x, y, value, orig_values, created, () => {
-                finished++;
-                if(finished >= payload.length){
-                    this.updateKalman(fp_id);
-                }
+        db.get(Db.query_get_scan_id, (err, row) => {
+            db.run(Db.query_update_scan_id);
+            payload.forEach((el) => {
+                let s_id = Number(row.value);
+                let fp_id = el.fp_id;
+                let ap_id = el.ap_id;
+                let x = Number(el.x);
+                let y = Number(el.y);
+                let value = Number(el.value);
+                let orig_values = el.orig_values;
+                let created = el.created;
+                stmt.run(s_id, fp_id, ap_id, x, y, value, orig_values, created, (err) => {
+                    finished++;
+                    if(finished >= payload.length){
+                        stmt.finalize();
+                        this.updateKalman(fp_id);
+                    }
+                });
             });
         });
-
-        stmt.finalize();
-
     }
 
     updateKalman(fp_id){
@@ -206,8 +260,11 @@ class Db {
         db.all(Db.query_get_for_kalman, fp_id, (err, rows) => {
             const insert = db.prepare(Db.query_insert_kalman_estimates);
             const update = db.prepare(Db.query_update_kalman_estimates);
-            log.log(err);
-            if(err) return;
+
+            if(err) {
+                log.error(err);
+                return;
+            }
 
             let done = 0;
             rows.forEach((row) => {
@@ -230,7 +287,8 @@ class Db {
                         if(done >= rows.length){
                             insert.finalize();
                             update.finalize();
-                            db.run("delete from features where fp_id = ?", fp_id, () => {
+                            db.serialize(() => {
+                                db.run("delete from features where fp_id = ?", fp_id);
                                 db.run(Db.query_update_features, fp_id, fp_id);
                             });
                         }

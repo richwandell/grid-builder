@@ -2,7 +2,7 @@ node_modules/
 .uuid
 .idea
 db.sqlite3
-log/*.log
+log/*.log*
 npm-debug.log
 public/log/*.log*
 cache

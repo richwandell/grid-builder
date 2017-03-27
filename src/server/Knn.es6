@@ -5,7 +5,7 @@ class Knn {
         this.log = log;
         this.db = db.getDatabase();
         this.fp_id = fp_id;
-        this.makeFeatures(ap_ids);
+        this.features = this.makeFeatures(ap_ids);
     }
 
     makeFeatures(ap_ids){
@@ -15,49 +15,43 @@ class Knn {
                 features[row.ap_id + row1.ap_id] = Math.abs(Number(row.value) - Number(row1.value));
             });
         });
-        this.features = features;
+        return features;
     }
 
     getNeighbors(k, cb){
         let keys = Object.keys(this.features);
         let done = 0;
-        let data = [];
-
+        let knn = [];
         keys.forEach((key) => {
             this.db.all(Db.query_get_features.replace(":feature_value:", this.features[key]), [key, this.fp_id], (err, rows) => {
-                data.push(rows);
+                if(rows.length != 0){
+                    let nei = null;
+                    rows.forEach((coord) => {
+                        if(nei == null){
+                            nei = {
+                                x_y: coord.x + "_" + coord.y,
+                                x: Number(coord.x),
+                                y: Number(coord.y),
+                                distance: 0
+                            }
+                        }
+                        nei.distance += Math.pow(coord.diff, 2);
+                    });
+                    nei.distance = Math.sqrt(nei.distance);
+                    knn.push(nei);
+                }
                 done++;
                 if(done >= keys.length){
-                    this.makeGuess(data, cb, k);
+                    this.makeGuess(knn, cb, k);
                 }
             });
         });
     }
 
-    makeGuess(data, cb, k){
-
-        let distances = {};
-        let knn = [];
-
-        data.forEach((feature) => {
-            if(feature.length == 0) return;
-
-            feature.forEach((coord) => {
-                if(typeof(distances[coord.x + "_" + coord.y]) == "undefined"){
-                    distances[coord.x + "_" + coord.y] = [];
-                }
-                distances[coord.x + "_" + coord.y].push(Math.pow(coord.diff, 2));
-            });
-        });
-        let keys = Object.keys(distances);
-        keys.forEach((key) => {
-            knn.push({
-                x_y: key,
-                distance: Math.sqrt(distances[key].reduce((a, b) => { return a+b; }))
-            });
-        });
+    makeGuess(knn, cb, k){
         knn.sort((a, b) => { return a.distance > b.distance; });
-        cb(knn.splice(0, k));
+        knn = knn.splice(0, k);
+        cb(knn);
     }
 }
 

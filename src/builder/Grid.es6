@@ -30,6 +30,7 @@ class Grid{
         this.selected_grid = [];
         this.hover_grid = [];
         this.fp_grid = [];
+        this.scanned_grid = [];
         this.vgrid_spaces = parseInt($("#builder_vgrid_spaces").val());
         this.hgrid_spaces = parseInt($("#builder_hgrid_spaces").val());
         this.grid_color = $("#builder_grid_color").val();
@@ -40,6 +41,38 @@ class Grid{
         this.m_y_start = false;
         this.touch_cx = false;
         this.touch_cy = false;
+        this.show_scanned_area = false;
+    }
+
+    updateScannedArea(area){
+
+        let u = (res) => {
+            let tmp_grid = [];
+            res.forEach(function(row){
+                if(typeof(tmp_grid[row.x]) == "undefined"){
+                    tmp_grid[row.x] = [];
+                }
+                tmp_grid[row.x][row.y] = row.num_features;
+            });
+            this.scanned_grid = tmp_grid;
+            this.show_scanned_area = true;
+            this.redraw();
+        };
+
+        if(area){
+            u(area);
+        }else{
+            this.container.db.getScannedCoords(this.container.state.getId(), u);
+        }
+    }
+
+    toggleScannedArea(event){
+        if(this.show_scanned_area == false){
+            this.updateScannedArea();
+        }else{
+            this.show_scanned_area = false;
+            this.redraw();
+        }
     }
 
     setImageString(image){
@@ -53,9 +86,6 @@ class Grid{
     overlayTouchEnd(event) {
         if(this.touch_cx && this.touch_cy) {
             let xy = this.clickCanvas(this.touch_cx, this.touch_cy);
-            if(this.container.android){
-                Android.setSpace(xy[0], xy[1], this.container.layout.floorplanId);
-            }
         }
     }
 
@@ -181,6 +211,14 @@ class Grid{
         };
         $(this.canvas).css(css);
         $(this.overlay).css(css);
+        if(this.container.android){
+            let size = this.getCurrentSize();
+            Android.setCurrentSize(parseInt(size[0]), parseInt(size[1]));
+        }
+    }
+
+    getCurrentSize(){
+        return [$(this.canvas).css("width"), $(this.canvas).css("height")];
     }
 
     zoomOut(event) {
@@ -193,6 +231,10 @@ class Grid{
         };
         $(this.canvas).css(css);
         $(this.overlay).css(css);
+        if(this.container.android){
+            let size = this.getCurrentSize();
+            Android.setCurrentSize(parseInt(size[0]), parseInt(size[1]));
+        }
     }
 
     overlayClicked(event) {
@@ -276,10 +318,7 @@ class Grid{
         return [cx, cy];
     }
 
-    clickCanvas(cx, cy) {
-        debug("Grid.clickCanvas");
-        let results = this.getGridXandY(cx, cy);
-        let x = results[0], y = results[1];
+    clickCanvasXY(x, y){
         let n = $("#builder_selected_box_name").val();
         let full_grid = this.getFullGrid();
         if(full_grid[x]){
@@ -290,6 +329,16 @@ class Grid{
         this.container.layout.setSelectedGrid(x, y, n);
         this.redraw();
         return [x, y];
+    }
+
+    clickCanvas(cx, cy) {
+        debug("Grid.clickCanvas");
+        let results = this.getGridXandY(cx, cy);
+        let x = results[0], y = results[1];
+        if(this.container.android){
+            Android.setSpace(x, y, this.container.layout.floorplanId);
+        }
+        return this.clickCanvasXY(x, y);
     }
 
     getGridXandY(cx, cy) {
@@ -331,6 +380,7 @@ class Grid{
         let hover_grid = this.hover_grid;
         let multi_selected_grid = this.multi_selected_grid;
         let fp_grid = this.fp_grid;
+        let scanned_grid = this.scanned_grid;
 
         let android = this.container.android;
 
@@ -411,6 +461,20 @@ class Grid{
                 for(let y = 0; y < multi_selected_grid[i].length; y++){
                     if(multi_selected_grid[i][y] || multi_selected_grid[i][y] === ""){
                         co.fillStyle = "blue";
+                        co.fillRect(
+                            (wi / ho) * i,
+                            (he / vi) * y,
+                            (wi / ho),
+                            (he / vi)
+                        );
+                    }
+                }
+            }
+
+            if(this.show_scanned_area && (scanned_grid[i] || scanned_grid[i] == 0)){
+                for(let y = 0; y < scanned_grid[i].length; y++){
+                    if(scanned_grid[i][y] || scanned_grid[i][y] == 0){
+                        co.fillStyle = "brown";
                         co.fillRect(
                             (wi / ho) * i,
                             (he / vi) * y,

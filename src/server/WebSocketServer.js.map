@@ -1,0 +1,1 @@
+{"version":3,"sources":["WebSocketServer.es6"],"names":["WebSocketServer"],"mappings":";;;;IAAMA,e,GACF,2BAAa;AAAA;AAEZ,C","file":"WebSocketServer.js","sourcesContent":["class WebSocketServer {\n    constructor(){\n\n    }\n}"]}

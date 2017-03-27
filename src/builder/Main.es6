@@ -122,6 +122,10 @@ class Main{
             }
         });
 
+        $("#toggle_scanned_area").click((event) => {
+            this.grid.toggleScannedArea(event);
+        });
+
         $(".builder_clear_selection").click((event) => {
             this.grid.clearMultiSelection(event);
         });
@@ -169,9 +173,44 @@ class Main{
         }
     }
 
+    clickCanvasXY(x, y){
+        debug("Main.clickCanvasXY");
+        if(this.android){
+            this.grid.clickCanvasXY(x, y);
+        }
+    }
+
+    toggleScannedArea(){
+        debug("Main.toggleScannedArea");
+        if(this.android){
+            this.grid.toggleScannedArea();
+        }
+    }
+
+    updateScannedArea(area){
+        debug("Main.updateScannedArea");
+        if(this.android){
+            this.grid.updateScannedArea(area);
+        }
+    }
+
 }
 
 const m = new Main();
 window.loadFloorPlan = function(fp){
     m.loadFloorPlan(fp);
+};
+
+window.clickCanvas = function(x, y){
+    m.clickCanvasXY(x, y);
+};
+
+window.toggleScannedArea = function(){
+    m.toggleScannedArea();
+};
+
+window.updateScannedArea = function(area){
+    const data = JSON.parse(area);
+    console.log(data);
+    m.updateScannedArea(data);
 };
