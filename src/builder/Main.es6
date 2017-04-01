@@ -41,9 +41,8 @@ class Main{
         this.layout = new LayoutManager(this);
         this.contextMenu = new ContextMenu(this);
         this.compass = new Compass(this);
-        if(this.android){
-            this.webSocket = new WebSocketClient("ws://" + HOST_NAME + ":" + WS_PORT);
-        }
+        this.webSocket = new WebSocketClient("ws://" + HOST_NAME + ":" + WS_PORT, ['echo-protocol']);
+
         this.setupEvents();
 
         if(this.nodeWebkit){

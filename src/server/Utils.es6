@@ -1,8 +1,8 @@
 module.exports = {
     getServerIp: function() {
-        var os = require('os');
-        var ifaces = os.networkInterfaces();
-        var values = Object.keys(ifaces).map(function(name) {
+        let os = require('os');
+        let ifaces = os.networkInterfaces();
+        let values = Object.keys(ifaces).map(function(name) {
             return ifaces[name];
         });
         values = [].concat.apply([], values).filter(function(val){

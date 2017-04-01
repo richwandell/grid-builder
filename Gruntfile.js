@@ -50,7 +50,7 @@ module.exports = function (grunt) {
             }
         },
         clean: {
-            temp: ['public/builder/**']
+            temp: ['public/builder/**', 'public/server/**']
         },
         less: {
             dev: {
@@ -100,6 +100,7 @@ module.exports = function (grunt) {
                 devtool: 'source-map',
                 plugins: [
                     new webpack.DefinePlugin({
+                        WS_PORT: JSON.stringify(pkg.builder_ws_port),
                         REST_PORT: JSON.stringify(pkg.builder_rest_port),
                         HOST_NAME: JSON.stringify(pkg.builder_host_name),
                         PROTOCOL: JSON.stringify(pkg.builder_protocol)
@@ -124,8 +125,9 @@ module.exports = function (grunt) {
             dist: {
                 files: [{
                     expand: true,
-                    src: ['src/server/*.es6'],
-                    dest: '.',
+                    cwd: 'src/server',
+                    src: ['*.es6'],
+                    dest: 'public/server/',
                     ext: '.js'
                 },{
                     expand: true,

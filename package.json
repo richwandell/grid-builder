@@ -8,12 +8,12 @@
     "body-parser": "latest",
     "express": "^4.14.0",
     "node-ssdp": "^2.8.0",
+    "node-wifi-scanner": "^1.0.0",
+    "nw": "^0.19.1",
     "sqlite3": "^3.1.8",
     "uuid": "^2.0.2",
     "websocket": "^1.0.24",
-    "ws": "^1.1.1",
-    "node-wifi-scanner": "^1.0.0",
-    "nw": "^0.19.1"
+    "ws": "^1.1.1"
   },
   "devDependencies": {
     "babel-cli": "^6.0.0",
@@ -41,11 +41,12 @@
     "webpack": "^2.2.1"
   },
   "scripts": {
-    "start-server": "node --debug src/server/Server.js -r babel-register",
+    "start-server": "node public/server/Server.js -r babel-register",
+    "debug-server": "node --debug public/server/Server.js -r babel-register",
     "start": "./node_modules/.bin/nw"
   },
   "main": "public/builder/builder.html",
-  "node-main": "src/server/Server.js",
+  "node-main": "public/server/Server.js",
   "window": {
     "title": "Grid Builder",
     "icon": "desktop/icon24.png",
@@ -60,5 +61,6 @@
   "builder_log_folder": "log",
   "builder_protocol": "http",
   "builder_host_name": "localhost",
-  "builder_rest_port": 8888
+  "builder_rest_port": 8888,
+  "builder_ws_port": 8888
 }

@@ -17,7 +17,11 @@ class WebSocketServer {
         });
 
         this.server.on('request', (request) => {
-            this.onRequest(request);
+            try {
+                this.onRequest(request);
+            }catch(e){
+                this.log.error(e.message);
+            }
         });
     }
 
@@ -33,6 +37,8 @@ class WebSocketServer {
         connection.on('close', (reasonCode, description) => {
             this.log.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
         });
+
+        connection.sendUTF(JSON.stringify({'action': 'HI'}));
     }
 
     onConnectionMessage(connection, message) {

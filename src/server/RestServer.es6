@@ -11,6 +11,7 @@ const uuid = require('uuid');
 const http = require('http');
 
 
+
 /**
  * RestServer class is used to power the rest server that will communicate with the
  * mobile phone on the local wifi network. This server will respond to upnp devices
@@ -170,7 +171,7 @@ class RestServer{
     /**
      * Routes are defined here and mapped to actions
      */
-    startServer() {
+    createServer() {
         const db = this.db;
         const log = this.log;
         const app = this.app;
@@ -230,7 +231,16 @@ class RestServer{
         });
 
         this.server = http.createServer(app);
+
+    }
+
+    listen(worker: Worker){
+        this.worker = worker;
         this.server.listen(pjson.builder_rest_port);
+    }
+
+    getApp(): express {
+        return this.app;
     }
 
     getServer(): Server {
