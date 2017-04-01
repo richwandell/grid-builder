@@ -1,7 +1,4 @@
 class Registry{
-    static classes = {};
-
-    static objs = {};
 
     static debug = true;
 

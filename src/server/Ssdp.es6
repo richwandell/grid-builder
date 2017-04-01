@@ -6,7 +6,7 @@ const pjson = require('../../package.json');
 const Server = require('node-ssdp').Server;
 let builder = false;
 
-class Log {
+class Ssdp {
 
     constructor(){
         this.log = new Logger({
@@ -50,4 +50,4 @@ class Log {
 }
 
 
-module.exports = Log;
+export default Ssdp;

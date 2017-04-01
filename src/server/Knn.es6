@@ -21,24 +21,24 @@ class Knn {
     getNeighbors(k, cb){
         let keys = Object.keys(this.features);
         let done = 0;
-        let knn = [];
+        let knn = {};
         keys.forEach((key) => {
             this.db.all(Db.query_get_features.replace(":feature_value:", this.features[key]), [key, this.fp_id], (err, rows) => {
-                if(rows.length != 0){
-                    let nei = null;
+
+                if(typeof(rows) != "undefined" && rows.length != 0){
+
                     rows.forEach((coord) => {
-                        if(nei == null){
-                            nei = {
+                        let key = coord.x + "_" + coord.y;
+                        if(typeof(knn[key]) == "undefined"){
+                            knn[key] = {
                                 x_y: coord.x + "_" + coord.y,
                                 x: Number(coord.x),
                                 y: Number(coord.y),
                                 distance: 0
                             }
                         }
-                        nei.distance += Math.pow(coord.diff, 2);
+                        knn[key].distance += Math.pow(coord.diff, 2);
                     });
-                    nei.distance = Math.sqrt(nei.distance);
-                    knn.push(nei);
                 }
                 done++;
                 if(done >= keys.length){
@@ -49,7 +49,21 @@ class Knn {
     }
 
     makeGuess(knn, cb, k){
-        knn.sort((a, b) => { return a.distance > b.distance; });
+        knn = Object
+            .keys(knn)
+            .map((key) => {
+                let obj = knn[key];
+                obj.distance = Math.sqrt(obj.distance);
+                return knn[key];
+            });
+        knn = knn.sort((a, b) => {
+            if(a.distance > b.distance){
+                return 1;
+            }else if(b.distance > a.distance){
+                return -1;
+            }
+            return 0;
+        });
         knn = knn.splice(0, k);
         cb(knn);
     }

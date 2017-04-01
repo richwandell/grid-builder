@@ -172,4 +172,3 @@ class Test1{
     }
 }
 
-new Test1();

@@ -8,6 +8,7 @@ let Db = require('./Db.js');
 const fs = require('fs');
 const Utils = require('./Utils.js');
 const uuid = require('uuid');
+const http = require('http');
 
 
 /**
@@ -21,8 +22,6 @@ const uuid = require('uuid');
  * @author Rich Wandell <richwandell@gmail.com>
  */
 class RestServer{
-
-
 
     constructor(){
         this.id = uuid.v4();
@@ -179,6 +178,7 @@ class RestServer{
 
         app.post('/rest/localize', (req, res) => {
             log.log('/rest/localize');
+            log.log(req.body.ap_ids);
             this.setResponseHeaders(res);
             const data = req.body;
             let knn = new Knn(log, db, data.fp_id, data.ap_ids);
@@ -229,13 +229,18 @@ class RestServer{
             this.getScannedCoords(req, res);
         });
 
-        app.listen(pjson.builder_rest_port, function () {
-            log.log('Server Started')
-        });
+        this.server = http.createServer(app);
+        this.server.listen(pjson.builder_rest_port);
     }
 
+    getServer(): Server {
+        return this.server
+    }
+
+    getLog(): Log {
+        return this.log;
+    }
 }
 
 
-
-module.exports = RestServer;
+export default RestServer;

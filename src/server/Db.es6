@@ -4,7 +4,7 @@ let sqlite3 = require('sqlite3').verbose();
 
 class Db {
 
-    static database_code_version = 3;
+    static database_code_version = 4;
     static query_get_all_floorplans = "select * from layout_images";
     static query_get_database_version = "select value from settings where key = 'database_version';";
     static query_insert_version = "insert or ignore into settings values ('database_version', ?);";
@@ -22,10 +22,10 @@ class Db {
     static query_insert_kalman_estimates = "insert or ignore into kalman_estimates values (?, ?, ?, ?, ?);"
     static query_update_kalman_estimates = "update kalman_estimates set kalman = ? where fp_id = ? and ap_id = ? and "
     + " x = ? and y = ?;";
-    static query_update_features = "insert into features select s.fp_id, s.x, s.y, s.ap_id || s1.ap_id as feature,"
-    + " abs(s.value - s1.value) as value, s.s_id from scan_results s join"
-    + " scan_results s1 on s.fp_id = s1.fp_id and s.x = s1.x and s.y = s1.y and s.ap_id < s1.ap_id"
-    + " and s.s_id = s1.s_id where s.fp_id = ? and s1.fp_id = ?;";
+    static query_update_features = "insert into features "
+    + " select k.fp_id, k.x, k.y, k.ap_id || k1.ap_id as feature, abs(k.kalman - k1.kalman) as value "
+    + " from kalman_estimates k join kalman_estimates k1 on k.fp_id = k1.fp_id and k.x = k1.x and k.y = k1.y "
+    + " where k.kalman != 0 and k1.kalman != 0;";
     static query_update_oldest_features = "select k.fp_id, k.x, k.y, k.ap_id || k1.ap_id as feature, "
     + " abs(k.kalman - k1.kalman) as value, :scan_id: s_id from kalman_estimates k join "
     + " kalman_estimates k1 on k.fp_id = k1.fp_id and k.x = k1.x and k.y = k1.y and k.ap_id < k1.ap_id where"
@@ -103,6 +103,13 @@ class Db {
         "update settings set value = '" + Db.database_code_version + "' where key = 'database_code_version';"
     ];
 
+    static migration4 = [
+        "drop table features;",
+        "CREATE TABLE features (fp_id TEXT, x INTEGER, y INTEGER, feature TEXT, value REAL, "
+        + " CONSTRAINT features_fp_id_x_y_feature_pk PRIMARY KEY (fp_id, x, y, feature));",
+        "update settings set value = '" + Db.database_code_version + "' where key = 'database_code_version';"
+    ];
+
     constructor(log){
         this.log = log;
         this.db = new sqlite3.Database('db.sqlite3');
@@ -138,6 +145,15 @@ class Db {
             case 2:
                 db.serialize(() => {
                     Db.migration3.forEach((mig) => {
+                        db.run(mig);
+                    });
+                    this.createTables();
+                });
+                break;
+
+            case 3:
+                db.serialize(() => {
+                    Db.migration4.forEach((mig) => {
                         db.run(mig);
                     });
                     this.createTables();
