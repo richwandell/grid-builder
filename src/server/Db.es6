@@ -112,7 +112,13 @@ class Db {
 
     constructor(log){
         this.log = log;
-        this.db = new sqlite3.Database('db.sqlite3');
+        this.db = new sqlite3.Database('db/db.sqlite3');
+        this.db.configure('busyTimeout', 15000);
+        this.db.serialize(() => {
+            this.db.exec("PRAGMA journal_mode = WAL;");
+            this.db.exec("PRAGMA cache_size = 4096000;");
+            this.db.exec("PRAGMA optimize;");
+        });
         this.log.debug("Db.constructor");
     }
 

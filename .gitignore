@@ -7,3 +7,4 @@ npm-debug.log
 public/log/*.log*
 cache
 dist
+db/db.sqlite3*

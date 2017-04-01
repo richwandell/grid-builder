@@ -41,13 +41,42 @@ class KMeans {
         this.old_error = clusters.map(() => {return Infinity;});
 
         let cc = this.kmeans(clusters);
-        cc[0].forEach((c) => {
-            c.sort((a, b) => { return a[2] > b[2]; });
-        });
+        cc[0]
+            .forEach((c) => {
+                c.sort((a, b) => {
+                    return a[2] > b[2];
+                });
+            });
+
         cc[1] = cc[1].map((c) => {
             return [Math.round(c[0]), Math.round(c[1])];
         });
-        return cc;
+        this.clusters = cc[0];
+        this.centroids = cc[1];
+    }
+
+    getClusters(){
+        return this.clusters;
+    }
+
+    getCentroids(){
+        return this.centroids;
+    }
+
+    getCentroid(clusterIndex: number){
+        return this.centroids[clusterIndex];
+    }
+
+    getLargestClusterIndex(){
+        let largestLength = 0;
+        let largestCluster = 0;
+        this.clusters.forEach((clu, i) => {
+            if(clu.length > largestLength){
+                largestLength = clu.length;
+                largestCluster = i;
+            }
+        });
+        return largestCluster;
     }
 
 

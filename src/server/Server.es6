@@ -4,18 +4,23 @@ import WebSocketServer from './WebSocketServer';
 const numCPUs = require('os').cpus().length;
 const debug = process.execArgv.indexOf('--debug') > -1 || process.execArgv.indexOf('--debug-brk') > -1;
 const cluster = require('cluster');
+const pjson = require('../../package.json');
 
 class Server {
+
+    send(data){
+        if(!this.debug) {
+            process.send(data);
+        }else{
+            this.onWorkerMessage(data);
+        }
+    }
 
     constructor(numWorker: Number, debug: boolean) {
         this.debug = debug;
         this.workers = [];
         if (cluster.isMaster && !debug) {
-            this.runtMainWorker();
-
-            process.on('message', (message) => {
-                this.onMainMessage(message);
-            });
+            this.runMainWorker();
 
             for (let i = 0; i < numWorker; i++) {
                 let w = cluster.fork();
@@ -26,28 +31,33 @@ class Server {
 
                 this.workers.push(w);
             }
-        }else {
+        }else{
             this.run();
         }
     }
 
     onMainMessage(message) {
-        console.log(message);
+        console.log("Main Message: " + process.pid);
     }
 
     onWorkerMessage(message) {
-        console.log(message);
+        this.socket.send(message);
     }
 
-    runtMainWorker(){
-        const upnp = new Ssdp();
-        upnp.startBroadcast();
+    runMainWorker(){
+        process.on('message', (message) => {
+            this.onMainMessage(message);
+        });
+
+        this.upnp = new Ssdp();
+        this.upnp.startBroadcast();
 
         const rest = new RestServer();
         rest.createServer();
+        rest.listen(this, pjson.builder_ws_port);
 
-        const socket = new WebSocketServer(rest.getLog(), rest.getServer());
-        socket.startServer();
+        this.socket = new WebSocketServer(rest.getLog(), rest.getServer());
+        this.socket.startServer();
 
         return rest;
     }
@@ -55,7 +65,7 @@ class Server {
     run() {
         const rest = new RestServer();
         rest.createServer();
-        rest.listen(this);
+        rest.listen(this, pjson.builder_rest_port);
     }
 }
 

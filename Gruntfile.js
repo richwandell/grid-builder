@@ -24,7 +24,7 @@ module.exports = function (grunt) {
                     expand: true
                 }, {
                     cwd: 'src/',
-                    src: ['builder.html', 'compass.svg'],
+                    src: ['builder.html', 'compass.svg', 'phone.png'],
                     dest: 'public/builder/',
                     expand: true
                 }, {

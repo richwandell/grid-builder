@@ -41,7 +41,7 @@ class Main{
         this.layout = new LayoutManager(this);
         this.contextMenu = new ContextMenu(this);
         this.compass = new Compass(this);
-        this.webSocket = new WebSocketClient("ws://" + HOST_NAME + ":" + WS_PORT, ['echo-protocol']);
+        this.webSocket = new WebSocketClient(this, "ws://" + HOST_NAME + ":" + WS_PORT, ['echo-protocol']);
 
         this.setupEvents();
 

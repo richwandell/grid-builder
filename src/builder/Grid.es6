@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import Registry from './Registry';
 import InvalidArgumentException from './CustomExceptions';
+import Phone from './Phone';
 
 let debug = Registry.console.debug;
 let superDebug = Registry.console.superDebug;
@@ -42,6 +43,18 @@ class Grid{
         this.touch_cx = false;
         this.touch_cy = false;
         this.show_scanned_area = false;
+        this.phones = [];
+        this.phoneIds = [];
+    }
+
+    setPhone(phone: Phone){
+        const index = this.phoneIds.indexOf(phone.id);
+        if(index > -1){
+            this.phones = this.phones.splice(index, 1);
+            this.phoneIds = this.phoneIds.splice(index, 1);
+        }
+        this.phones.push(phone);
+        this.phoneIds.push(phone.id);
     }
 
     updateScannedArea(area){
@@ -354,6 +367,15 @@ class Grid{
         return [x, y];
     }
 
+    getCanvasCoordinates(x, y){
+        let c = this.canvas_context;
+        let wi = c.canvas.width;
+        let he = c.canvas.height;
+        let ho = this.hgrid_spaces;
+        let vi = this.vgrid_spaces;
+        return [(wi / ho) * x, (he / vi) * y];
+    }
+
     drawGrid() {
         debug("Grid.drawGrid");
 
@@ -485,6 +507,10 @@ class Grid{
                 }
             }
         }
+
+        this.phones.forEach((phone) => {
+            phone.draw();
+        });
     }
 }
 

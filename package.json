@@ -10,6 +10,7 @@
     "node-ssdp": "^2.8.0",
     "node-wifi-scanner": "^1.0.0",
     "nw": "^0.19.1",
+    "opn-cli": "^3.1.0",
     "sqlite3": "^3.1.8",
     "uuid": "^2.0.2",
     "websocket": "^1.0.24",
@@ -43,7 +44,8 @@
   "scripts": {
     "start-server": "node public/server/Server.js -r babel-register",
     "debug-server": "node --debug public/server/Server.js -r babel-register",
-    "start": "./node_modules/.bin/nw"
+    "start-app": "./node_modules/.bin/nw",
+    "open-browser": "opn public/builder/builder.html"
   },
   "main": "public/builder/builder.html",
   "node-main": "public/server/Server.js",
@@ -62,5 +64,5 @@
   "builder_protocol": "http",
   "builder_host_name": "localhost",
   "builder_rest_port": 8888,
-  "builder_ws_port": 8888
+  "builder_ws_port": 8889
 }

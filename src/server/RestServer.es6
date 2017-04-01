@@ -130,7 +130,6 @@ class RestServer{
         let db = this.db;
         const data = req.params;
         log.log("/rest/getScannedCoords");
-        this.setResponseHeaders(res);
         db.getScannedCoords(data.fp_id, function(err, rows){
             res.send(rows);
         });
@@ -139,7 +138,6 @@ class RestServer{
     saveReadings(req, res){
         let log = this.log;
         log.log("/rest/saveReadings");
-        this.setResponseHeaders(res);
         const data = req.body;
         log.log(data);
         if(typeof(data.payload) == "undefined"){
@@ -168,6 +166,44 @@ class RestServer{
         res.header("Cache-Control", "no-cache");
     }
 
+    localize(req, res) {
+        this.log.log('/rest/localize');
+        this.log.log(req.body.ap_ids);
+
+        const data = req.body;
+        let knn = new Knn(this.log, this.db, data.fp_id, data.ap_ids);
+        knn.getNeighbors(5, (knn) => {
+            this.log.log(knn);
+            let km = new KMeans(2, knn);
+            const largestCluster = km.getLargestClusterIndex();
+            const guess = km.getCentroid(largestCluster);
+            const id = data.device_id;
+
+
+            res.send({
+                succes: true,
+                guess: guess
+            });
+            this.notifyListeners({
+                action: 'LOCALIZE',
+                id: id,
+                guess: guess
+            });
+        });
+    }
+
+    notifyListeners(data: Object) {
+        console.log(process.pid);
+        this.worker.send(data);
+    }
+
+    jsonHeaders(req, res, next){
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header('Content-Type', 'application/javascript');
+        res.header("Cache-Control", "no-cache");
+        next();
+    }
+
     /**
      * Routes are defined here and mapped to actions
      */
@@ -177,31 +213,12 @@ class RestServer{
         const app = this.app;
         db.createTables(log);
 
-        app.post('/rest/localize', (req, res) => {
-            log.log('/rest/localize');
-            log.log(req.body.ap_ids);
-            this.setResponseHeaders(res);
-            const data = req.body;
-            let knn = new Knn(log, db, data.fp_id, data.ap_ids);
-            knn.getNeighbors(9, (knn) => {
-                log.log(knn);
-                let cc = new KMeans(4, knn);
-                res.send({
-                    succes: true,
-                    knn: knn,
-                    clusters: cc[0],
-                    centroids: cc[1]
-                });
-            });
+        app.post('/rest/localize', this.jsonHeaders, (req, res) => {
+            this.localize(req, res);
         });
 
-        app.get('/rest/alive', (req, res) => {
-            this.setResponseHeaders(res);
+        app.get('/rest/alive', this.jsonHeaders, (req, res) => {
             res.send({success: true});
-        });
-
-        app.get('/rest/databaseVersion', (req, res) => {
-            this.getDatabaseVersion(req, res);
         });
 
         app.post('/rest/updateDatabase', (req, res) => {
@@ -222,11 +239,11 @@ class RestServer{
             this.getFloorplans(req, res);
         });
 
-        app.post("/rest/saveReadings", (req, res) => {
+        app.post("/rest/saveReadings", this.jsonHeaders, (req, res) => {
             this.saveReadings(req, res);
         });
 
-        app.get("/rest/getScannedCoords/:fp_id", (req, res) => {
+        app.get("/rest/getScannedCoords/:fp_id", this.jsonHeaders, (req, res) => {
             this.getScannedCoords(req, res);
         });
 
@@ -234,9 +251,9 @@ class RestServer{
 
     }
 
-    listen(worker: Worker){
+    listen(worker, port){
         this.worker = worker;
-        this.server.listen(pjson.builder_rest_port);
+        this.server.listen(port);
     }
 
     getApp(): express {

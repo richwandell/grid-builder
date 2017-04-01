@@ -1,3 +1,4 @@
+import RestServer from './RestServer';
 const WsServer = require('websocket').server;
 const http = require('http');
 
@@ -8,6 +9,12 @@ class WebSocketServer {
         this.log = log;
         this.connections = [];
         this.restServer = restServer;
+    }
+
+    send(message){
+        this.connections.forEach((conn) => {
+            conn.sendUTF(JSON.stringify(message));
+        });
     }
 
     startServer(){
@@ -27,6 +34,7 @@ class WebSocketServer {
 
     onRequest(request) {
         let connection = request.accept('echo-protocol', request.origin);
+        connection.cid = this.connections.length;
         this.connections.push(connection);
         this.log.log("Connection Accepted");
 
@@ -35,10 +43,23 @@ class WebSocketServer {
         });
 
         connection.on('close', (reasonCode, description) => {
-            this.log.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+            this.log.debug((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+            this.removeDisconnected();
         });
 
         connection.sendUTF(JSON.stringify({'action': 'HI'}));
+    }
+
+    removeDisconnected() {
+        let dis = Infinity;
+        for(let i = 0; i < this.connections.length; i++){
+            if(this.connections.closeEventEmitted){
+                dis = i;
+            }
+        }
+        if(dis < Infinity) {
+            this.connections = this.connections.splice(dis, 1);
+        }
     }
 
     onConnectionMessage(connection, message) {
