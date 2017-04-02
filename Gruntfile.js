@@ -24,7 +24,7 @@ module.exports = function (grunt) {
                     expand: true
                 }, {
                     cwd: 'src/',
-                    src: ['builder.html', 'compass.svg', 'phone.png'],
+                    src: ['builder.html', 'images/*'],
                     dest: 'public/builder/',
                     expand: true
                 }, {
@@ -57,7 +57,7 @@ module.exports = function (grunt) {
                 files: [{
                     expand: true,
                     cwd: 'src/styles',
-                    src: ['*.less'],
+                    src: ['builder.less'],
                     dest: 'public/builder/',
                     ext: '.css'
                 }]

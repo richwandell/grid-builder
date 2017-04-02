@@ -1,4 +1,5 @@
 import Phone from './Phone';
+import Macbook from './Macbook';
 
 class WebSocketClient {
 
@@ -20,7 +21,11 @@ class WebSocketClient {
         if(!data.action) return;
         switch(data.action){
             case "LOCALIZE":
-                this.onLocalize(data.id, data.guess);
+                this.onLocalize(data.id, data.guess, data.type);
+                break;
+
+            case "NEW_READING":
+                this.container.grid.updateScannedArea();
                 break;
         }
     }
@@ -29,9 +34,18 @@ class WebSocketClient {
         console.log(event);
     }
 
-    onLocalize(id, guess){
-        const ph = new Phone(this.container, guess[0], guess[1], id);
-        this.container.grid.setPhone(ph);
+    onLocalize(id, guess, type) {
+        switch(type){
+            case "PHONE":
+                const ph = new Phone(this.container, guess[0], guess[1], id);
+                this.container.grid.setPhone(ph);
+                break;
+
+            case "COMPUTER":
+                const co = new Macbook(this.container, guess[0], guess[1], id);
+                this.container.grid.setComputer(co);
+                break;
+        }
         this.container.grid.redraw();
     }
 }

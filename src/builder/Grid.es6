@@ -2,6 +2,7 @@ import $ from 'jquery';
 import Registry from './Registry';
 import InvalidArgumentException from './CustomExceptions';
 import Phone from './Phone';
+import Macbook from './Macbook';
 
 let debug = Registry.console.debug;
 let superDebug = Registry.console.superDebug;
@@ -45,6 +46,8 @@ class Grid{
         this.show_scanned_area = false;
         this.phones = [];
         this.phoneIds = [];
+        this.computers = [];
+        this.computerIds = [];
     }
 
     setPhone(phone: Phone){
@@ -55,6 +58,16 @@ class Grid{
         }
         this.phones.push(phone);
         this.phoneIds.push(phone.id);
+    }
+
+    setComputer(comp: Macbook){
+        const index = this.computerIds.indexOf(comp.id);
+        if(index > -1){
+            this.computers = this.computers.splice(index, 1);
+            this.computerIds = this.computerIds.splice(index, 1);
+        }
+        this.computers.push(comp);
+        this.computerIds.push(comp.id);
     }
 
     updateScannedArea(area){
@@ -510,6 +523,10 @@ class Grid{
 
         this.phones.forEach((phone) => {
             phone.draw();
+        });
+
+        this.computers.forEach((comp) => {
+            comp.draw();
         });
     }
 }

@@ -1,4 +1,4 @@
-class Phone {
+class Macbook {
 
     static img = document.createElement("img");
 
@@ -11,8 +11,8 @@ class Phone {
 
     draw(){
         const ctx = this.container.grid.canvas_context;
-        let img = Phone.img;
-        img.src = "images/phone.png";
+        let img = Macbook.img;
+        img.src = "images/macbook.png";
         img.onload = (event) => {
             let [x, y] = this.container.grid.getCanvasCoordinates(this.x, this.y);
             ctx.drawImage(img, x, y);
@@ -20,4 +20,4 @@ class Phone {
     }
 }
 
-export default Phone;
+export default Macbook;

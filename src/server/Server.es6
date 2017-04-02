@@ -19,21 +19,27 @@ class Server {
     constructor(numWorker: Number, debug: boolean) {
         this.debug = debug;
         this.workers = [];
-        if (cluster.isMaster && !debug) {
+
+        if(debug){
+            this.runMainWorker();
+            this.run();
+        }else if(cluster.isMaster){
             this.runMainWorker();
 
             for (let i = 0; i < numWorker; i++) {
-                let w = cluster.fork();
-
-                w.on('message', (message) => {
-                    this.onWorkerMessage(message);
-                });
-
-                this.workers.push(w);
+                this.createWorker();
             }
-        }else{
+        } else {
             this.run();
         }
+    }
+
+    createWorker(){
+        let w = cluster.fork();
+        w.on('message', (message) => {
+            this.onWorkerMessage(message);
+        });
+        this.workers.push(w);
     }
 
     onMainMessage(message) {
@@ -47,6 +53,12 @@ class Server {
     runMainWorker(){
         process.on('message', (message) => {
             this.onMainMessage(message);
+        });
+
+        cluster.on('exit', (worker, code, signal) => {
+            if (worker.exitedAfterDisconnect === false) {
+                this.createWorker();
+            }
         });
 
         this.upnp = new Ssdp();

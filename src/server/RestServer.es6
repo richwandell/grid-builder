@@ -143,8 +143,13 @@ class RestServer{
         if(typeof(data.payload) == "undefined"){
             return res.send({success: false, message: "missing payload"});
         }
-        this.db.saveReadings(data.payload);
-        res.send({success: true});
+        this.db.saveReadings(data.payload, () => {
+            res.send({success: true});
+            this.notifyListeners({
+                action: 'NEW_READING'
+            });
+        });
+
     }
 
     getLayoutInfo(req, res){
@@ -187,7 +192,8 @@ class RestServer{
             this.notifyListeners({
                 action: 'LOCALIZE',
                 id: id,
-                guess: guess
+                guess: guess,
+                type: data.type
             });
         });
     }

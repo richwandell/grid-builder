@@ -19,13 +19,13 @@ class Db {
     + "k.kalman FROM scan_results s left join "
     + "kalman_estimates k on s.fp_id = k.fp_id and s.ap_id = k.ap_id and s.x = k.x and s.y = k.y "
     + " where s.fp_id = ? GROUP BY s.fp_id, s.ap_id, s.x, s.y;";
-    static query_insert_kalman_estimates = "insert or ignore into kalman_estimates values (?, ?, ?, ?, ?);"
+    static query_insert_kalman_estimates = "insert or ignore into kalman_estimates values (?, ?, ?, ?, ?);";
     static query_update_kalman_estimates = "update kalman_estimates set kalman = ? where fp_id = ? and ap_id = ? and "
     + " x = ? and y = ?;";
     static query_update_features = "insert into features "
     + " select k.fp_id, k.x, k.y, k.ap_id || k1.ap_id as feature, abs(k.kalman - k1.kalman) as value "
-    + " from kalman_estimates k join kalman_estimates k1 on k.fp_id = k1.fp_id and k.x = k1.x and k.y = k1.y "
-    + " where k.kalman != 0 and k1.kalman != 0;";
+    + " from kalman_estimates k join kalman_estimates k1 on k.fp_id = k1.fp_id and k.x = k1.x and k.y = k1.y"
+    + " where value != 0 and k.fp_id = ? and k1.fp_id = ?";
     static query_update_oldest_features = "select k.fp_id, k.x, k.y, k.ap_id || k1.ap_id as feature, "
     + " abs(k.kalman - k1.kalman) as value, :scan_id: s_id from kalman_estimates k join "
     + " kalman_estimates k1 on k.fp_id = k1.fp_id and k.x = k1.x and k.y = k1.y and k.ap_id < k1.ap_id where"
@@ -267,14 +267,14 @@ class Db {
                     finished++;
                     if(finished >= payload.length){
                         stmt.finalize();
-                        this.updateKalman(fp_id);
+                        this.updateKalman(fp_id, cb);
                     }
                 });
             });
         });
     }
 
-    updateKalman(fp_id){
+    updateKalman(fp_id, cb){
         let log = this.log;
         let db = this.db;
         let kalman = {};
@@ -311,7 +311,9 @@ class Db {
                             update.finalize();
                             db.serialize(() => {
                                 db.run("delete from features where fp_id = ?", fp_id);
-                                db.run(Db.query_update_features, fp_id, fp_id);
+                                db.run(Db.query_update_features, fp_id, fp_id, () => {
+                                    cb();
+                                });
                             });
                         }
                     });
