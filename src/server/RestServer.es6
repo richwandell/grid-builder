@@ -1,15 +1,11 @@
 import Knn from './Knn';
 import KMeans from './KMeans';
+
 const express = require('express');
 const bodyParser = require('body-parser');
-const pjson = require('../../package.json');
-const Logger = require('./Log.js');
-let Db = require('./Db.js');
-const fs = require('fs');
 const Utils = require('./Utils.js');
-const uuid = require('uuid');
 const http = require('http');
-
+const fs = require("fs");
 
 
 /**
@@ -24,22 +20,12 @@ const http = require('http');
  */
 class RestServer{
 
-    constructor(){
-        this.id = uuid.v4();
-        try {
-            let oldUUID = fs.readFileSync(".uuid", "utf8");
-            this.id = oldUUID;
-        }catch(e){
-            fs.writeFileSync(".uuid", this.id);
-        }
+    constructor(server: Server){
+        this.worker = server;
+        this.id = server.id;
+        this.log = server.log;
+        this.db = server.db;
 
-        this.log = new Logger({
-            logfolder: pjson.builder_log_folder,
-            filename: "rest.log",
-            filesize: 5000000,
-            numfiles: 3
-        });
-        this.db = new Db(this.log);
         this.app = express();
         this.app.use(bodyParser.json({limit: '50mb'}));
         this.app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
@@ -114,7 +100,6 @@ class RestServer{
         let log = this.log;
         let db = this.db;
         log.log("/rest/floorplans");
-        this.setResponseHeaders(res);
         db.getFloorPlans(function(err, rows){
             rows.forEach(function(row){
                 if(typeof(row.layout_image) != "undefined"){
@@ -199,7 +184,6 @@ class RestServer{
     }
 
     notifyListeners(data: Object) {
-        console.log(process.pid);
         this.worker.send(data);
     }
 
@@ -214,10 +198,7 @@ class RestServer{
      * Routes are defined here and mapped to actions
      */
     createServer() {
-        const db = this.db;
-        const log = this.log;
         const app = this.app;
-        db.createTables(log);
 
         app.post('/rest/localize', this.jsonHeaders, (req, res) => {
             this.localize(req, res);
@@ -241,7 +222,7 @@ class RestServer{
             res.sendFile(process.cwd() + '/src/icon24.png');
         });
 
-        app.get("/rest/floorplans", (req, res) => {
+        app.get("/rest/floorplans", this.jsonHeaders, (req, res) => {
             this.getFloorplans(req, res);
         });
 
@@ -257,8 +238,7 @@ class RestServer{
 
     }
 
-    listen(worker, port){
-        this.worker = worker;
+    listen(port){
         this.server.listen(port);
     }
 

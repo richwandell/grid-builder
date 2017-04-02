@@ -99,4 +99,4 @@ class Log {
 }
 
 
-module.exports = Log;
+export default Log;
