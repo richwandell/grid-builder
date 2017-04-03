@@ -21,7 +21,7 @@ class WebSocketClient {
         if(!data.action) return;
         switch(data.action){
             case "LOCALIZE":
-                this.onLocalize(data.id, data.guess, data.type);
+                this.onLocalize(data);
                 break;
 
             case "NEW_READING":
@@ -34,15 +34,16 @@ class WebSocketClient {
         console.log(event);
     }
 
-    onLocalize(id, guess, type) {
+    onLocalize(data) {
+        const id = data.id, guess = data.guess, type = data.type, particles = data.particles;
         switch(type){
             case "PHONE":
-                const ph = new Phone(this.container, guess[0], guess[1], id);
+                const ph = new Phone(this.container, guess[0], guess[1], id, particles);
                 this.container.grid.setPhone(ph);
                 break;
 
             case "COMPUTER":
-                const co = new Macbook(this.container, guess[0], guess[1], id);
+                const co = new Macbook(this.container, guess[0], guess[1], id, particles);
                 this.container.grid.setComputer(co);
                 break;
         }

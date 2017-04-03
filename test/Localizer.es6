@@ -43,6 +43,7 @@ class Localizer {
             body: data
         }, (error, res, body) => {
 
+
             this.requests++;
             let endTime = new Date().getTime();
             let diff = this.toSeconds(endTime - this.startTime);

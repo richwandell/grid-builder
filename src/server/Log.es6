@@ -8,7 +8,8 @@ class Log {
             filesize: 1000000,
             logfolder: "log",
             numfiles: 3,
-            debug: true
+            debug: true,
+            timestamp: true
         };
         for (let attrname in options) {
             if(this.options.hasOwnProperty(attrname)){
@@ -26,12 +27,17 @@ class Log {
                 this.existingFiles.push(file);
             }
         });
-
-        fs.appendFile(this.fullpath, "[INFO] log file opened \n", () =>{
+        const dt = this.getDateTime();
+        fs.appendFile(this.fullpath, `[INFO][${dt}] log file opened \n`, () =>{
             this.watcher = fs.watch(this.fullpath, (eventType, filename) =>{
                 this.rotate(eventType, filename);
             });
         });
+    }
+
+    getDateTime(){
+        let [date, crap] = (new Date() + "").split("GMT");
+        return date.trim();
     }
 
     close(){
@@ -66,35 +72,46 @@ class Log {
         }
     }
 
-    log(message){
+    log(message, level = "INFO", json = true){
         let st;
-        try{
-            st = JSON.stringify(message);
-        }catch(e){
+        if(json) {
+            st = this.makeMessage(message);
+        }else{
             st = message;
         }
-        fs.appendFile(this.fullpath, "[INFO] " + st + "\n", function(){});
+        let fst = `[${level}]`;
+        if(this.options.timestamp){
+            let dt = this.getDateTime();
+            fst += `[${dt}]`;
+        }
+        fst += " ";
+
+        fst += st;
+        fs.appendFile(this.fullpath, fst + "\n", function(){});
     }
 
     error(message){
-        let st;
-        try{
-            st = JSON.stringify(message);
-        }catch(e){
-            st = message;
-        }
-        fs.appendFile(this.fullpath, "[ERROR] " + st + "\n", function(){});
+        const st = this.makeMessage(message);
+        this.log(st, "ERROR", false);
     }
 
     debug(message){
         if(!this.options.debug) return;
+        const st = this.makeMessage(message);
+        this.log(st, "DEBUG", false);
+    }
+
+    makeMessage(message){
+        if(typeof(message) === "string"){
+            return message;
+        }
         let st;
         try{
             st = JSON.stringify(message);
         }catch(e){
             st = message;
         }
-        fs.appendFile(this.fullpath, "[DEBUG] " + st + "\n", function(){});
+        return st;
     }
 }
 

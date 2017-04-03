@@ -24,6 +24,8 @@ class Server {
     constructor(numWorker: Number, debug: boolean) {
         this.debug = debug;
         this.workers = [];
+        this.particles = {};
+
         this.configure();
 
         if(debug){
@@ -42,6 +44,7 @@ class Server {
 
     createWorker(){
         let w = cluster.fork();
+        // Receive messages from this worker and handle them in the master process.
         w.on('message', (message) => {
             this.onWorkerMessage(message);
         });
@@ -49,11 +52,52 @@ class Server {
     }
 
     onMainMessage(message) {
-        console.log("Main Message: " + process.pid);
+        if(message.action === undefined) return false;
+        switch(message.action){
+            case 'NEW_READING':
+                this.db.createFeaturesCache();
+                break;
+
+            case 'LOCALIZE':
+                this.particles[message.id] = message.all_particles;
+                break;
+        }
+    }
+
+    messageWorkers(message){
+        this.workers.forEach((w) => {
+            if (!w.isDead()) {
+                w.send(message);
+            }
+        });
     }
 
     onWorkerMessage(message) {
-        this.socket.send(message);
+        if(message.action === undefined) return false;
+        switch(message.action){
+            case 'NEW_READING':
+                if(!this.debug) {
+                    this.messageWorkers(message);
+                }else{
+                    this.onMainMessage(message);
+                }
+                break;
+
+            case 'LOCALIZE':
+                this.socket.send({
+                    action: 'LOCALIZE',
+                    id: message.id,
+                    guess: message.guess,
+                    type: message.type,
+                    particles: message.particles
+                });
+                if(!this.debug) {
+                    this.messageWorkers(message);
+                }else{
+                    this.onMainMessage(message);
+                }
+                break;
+        }
     }
 
     configure(){
@@ -72,15 +116,9 @@ class Server {
             numfiles: 3
         });
         this.db = new Db(this.log);
-        this.db.createTables(this.log);
     }
 
     runMainWorker(){
-
-        process.on('message', (message) => {
-            this.onMainMessage(message);
-        });
-
         cluster.on('exit', (worker, code, signal) => {
             if (worker.exitedAfterDisconnect === false) {
                 this.createWorker();
@@ -101,6 +139,10 @@ class Server {
     }
 
     run() {
+        // Receive messages from the master process.
+        process.on('message', (message) => {
+            this.onMainMessage(message);
+        });
         const rest = new RestServer(this);
         rest.createServer();
         rest.listen(pjson.builder_rest_port);

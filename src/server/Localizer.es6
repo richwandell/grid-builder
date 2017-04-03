@@ -17,8 +17,6 @@ class Localizer {
     }
 
     send(rows){
-
-
         const data = {
             action: "action",
             fp_id: "336c6582c283421c28479e8801e8edfa",
@@ -27,16 +25,17 @@ class Localizer {
             type: "COMPUTER"
         };
 
-        console.time('time');
+
         request({
             url: 'http://localhost:8888/rest/localize',
             json: true,
             method: "POST",
             body: data
         }, (error, res, body) => {
-            console.timeEnd('time');
-
-            this.send(rows);
+            this.start(rows);
+            // setTimeout(() => {
+            //     this.start(rows);
+            // }, 500);
         });
     }
 
@@ -50,8 +49,6 @@ class Localizer {
             const rows = networks.map((net) => {
                 return {ap_id: net.mac, value: net.rssi};
             });
-
-            console.log(rows);
             this.send(rows);
         });
     }

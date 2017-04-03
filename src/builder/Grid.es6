@@ -51,21 +51,30 @@ class Grid{
     }
 
     setPhone(phone: Phone){
-        const index = this.phoneIds.indexOf(phone.id);
-        if(index > -1){
+        let index = this.phoneIds.indexOf(phone.id);
+
+        if (index === 0) {
+            this.phones.shift();
+            this.phoneIds.shift();
+        } else if(index > -1) {
             this.phones = this.phones.splice(index, 1);
             this.phoneIds = this.phoneIds.splice(index, 1);
         }
+
         this.phones.push(phone);
         this.phoneIds.push(phone.id);
     }
 
     setComputer(comp: Macbook){
         const index = this.computerIds.indexOf(comp.id);
-        if(index > -1){
+        if (index === 0) {
+            this.computers.shift();
+            this.computerIds.shift();
+        } else if(index > -1) {
             this.computers = this.computers.splice(index, 1);
             this.computerIds = this.computerIds.splice(index, 1);
         }
+
         this.computers.push(comp);
         this.computerIds.push(comp.id);
     }
@@ -386,7 +395,7 @@ class Grid{
         let he = c.canvas.height;
         let ho = this.hgrid_spaces;
         let vi = this.vgrid_spaces;
-        return [(wi / ho) * x, (he / vi) * y];
+        return [(wi / ho) * x, (he / vi) * y, (wi / ho), (he / vi)];
     }
 
     drawGrid() {

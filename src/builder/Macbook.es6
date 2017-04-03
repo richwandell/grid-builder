@@ -1,22 +1,14 @@
-class Macbook {
+import ImageAsset from './ImageAsset';
 
-    static img = document.createElement("img");
+class Macbook extends ImageAsset {
 
-    constructor(container: Main, x, y, id){
-        this.container = container;
-        this.x = x;
-        this.y = y;
-        this.id = id;
+    constructor(container: Main, x, y, id, particles){
+        super(container, x, y, id, ImageAsset.Macbook, particles);
     }
 
     draw(){
-        const ctx = this.container.grid.canvas_context;
-        let img = Macbook.img;
-        img.src = "images/macbook.png";
-        img.onload = (event) => {
-            let [x, y] = this.container.grid.getCanvasCoordinates(this.x, this.y);
-            ctx.drawImage(img, x, y);
-        };
+        super.drawParticles();
+        super.drawImage("images/macbook.png", this.x, this.y);
     }
 }
 

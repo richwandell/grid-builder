@@ -1,22 +1,13 @@
-class Phone {
+import ImageAsset from './ImageAsset';
 
-    static img = document.createElement("img");
+class Phone extends ImageAsset {
 
-    constructor(container: Main, x, y, id){
-        this.container = container;
-        this.x = x;
-        this.y = y;
-        this.id = id;
+    constructor(container: Main, x, y, id, particles = []){
+        super(container, x, y, id, ImageAsset.Phone, particles);
     }
 
     draw(){
-        const ctx = this.container.grid.canvas_context;
-        let img = Phone.img;
-        img.src = "images/phone.png";
-        img.onload = (event) => {
-            let [x, y] = this.container.grid.getCanvasCoordinates(this.x, this.y);
-            ctx.drawImage(img, x, y);
-        };
+        super.drawImage("images/phone.png",  this.x, this.y);
     }
 }
 

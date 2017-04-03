@@ -1,5 +1,7 @@
 import Knn from './Knn';
 import KMeans from './KMeans';
+import ParticleFilter from './ParticleFilter';
+import Features from './Features';
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -76,7 +78,6 @@ class RestServer{
     getDeviceDescription(req, res){
         let log = this.log;
         let id = this.id;
-        log.log("devicedescription.xml");
         fs.readFile('devicedescription.xml', "binary", function (err, file) {
             if (err) {
                 res.header("Content-Type", "text/plain");
@@ -157,28 +158,44 @@ class RestServer{
     }
 
     localize(req, res) {
-        this.log.log('/rest/localize');
-        this.log.log(req.body.ap_ids);
-
         const data = req.body;
-        let knn = new Knn(this.log, this.db, data.fp_id, data.ap_ids);
-        knn.getNeighbors(5, (knn) => {
-            this.log.log(knn);
+        const id = data.device_id;
+
+        let stateParticles = [];
+        if(this.worker.particles[id] !== undefined){
+            stateParticles = this.worker.particles[id];
+        }
+        let pf = new ParticleFilter(this.db, data.fp_id);
+        pf.setParticles(stateParticles);
+
+        const f = new Features();
+        const features = f.makeFeatures(data.ap_ids);
+        pf.move(features);
+        const allParticles = pf.getParticles();
+        this.worker.particles[id] = allParticles;
+
+        const particles = pf.getParticleCoords();
+
+        let knn = new Knn(this.db, data.fp_id);
+
+        knn.getNeighbors(features, pf.getParticleKeys(), 5, (knn) => {
             let km = new KMeans(2, knn);
             const largestCluster = km.getLargestClusterIndex();
             const guess = km.getCentroid(largestCluster);
-            const id = data.device_id;
-
 
             res.send({
-                succes: true,
-                guess: guess
+                success: true,
+                guess: guess,
+                particles: particles
             });
             this.notifyListeners({
                 action: 'LOCALIZE',
                 id: id,
                 guess: guess,
-                type: data.type
+                type: data.type,
+                particles: particles,
+                fp_id: data.fp_id,
+                all_particles: allParticles
             });
         });
     }

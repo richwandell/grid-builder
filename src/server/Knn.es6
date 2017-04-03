@@ -1,54 +1,45 @@
 import Db from './Db';
+import Log from './Log';
+import Features from './Features';
 
-class Knn {
-    constructor(log, db, fp_id, ap_ids){
-        this.log = log;
-        this.db = db.getDatabase();
+class Knn  {
+
+    constructor(db: Db, fp_id: string){
+        this.db = db;
         this.fp_id = fp_id;
-        this.features = this.makeFeatures(ap_ids);
     }
 
-    makeFeatures(ap_ids){
-        let features = {};
-        ap_ids.forEach((row) => {
-            ap_ids.forEach((row1) => {
-                features[row.ap_id + row1.ap_id] = Math.abs(Number(row.value) - Number(row1.value));
-            });
-        });
-        return features;
-    }
+    getNeighbors(features, points, k, cb){
+        this.features = features;
+        const cache = points;
 
-    getNeighbors(k, cb){
-        let keys = Object.keys(this.features);
-        let done = 0;
+        const featureKeys = Object.keys(this.features);
+        const featureKeysLength = featureKeys.length;
+        const coords = Object.keys(cache);
+        const coordsLength = coords.length;
+
         let knn = {};
-        keys.forEach((key) => {
-            this.db.all(Db.query_get_features.replace(":feature_value:", this.features[key]), [key, this.fp_id], (err, rows) => {
 
-                if(typeof(rows) != "undefined" && rows.length != 0){
-
-                    rows.forEach((coord) => {
-                        let key = coord.x + "_" + coord.y;
-                        if(typeof(knn[key]) == "undefined"){
-                            knn[key] = {
-                                x_y: coord.x + "_" + coord.y,
-                                x: Number(coord.x),
-                                y: Number(coord.y),
-                                distance: 0
-                            }
-                        }
-                        knn[key].distance += Math.pow(coord.diff, 2);
-                    });
+        for(let i = 0; i < coordsLength; i++){
+            let coord = coords[i];
+            if(knn[coord] === undefined){
+                let [x, y] = coord.split("_");
+                knn[coord] = {
+                    x_y: coord,
+                    x: Number(x),
+                    y: Number(y),
+                    distance: 0
+                };
+            }
+            for(let j = 0; j < featureKeysLength; j++){
+                let feature = featureKeys[j];
+                let testValue = this.db.getFeatureValue(this.fp_id, coord, feature);
+                if(testValue){
+                    knn[coord].distance += Math.pow(Math.abs(testValue - this.features[feature]), 2);
                 }
-                done++;
-                if(done >= keys.length){
-                    this.makeGuess(knn, cb, k);
-                }
-            });
-        });
-    }
+            }
+        }
 
-    makeGuess(knn, cb, k){
         knn = Object
             .keys(knn)
             .map((key) => {
