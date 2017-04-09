@@ -1,7 +1,17 @@
 var webpack = require('webpack');
+var uuid = require('uuid');
+var fs = require('fs');
 
 
 module.exports = function (grunt) {
+    var id = uuid.v4();
+    try {
+        var oldUUID = fs.readFileSync(".uuid", "utf8");
+        id = oldUUID;
+    }catch(e){
+        fs.writeFileSync(".uuid", id);
+    }
+
     var pkg  = grunt.file.readJSON("./package.json");
     grunt.initConfig({
         pkg: pkg,
@@ -95,7 +105,8 @@ module.exports = function (grunt) {
                         WS_PORT: JSON.stringify(pkg.builder_ws_port),
                         REST_PORT: JSON.stringify(pkg.builder_rest_port),
                         HOST_NAME: JSON.stringify(pkg.builder_host_name),
-                        PROTOCOL: JSON.stringify(pkg.builder_protocol)
+                        PROTOCOL: JSON.stringify(pkg.builder_protocol),
+                        SYSTEM_ID: JSON.stringify(id)
                     }),
                     new webpack.optimize.UglifyJsPlugin({
                         compress: {

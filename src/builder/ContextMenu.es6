@@ -7,27 +7,16 @@ let debug = Registry.console.debug;
 let superDebug = Registry.console.superDebug;
 
 class ContextMenu {
+
     constructor(container) {
         debug("ContextMenu");
         this.container = container;
         if(this.container.isNodeWebkit){
             this.gui = GLOBAL_NW_GUI;
             this.scanner = GLOBAL_SCANNER;
-            // this.uuid = GLOBAL_UUID;
-            // this.fs = GLOBAL_FS;
-
-            // this.id = this.uuid.v4();
-            // try {
-            //     let oldUUID = this.fs.readFileSync(".uuid", "utf8");
-            //     this.id = oldUUID;
-            // }catch(e){
-            //     this.fs.writeFileSync(".uuid", this.id);
-            // }
-            // debug(this.id);
             this.setupMenu();
-            // this.localizer = new Localizer(this.scanner, this.id, this.container.db.DSN);
+            this.localizer = new Localizer(this.scanner, this.container.systemId, this.container.db.DSN);
         }
-
     }
 
     setupMenu(){
@@ -64,10 +53,11 @@ class ContextMenu {
         sub2.append(new gui.MenuItem({
             label: 'Run Localizer',
             click:  () => {
-                sub2.items[0].label = 'Stop Localizer';
                 if (this.localizer.running) {
+                    sub2.items[0].label = 'Start Localizer';
                     this.localizer.stop();
                 } else {
+                    sub2.items[0].label = 'Stop Localizer';
                     this.localizer.start();
                 }
             }

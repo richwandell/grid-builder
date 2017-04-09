@@ -49,6 +49,7 @@ class ParticleFilter {
     }
 
     getParticleWeight(coord, weight){
+        return Math.sqrt(weight);
         const featureNumber = this.db.getFeatureNumber(this.fp_id, coord);
         let w = Math.sqrt(weight);
         return w / featureNumber;
@@ -109,6 +110,7 @@ class ParticleFilter {
                     distance: old.weight,
                     weight: old.weight
                 });
+                usedXy.push(key);
             }
             if(goodX.indexOf(gx) === -1) {
                 goodX.push(gx);

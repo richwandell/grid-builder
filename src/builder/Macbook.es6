@@ -7,9 +7,20 @@ class Macbook extends ImageAsset {
     }
 
     draw(){
-        super.drawParticles();
-        super.drawNeighbors();
-        super.drawClusters();
+        if(this.container.grid.showParticles) {
+            super.drawParticles();
+            super.drawNeighbors();
+            super.drawClusters();
+        }
+        if(this.container.grid.showWeights) {
+            super.drawNeightborArcs();
+        }
+        if(this.container.grid.showLines) {
+            super.drawNeighborLines();
+        }
+        if(this.container.grid.showWeights) {
+            super.drawNeighborText();
+        }
         super.drawImage("images/macbook.png", this.x, this.y);
     }
 }

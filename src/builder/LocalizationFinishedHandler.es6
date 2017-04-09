@@ -1,6 +1,7 @@
 import Registry from './Registry';
 import Phone from './Phone';
 import Macbook from './Macbook';
+import ImageAsset from './ImageAsset';
 
 let debug = Registry.console.debug;
 let superDebug = Registry.console.superDebug;

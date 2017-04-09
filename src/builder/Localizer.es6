@@ -7,6 +7,7 @@ const superDebug = Registry.console.superDebug;
 class Localizer {
 
     constructor(scanner, id, DSN){
+        this.id = id;
         this.scanner = scanner;
         this.DSN = DSN;
         this.stop();

@@ -24,6 +24,7 @@ class Main{
         this.isAndroid = typeof(Android) !== "undefined";
         let isNode = (typeof process !== "undefined" && typeof require !== "undefined");
         this.isNodeWebkit = typeof(GLOBAL_NW) !== "undefined" && GLOBAL_NW;
+        this.systemId = SYSTEM_ID;
 
 
         this.state = new State(this);
@@ -133,6 +134,18 @@ class Main{
 
         $("#builder_download").click((event) => {
             this.downloadFloorplan(event);
+        });
+
+        $("#toggle_weights").click((event) => {
+            this.grid.toggleWeights();
+        });
+
+        $("#toggle_particles").click((event) => {
+            this.grid.toggleParticles();
+        });
+
+        $("#toggle_lines").click((event) => {
+            this.grid.toggleLines();
         });
     }
 

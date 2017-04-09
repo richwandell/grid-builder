@@ -48,18 +48,68 @@ class Grid{
         this.phoneIds = [];
         this.computers = [];
         this.computerIds = [];
+        this.last = Date.now();
+        this.showWeights = false;
+        this.showParticles = false;
+        this.showLines = false;
         this.setAndroidSize();
+    }
+
+    toggleWeights(){
+        this.showWeights = !this.showWeights;
+        if(this.showWeights) {
+            $("#toggle_weights")
+                .removeClass("btn-default")
+                .addClass("btn-success");
+        } else {
+            $("#toggle_weights")
+                .removeClass("btn-success")
+                .addClass("btn-default");
+        }
+        this.redraw();
+    }
+
+    toggleParticles(){
+        this.showParticles = !this.showParticles;
+        if(this.showParticles) {
+            $("#toggle_particles")
+                .removeClass("btn-default")
+                .addClass("btn-success");
+        } else {
+            $("#toggle_particles")
+                .removeClass("btn-success")
+                .addClass("btn-default");
+        }
+        this.redraw();
+    }
+
+    toggleLines(){
+        this.showLines = !this.showLines;
+        if(this.showLines) {
+            $("#toggle_lines")
+                .removeClass("btn-default")
+                .addClass("btn-success");
+        } else {
+            $("#toggle_lines")
+                .removeClass("btn-success")
+                .addClass("btn-default");
+        }
+        this.redraw();
     }
 
     setPhone(phone: Phone){
         let index = this.phoneIds.indexOf(phone.id);
 
         if (index === 0) {
-            this.phones.shift();
+            const oldPhone = this.phones.shift();
+            oldPhone.stopAnimation();
             this.phoneIds.shift();
+            phone.setAnimationFrom(oldPhone.x, oldPhone.y);
         } else if(index > -1) {
-            this.phones = this.phones.splice(index, 1);
-            this.phoneIds = this.phoneIds.splice(index, 1);
+            const [oldPhone] = this.phones.splice(index, 1);
+            oldPhone.stopAnimation();
+            this.phoneIds.splice(index, 1);
+            phone.setAnimationFrom(oldPhone.x, oldPhone.y);
         }
 
         this.phones.push(phone);
@@ -69,11 +119,15 @@ class Grid{
     setComputer(comp: Macbook){
         const index = this.computerIds.indexOf(comp.id);
         if (index === 0) {
-            this.computers.shift();
+            const oldComputer = this.computers.shift();
+            oldComputer.stopAnimation();
             this.computerIds.shift();
+            comp.setAnimationFrom(oldComputer.x, oldComputer.y);
         } else if(index > -1) {
-            this.computers = this.computers.splice(index, 1);
-            this.computerIds = this.computerIds.splice(index, 1);
+            const [oldComputer] = this.computers.splice(index, 1);
+            oldComputer.stopAnimation();
+            this.computerIds.splice(index, 1);
+            comp.setAnimationFrom(oldComputer.x, oldComputer.y);
         }
 
         this.computers.push(comp);
@@ -105,8 +159,14 @@ class Grid{
     toggleScannedArea(event){
         if(this.show_scanned_area == false){
             this.updateScannedArea();
+            $("#toggle_scanned_area")
+                .removeClass("btn-default")
+                .addClass("btn-success");
         }else{
             this.show_scanned_area = false;
+            $("#toggle_scanned_area")
+                .removeClass("btn-success")
+                .addClass("btn-default");
             this.redraw();
         }
     }
@@ -191,7 +251,6 @@ class Grid{
     }
 
     redraw() {
-        debug("Grid.redraw");
         this.drawGrid();
     }
 
@@ -406,7 +465,16 @@ class Grid{
     }
 
     drawGrid() {
-        debug("Grid.drawGrid");
+        // const now = Date.now();
+        // const interval = 1000 / 30;
+        // if(now - this.last > interval){
+        //     this.drawTheThings();
+        //     this.last = now;
+        // }
+        this.drawTheThings();
+    }
+
+    drawTheThings() {
 
         let c = this.canvas_context;
         c.canvas.width = this.image_width;
