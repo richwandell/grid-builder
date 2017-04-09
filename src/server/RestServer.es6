@@ -139,6 +139,10 @@ class RestServer{
 
     }
 
+    runLocalizer(req, res) {
+        const fp_id = data.fp_id;
+    }
+
     getLayoutInfo(req, res){
         let log = this.log;
         log.log("/rest/layout_info/all");
@@ -227,6 +231,10 @@ class RestServer{
      */
     createServer() {
         const app = this.app;
+
+        app.post('/rest/runLocalizer', this.jsonHeaders, (req, res) => {
+            this.runLocalizer(req, res);
+        });
 
         app.post('/rest/localize', this.jsonHeaders, (req, res) => {
             this.localize(req, res);

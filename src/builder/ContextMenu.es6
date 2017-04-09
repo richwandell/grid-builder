@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import Registry from './Registry';
+import Localizer from './Localizer';
 
 
 let debug = Registry.console.debug;
@@ -11,8 +12,22 @@ class ContextMenu {
         this.container = container;
         if(this.container.isNodeWebkit){
             this.gui = GLOBAL_NW_GUI;
+            this.scanner = GLOBAL_SCANNER;
+            // this.uuid = GLOBAL_UUID;
+            // this.fs = GLOBAL_FS;
+
+            // this.id = this.uuid.v4();
+            // try {
+            //     let oldUUID = this.fs.readFileSync(".uuid", "utf8");
+            //     this.id = oldUUID;
+            // }catch(e){
+            //     this.fs.writeFileSync(".uuid", this.id);
+            // }
+            // debug(this.id);
             this.setupMenu();
+            // this.localizer = new Localizer(this.scanner, this.id, this.container.db.DSN);
         }
+
     }
 
     setupMenu(){
@@ -44,14 +59,36 @@ class ContextMenu {
 
 
 
+        let sub2 = new gui.Menu();
+
+        sub2.append(new gui.MenuItem({
+            label: 'Run Localizer',
+            click:  () => {
+                sub2.items[0].label = 'Stop Localizer';
+                if (this.localizer.running) {
+                    this.localizer.stop();
+                } else {
+                    this.localizer.start();
+                }
+            }
+        }));
+
         menubar.createMacBuiltin("your-app-name", {
             hideEdit: true,
             hideWindow: true
         });
+
         menubar.append(new gui.MenuItem({
             label: 'File',
             submenu: sub1
         }));
+
+        menubar.append(new gui.MenuItem({
+            label: 'Run',
+            submenu: sub2
+        }));
+
+
         win.menu = menubar;
 
 

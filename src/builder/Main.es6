@@ -42,9 +42,7 @@ class Main{
         this.setupEvents();
 
         if(this.isNodeWebkit){
-            alert("this is node webkit");
             console.log("this is node webkit");
-            // process.mainModule.exports.register(this);
         }
     }
 

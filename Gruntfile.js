@@ -113,10 +113,10 @@ module.exports = function (grunt) {
             options: {
                 platforms: ['osx64'],
                 buildDir: './dist',
-                flavor: 'normal',
-                version: '0.19.1'
+                flavor: 'sdk',
+                version: '0.21.5'
             },
-            src: ['./public/**/*']
+            src: ['./**/*']
         },
         babel: {
             options: {

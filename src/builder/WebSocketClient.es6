@@ -37,6 +37,7 @@ class WebSocketClient extends LocalizationFinishedHandler {
 
     onSocketOpen(event) {
         debug("WebSocketClient.onSocketOpen");
+        this.container.db.connectToDb();
     }
 }
 

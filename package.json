@@ -44,7 +44,7 @@
   "scripts": {
     "start-server": "node public/server/Server.js -r babel-register",
     "debug-server": "node --debug public/server/Server.js -r babel-register",
-    "start-app": "./node_modules/.bin/nw",
+    "start-app": "./node_modules/.bin/nwbuild -r .",
     "open-browser": "opn public/builder/builder.html",
     "speed-test": "node_modules/.bin/babel-node test/SpeedTest.es6",
     "reindex": "node public/server/Reindex.js"

@@ -6,6 +6,7 @@ const fs = require('fs');
 const request = require('request');
 
 class Localizer {
+
     constructor(){
         this.id = uuid.v4();
         try {
