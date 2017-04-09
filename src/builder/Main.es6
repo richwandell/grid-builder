@@ -8,6 +8,7 @@ import InvalidArgumentException from './CustomExceptions';
 import Compass from './Compass';
 import State from './State';
 import WebSocketClient from './WebSocketClient';
+import LocalizationFinishedHandler from './LocalizationFinishedHandler';
 
 let debug = Registry.console.debug;
 
@@ -20,19 +21,9 @@ class Main{
         if(!REST_PORT || !HOST_NAME || !PROTOCOL){
             throw InvalidArgumentException("Missing PORT HOST or PROTOCOL");
         }
-        this.android = typeof(Android) != "undefined";
+        this.isAndroid = typeof(Android) !== "undefined";
         let isNode = (typeof process !== "undefined" && typeof require !== "undefined");
-        this.nodeWebkit = false;
-
-        //Is this Node.js?
-        if(isNode) {
-            //If so, test for Node-Webkit
-            try {
-                this.nodeWebkit = (typeof require('nw.gui') !== "undefined");
-            } catch(e) {
-                this.nodeWebkit = false;
-            }
-        }
+        this.isNodeWebkit = typeof(GLOBAL_NW) !== "undefined" && GLOBAL_NW;
 
 
         this.state = new State(this);
@@ -41,12 +32,19 @@ class Main{
         this.layout = new LayoutManager(this);
         this.contextMenu = new ContextMenu(this);
         this.compass = new Compass(this);
-        this.webSocket = new WebSocketClient(this, "ws://" + HOST_NAME + ":" + WS_PORT, ['echo-protocol']);
+        if (this.isAndroid) {
+            this.localizationFinishedHandler = new LocalizationFinishedHandler(this);
+        } else {
+            this.webSocket = new WebSocketClient(this, "ws://" + HOST_NAME + ":" + WS_PORT, ['echo-protocol']);
+            this.localizationFinishedHandler = this.webSocket;
+        }
 
         this.setupEvents();
 
-        if(this.nodeWebkit){
-            process.mainModule.exports.register(this);
+        if(this.isNodeWebkit){
+            alert("this is node webkit");
+            console.log("this is node webkit");
+            // process.mainModule.exports.register(this);
         }
     }
 
@@ -167,7 +165,7 @@ class Main{
      */
     loadFloorPlan(fp) {
         debug("Main.loadFloorPlan");
-        if(this.android){
+        if(this.isAndroid){
             this.floorPlan = JSON.parse(Android.getData2(Number(fp)));
             this.db.addFloorPlan(this.floorPlan);
             this.layout.displayFloorplan(this.floorPlan.id);
@@ -176,21 +174,21 @@ class Main{
 
     clickCanvasXY(x, y){
         debug("Main.clickCanvasXY");
-        if(this.android){
+        if(this.isAndroid){
             this.grid.clickCanvasXY(x, y);
         }
     }
 
     toggleScannedArea(){
         debug("Main.toggleScannedArea");
-        if(this.android){
+        if(this.isAndroid){
             this.grid.toggleScannedArea();
         }
     }
 
     updateScannedArea(area){
         debug("Main.updateScannedArea");
-        if(this.android){
+        if(this.isAndroid){
             this.grid.updateScannedArea(area);
         }
     }
@@ -212,6 +210,10 @@ window.toggleScannedArea = function(){
 
 window.updateScannedArea = function(area){
     const data = JSON.parse(area);
-    console.log(data);
     m.updateScannedArea(data);
+};
+
+window.loadLocalizationResponse = function(res) {
+    const data = JSON.parse(res);
+    m.localizationFinishedHandler.onLocalize(data);
 };

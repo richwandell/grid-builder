@@ -55,7 +55,7 @@ class Server {
         if(message.action === undefined) return false;
         switch(message.action){
             case 'NEW_READING':
-                this.db.createFeaturesCache();
+                this.db.clearFeaturesCache(message.fp_id);
                 break;
 
             case 'LOCALIZE':
@@ -89,7 +89,9 @@ class Server {
                     id: message.id,
                     guess: message.guess,
                     type: message.type,
-                    particles: message.particles
+                    particles: message.particles,
+                    neighbors: message.neighbors,
+                    clusters: message.clusters
                 });
                 if(!this.debug) {
                     this.messageWorkers(message);
@@ -115,7 +117,7 @@ class Server {
             filesize: 5000000,
             numfiles: 3
         });
-        this.db = new Db(this.log);
+        this.db = new Db(this.log, pjson.builder_db_name);
     }
 
     runMainWorker(){

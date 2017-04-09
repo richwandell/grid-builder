@@ -63,18 +63,6 @@ module.exports = function (grunt) {
                 }]
             }
         },
-        uglify: {
-            desktop: {
-                options: {
-                    mangle: false
-                },
-                files: {
-                    'public/builder/app.js': [
-                        'public/builder/app.js'
-                    ]
-                }
-            }
-        },
         webpack: {
             dist:  {
                 entry: [
@@ -89,6 +77,9 @@ module.exports = function (grunt) {
                         loader: 'babel-loader'
                     }]
                 },
+                externals: {
+                    "nw": "nw"
+                },
                 resolve: {
                     extensions: ['.es6', '.js', '.jsx']
                 },
@@ -99,12 +90,22 @@ module.exports = function (grunt) {
                 inline: false,
                 devtool: 'source-map',
                 plugins: [
+                    new webpack.IgnorePlugin(/nw\.gui/),
                     new webpack.DefinePlugin({
                         WS_PORT: JSON.stringify(pkg.builder_ws_port),
                         REST_PORT: JSON.stringify(pkg.builder_rest_port),
                         HOST_NAME: JSON.stringify(pkg.builder_host_name),
                         PROTOCOL: JSON.stringify(pkg.builder_protocol)
-                    })
+                    }),
+                    new webpack.optimize.UglifyJsPlugin({
+                        compress: {
+                            warnings: false,
+                        },
+                        output: {
+                            comments: false,
+                        },
+                        sourceMap: true
+                    }),
                 ]
             }
         },
@@ -138,7 +139,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-less');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-nw-builder');
     grunt.loadNpmTasks('grunt-babel');
     grunt.loadNpmTasks('grunt-webpack');

@@ -136,7 +136,15 @@
     </div>
     <div style="clear: both;"></div>
 </body>
-
+<script>
+    if (typeof(require) === "function") {
+        var GLOBAL_NW = require('nw');
+        var GLOBAL_NW_GUI = require('nw.gui');
+    } else {
+        var GLOBAL_NW = false;
+        var GLOBAL_NW_GUI = false;
+    }
+</script>
 
 <script src="lib/js/md5.min.js"></script>
 <script src="app.js"></script>

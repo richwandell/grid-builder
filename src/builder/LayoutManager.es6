@@ -253,7 +253,7 @@ class LayoutManager {
             right += "</ul></td>";
             $("#builder_named_grid_spaces").append("<tr>" + left + right + "</tr>");
         });
-        if(this.container.android){
+        if(this.container.isAndroid){
             this.container.grid.toggleScannedArea();
         }
     }

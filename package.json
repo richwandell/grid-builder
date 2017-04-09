@@ -33,7 +33,6 @@
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-less": "^1.4.0",
-    "grunt-contrib-uglify": "^2.0.0",
     "grunt-contrib-watch": "^1.0.0",
     "grunt-nw-builder": "^3.1.0",
     "grunt-webpack": "^2.0.1",
@@ -46,7 +45,9 @@
     "start-server": "node public/server/Server.js -r babel-register",
     "debug-server": "node --debug public/server/Server.js -r babel-register",
     "start-app": "./node_modules/.bin/nw",
-    "open-browser": "opn public/builder/builder.html"
+    "open-browser": "opn public/builder/builder.html",
+    "speed-test": "node_modules/.bin/babel-node test/SpeedTest.es6",
+    "reindex": "node public/server/Reindex.js"
   },
   "main": "public/builder/builder.html",
   "node-main": "public/server/Server.js",
@@ -65,5 +66,6 @@
   "builder_protocol": "http",
   "builder_host_name": "localhost",
   "builder_rest_port": 8888,
-  "builder_ws_port": 8889
+  "builder_ws_port": 8889,
+  "builder_db_name": "db.sqlite3"
 }

@@ -126,13 +126,14 @@ class RestServer{
         log.log("/rest/saveReadings");
         const data = req.body;
         log.log(data);
-        if(typeof(data.payload) == "undefined"){
+        if(data.payload === undefined){
             return res.send({success: false, message: "missing payload"});
         }
-        this.db.saveReadings(data.payload, () => {
+        this.db.saveReadings(data.payload, (fp_id) => {
             res.send({success: true});
             this.notifyListeners({
-                action: 'NEW_READING'
+                action: 'NEW_READING',
+                fp_id: fp_id
             });
         });
 
@@ -160,44 +161,54 @@ class RestServer{
     localize(req, res) {
         const data = req.body;
         const id = data.device_id;
+        const fp_id = data.fp_id;
 
-        let stateParticles = [];
-        if(this.worker.particles[id] !== undefined){
-            stateParticles = this.worker.particles[id];
-        }
-        let pf = new ParticleFilter(this.db, data.fp_id);
-        pf.setParticles(stateParticles);
+        this.db.createFeaturesCache(fp_id)
+            .then(() => {
 
-        const f = new Features();
-        const features = f.makeFeatures(data.ap_ids);
-        pf.move(features);
-        const allParticles = pf.getParticles();
-        this.worker.particles[id] = allParticles;
+                let stateParticles = [];
+                if (this.worker.particles[id] !== undefined) {
+                    stateParticles = this.worker.particles[id];
+                }
+                let pf = new ParticleFilter(this.db, data.fp_id);
+                pf.setParticles(stateParticles);
 
-        const particles = pf.getParticleCoords();
+                const f = new Features();
+                const features = f.makeFeatures(data.ap_ids);
+                pf.move(features);
+                const allParticles = pf.getParticles();
+                this.worker.particles[id] = allParticles;
 
-        let knn = new Knn(this.db, data.fp_id);
+                const particles = pf.getParticleCoords();
+                const unique = pf.getUniqueParticles();
 
-        knn.getNeighbors(features, pf.getParticleKeys(), 5, (knn) => {
-            let km = new KMeans(2, knn);
-            const largestCluster = km.getLargestClusterIndex();
-            const guess = km.getCentroid(largestCluster);
+                let km = new KMeans(2, unique.slice(0,5));
+                const largestCluster = km.getLargestClusterIndex();
+                const guess = km.getCentroid(largestCluster);
 
-            res.send({
-                success: true,
-                guess: guess,
-                particles: particles
-            });
-            this.notifyListeners({
-                action: 'LOCALIZE',
-                id: id,
-                guess: guess,
-                type: data.type,
-                particles: particles,
-                fp_id: data.fp_id,
-                all_particles: allParticles
-            });
-        });
+                res.send({
+                    success: true,
+                    id: id,
+                    guess: guess,
+                    type: data.type,
+                    particles: particles,
+                    neighbors: unique,
+                    clusters: km.getClusters()
+                });
+                this.notifyListeners({
+                    action: 'LOCALIZE',
+                    id: id,
+                    guess: guess,
+                    type: data.type,
+                    particles: particles,
+                    neighbors: unique,
+                    clusters: km.getClusters(),
+                    fp_id: data.fp_id,
+                    all_particles: allParticles
+                });
+
+            }
+        );
     }
 
     notifyListeners(data: Object) {

@@ -1,9 +1,14 @@
-import Phone from './Phone';
-import Macbook from './Macbook';
+import Registry from './Registry';
+import LocalizationFinishedHandler from './LocalizationFinishedHandler';
 
-class WebSocketClient {
+let debug = Registry.console.debug;
+let superDebug = Registry.console.superDebug;
 
-    constructor(container: Main, url, protocols){
+class WebSocketClient extends LocalizationFinishedHandler {
+
+    constructor(container: Main, url, protocols) {
+        super(container);
+        debug("WebSocketClient.constructor");
         this.container = container;
         this.socket = new WebSocket(url, protocols);
 
@@ -31,23 +36,7 @@ class WebSocketClient {
     }
 
     onSocketOpen(event) {
-        console.log(event);
-    }
-
-    onLocalize(data) {
-        const id = data.id, guess = data.guess, type = data.type, particles = data.particles;
-        switch(type){
-            case "PHONE":
-                const ph = new Phone(this.container, guess[0], guess[1], id, particles);
-                this.container.grid.setPhone(ph);
-                break;
-
-            case "COMPUTER":
-                const co = new Macbook(this.container, guess[0], guess[1], id, particles);
-                this.container.grid.setComputer(co);
-                break;
-        }
-        this.container.grid.redraw();
+        debug("WebSocketClient.onSocketOpen");
     }
 }
 

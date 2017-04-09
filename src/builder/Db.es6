@@ -22,7 +22,7 @@ class Db {
         this.androidFpDatabase = [];
         this.allFpIds = [];
         this.layoutImages = [];
-        if(!this.container.android){
+        if(!this.container.isAndroid){
             this.connectToDb();
         }
     }
@@ -222,7 +222,7 @@ class Db {
     loadFloorplan(id, cb) {
         debug("Db.loadFloorplan");
         let that = this;
-        if(this.container.android){
+        if(this.container.isAndroid){
             let index = this.allFpIds.indexOf(id);
             if(index > -1){
                 let fp = this.androidFpDatabase[index].layout_image;

@@ -9,8 +9,8 @@ class ContextMenu {
     constructor(container) {
         debug("ContextMenu");
         this.container = container;
-        if(this.container.nodeWebkit){
-            // this.gui = require('nw.gui');
+        if(this.container.isNodeWebkit){
+            this.gui = GLOBAL_NW_GUI;
             this.setupMenu();
         }
     }

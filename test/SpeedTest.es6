@@ -4,7 +4,7 @@ const http = require('http');
 const fs = require('fs');
 const request = require('request');
 
-class Localizer {
+class SpeedTest {
     constructor(){
         this.id = uuid.v4();
         try {
@@ -71,5 +71,5 @@ class Localizer {
     }
 }
 
-const l = new Localizer();
+const l = new SpeedTest();
 l.start();

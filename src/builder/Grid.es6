@@ -48,6 +48,7 @@ class Grid{
         this.phoneIds = [];
         this.computers = [];
         this.computerIds = [];
+        this.setAndroidSize();
     }
 
     setPhone(phone: Phone){
@@ -246,9 +247,18 @@ class Grid{
         };
         $(this.canvas).css(css);
         $(this.overlay).css(css);
-        if(this.container.android){
+        this.setAndroidSize();
+    }
+
+    setAndroidSize(){
+        if(this.container.isAndroid){
             let size = this.getCurrentSize();
-            Android.setCurrentSize(parseInt(size[0]), parseInt(size[1]));
+            Android.setCurrentSize(
+                parseInt(size[0]),
+                parseInt(size[1]),
+                Number(this.hgrid_spaces),
+                Number(this.vgrid_spaces)
+            );
         }
     }
 
@@ -266,10 +276,7 @@ class Grid{
         };
         $(this.canvas).css(css);
         $(this.overlay).css(css);
-        if(this.container.android){
-            let size = this.getCurrentSize();
-            Android.setCurrentSize(parseInt(size[0]), parseInt(size[1]));
-        }
+        this.setAndroidSize();
     }
 
     overlayClicked(event) {
@@ -370,7 +377,7 @@ class Grid{
         debug("Grid.clickCanvas");
         let results = this.getGridXandY(cx, cy);
         let x = results[0], y = results[1];
-        if(this.container.android){
+        if(this.container.isAndroid){
             Android.setSpace(x, y, this.container.layout.floorplanId);
         }
         return this.clickCanvasXY(x, y);
@@ -426,7 +433,7 @@ class Grid{
         let fp_grid = this.fp_grid;
         let scanned_grid = this.scanned_grid;
 
-        let android = this.container.android;
+        let android = this.container.isAndroid;
 
         if (this.grid_lines_enabled){
             for (i = 0; i < vi; i++) {

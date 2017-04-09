@@ -31,7 +31,7 @@ class KMeans {
         let c = [];
         for(let i = 0; i < knn.length; i++){
             c.push([knn[i].x, knn[i].y, knn[i].distance]);
-            if(i > 0 && i % Math.floor(knn.length / k) == 0){
+            if(i > 0 && i % Math.floor(knn.length / k) === 0){
                 clusters.push(c);
                 c = [];
             }
