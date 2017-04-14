@@ -139,6 +139,7 @@ class Db {
      */
     createFeaturesCache(fp_id){
         return new Promise((resolve, reject) => {
+
             if(this.featuresCache[fp_id] !== undefined) {
                 resolve();
                 return;

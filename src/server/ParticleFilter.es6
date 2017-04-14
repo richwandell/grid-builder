@@ -49,10 +49,11 @@ class ParticleFilter {
     }
 
     getParticleWeight(coord, weight){
-        return Math.sqrt(weight);
-        const featureNumber = this.db.getFeatureNumber(this.fp_id, coord);
         let w = Math.sqrt(weight);
-        return w / featureNumber;
+        if (Math.round(w) === 0) {
+           w = Infinity;
+        }
+        return w;
     }
 
     move(features){

@@ -20,7 +20,7 @@ class Localizer {
     send(rows){
         const data = {
             action: "action",
-            fp_id: "336c6582c283421c28479e8801e8edfa",
+            fp_id: "786a1914c87dc51701f5c97b7ec29fdd",
             ap_ids: rows,
             device_id: this.id,
             type: "COMPUTER"
