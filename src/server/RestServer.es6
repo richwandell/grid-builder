@@ -176,6 +176,7 @@ class RestServer{
                 }
                 let pf = new ParticleFilter(this.db, data.fp_id);
                 pf.setParticles(stateParticles);
+                this.worker.trackingLog.debug(data.ap_ids);
 
                 const f = new Features();
                 const features = f.makeFeatures(data.ap_ids);

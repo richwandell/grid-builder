@@ -117,6 +117,12 @@ class Server {
             filesize: 5000000,
             numfiles: 3
         });
+        this.trackingLog = new Logger({
+            logfolder: pjson.builder_log_folder,
+            filename: "tracking.log",
+            filesize: 5000000,
+            numfiles: 3
+        });
         this.db = new Db(this.log, pjson.builder_db_name);
     }
 
