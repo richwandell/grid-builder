@@ -12,6 +12,8 @@ module.exports = function (grunt) {
         fs.writeFileSync(".uuid", id);
     }
 
+    var grunt_watch_tasks = ['clean', 'babel', 'webpack', 'less:dev', 'copy:first'];
+
     var pkg  = grunt.file.readJSON("./package.json");
     grunt.initConfig({
         pkg: pkg,
@@ -56,7 +58,7 @@ module.exports = function (grunt) {
         watch: {
             dev: {
                 files: ['src/**/*.less', 'src/builder/**/*', 'src/builder.html', 'src/server/*'],
-                tasks: ['clean', 'babel', 'webpack', 'less:dev', 'copy:first']
+                tasks: grunt_watch_tasks
             }
         },
         clean: {
@@ -153,4 +155,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-nw-builder');
     grunt.loadNpmTasks('grunt-babel');
     grunt.loadNpmTasks('grunt-webpack');
+
+    grunt.registerTask('dist', grunt_watch_tasks);
 };
