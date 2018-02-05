@@ -162,35 +162,47 @@ class RestServer{
         res.header("Cache-Control", "no-cache");
     }
 
+    moveParticles(data, id) {
+        let stateParticles = [];
+        if (this.worker.particles[id] !== undefined) {
+            stateParticles = this.worker.particles[id];
+        }
+        let pf = new ParticleFilter(this.db, data.fp_id);
+        pf.setParticles(stateParticles);
+        this.worker.trackingLog.debug(data.ap_ids);
+
+        const f = new Features();
+        const features = f.makeFeatures(data.ap_ids);
+        pf.move(features);
+        const allParticles = pf.getParticles();
+        this.worker.particles[id] = allParticles;
+
+        const particles = pf.getParticleCoords();
+        const unique = pf.getUniqueParticles();
+        return [particles, unique, allParticles]
+    }
+
+    makeKMeans(args) {
+        let [particles, unique, allParticles] = args;
+        let km = new KMeans(2, unique.slice(0, 5));
+        const largestCluster = km.getLargestClusterIndex();
+        const guess = km.getCentroid(largestCluster);
+        const clusters = km.getClusters();
+
+        return [particles, unique, clusters, guess, allParticles];
+    }
+
     localize(req, res) {
+        this.log.log("/rest/localize");
         const data = req.body;
         const id = data.device_id;
         const fp_id = data.fp_id;
 
         this.db.createFeaturesCache(fp_id)
-            .then(() => {
-
-                let stateParticles = [];
-                if (this.worker.particles[id] !== undefined) {
-                    stateParticles = this.worker.particles[id];
-                }
-                let pf = new ParticleFilter(this.db, data.fp_id);
-                pf.setParticles(stateParticles);
-                this.worker.trackingLog.debug(data.ap_ids);
-
-                const f = new Features();
-                const features = f.makeFeatures(data.ap_ids);
-                pf.move(features);
-                const allParticles = pf.getParticles();
-                this.worker.particles[id] = allParticles;
-
-                const particles = pf.getParticleCoords();
-                const unique = pf.getUniqueParticles();
-
-                let km = new KMeans(2, unique.slice(0,5));
-                const largestCluster = km.getLargestClusterIndex();
-                const guess = km.getCentroid(largestCluster);
-
+            .then(() => this.moveParticles(data, id))
+            .then(this.makeKMeans)
+            .then((args) => {
+                let [particles, unique, clusters, guess, allParticles] = args;
                 res.send({
                     success: true,
                     id: id,
@@ -198,7 +210,7 @@ class RestServer{
                     type: data.type,
                     particles: particles,
                     neighbors: unique,
-                    clusters: km.getClusters()
+                    clusters: clusters
                 });
                 this.notifyListeners({
                     action: 'LOCALIZE',
@@ -207,11 +219,10 @@ class RestServer{
                     type: data.type,
                     particles: particles,
                     neighbors: unique,
-                    clusters: km.getClusters(),
+                    clusters: clusters,
                     fp_id: data.fp_id,
                     all_particles: allParticles
                 });
-
             }
         );
     }

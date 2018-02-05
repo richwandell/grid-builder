@@ -5,7 +5,14 @@ import Logger from './Log';
 import Db from './Db';
 
 const numCPUs = require('os').cpus().length;
-const debug = process.execArgv.indexOf('--debug') > -1 || process.execArgv.indexOf('--debug-brk') > -1;
+var debug = false;
+
+process.execArgv.forEach((item) => {
+    if(item.indexOf('--debug') > -1 || item.indexOf('--debug-brk') > -1){
+        debug = true;
+    }
+});
+
 const cluster = require('cluster');
 const pjson = require('../../package.json');
 const uuid = require('uuid');

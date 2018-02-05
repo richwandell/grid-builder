@@ -1,10 +1,11 @@
 import KalmanFilter from './KalmanFilter';
 
 let sqlite3 = require('sqlite3').verbose();
+let LinearInterpolate = require('everpolate').linear;
 
 class Db {
 
-    static database_code_version = 5;
+    static database_code_version = 6;
     static query_get_all_floorplans = "select * from layout_images";
     static query_get_database_version = "select value from settings where key = 'database_version';";
     static query_insert_version = "insert or ignore into settings values ('database_version', ?);";
@@ -115,16 +116,25 @@ class Db {
         "update settings set value = '" + Db.database_code_version + "' where key = 'database_code_version';"
     ];
 
+    static migration6 = [
+        "ALTER TABLE features ADD interpolated INTEGER DEFAULT 0 NOT NULL;",
+        "CREATE INDEX features_interpolated_index ON features (interpolated);",
+        "update settings set value = '" + Db.database_code_version + "' where key = 'database_code_version';"
+    ];
+
     constructor(log, database = "db.sqlite3"){
         this.log = log;
         this.log.debug("Db.constructor");
 
         this.db = new sqlite3.cached.Database(`db/${database}`);
-        this.db.serialize(() => {
-            this.db.exec("PRAGMA journal_mode = WAL;");
-            this.db.exec("PRAGMA cache_size = 4096000;");
-            this.db.exec("PRAGMA optimize;");
-            this.db.exec("PRAGMA busy_timeout = 150000;");
+
+        this.createTables(this.db, () => {
+            this.db.serialize(() => {
+                this.db.exec("PRAGMA journal_mode = WAL;");
+                this.db.exec("PRAGMA cache_size = 4096000;");
+                this.db.exec("PRAGMA optimize;");
+                this.db.exec("PRAGMA busy_timeout = 150000;");
+            });
         });
         this.featuresCache = {};
     }
@@ -256,6 +266,14 @@ class Db {
             case 4:
                 db.serialize(() => {
                     Db.migration5.forEach((mig) => {
+                        db.run(mig);
+                    });
+                    this.createTables(db, cb);
+                });
+                break;
+            case 5:
+                db.serialize(() => {
+                    Db.migration6.forEach((mig) => {
                         db.run(mig);
                     });
                     this.createTables(db, cb);
@@ -439,6 +457,155 @@ class Db {
                     this.db.close();
                 } : () => {};
                 this.updateKalman(fp_id, x, y, call);
+            });
+        });
+    }
+
+    static query_get_interpolate_count = `
+    SELECT
+      f.feature, count(f.feature) as feature_count
+    from
+      features f
+      join layout_images li on f.fp_id = li.id
+    where
+      li.id = ?      
+    group by
+      f.feature
+    order by
+      feature_count desc
+    `;
+
+    static query_get_interpolate_individual_feature = `
+    select
+      *
+    from
+      features f
+    where
+      f.feature = ?
+      and fp_id = ?
+    order by
+      f.x asc, f.y asc;
+    `;
+
+    static query_insert_new_interpolated_feature = `
+    insert into features (fp_id, x, y, feature, value, interpolated)
+    values (?, ?, ?, ?, ?, 1);
+    `;
+
+    interpolate(fp_id: String) {
+        this.interpolateX(fp_id)
+            .then(() => this.interpolateY(fp_id));
+    }
+
+    interpolateX(fp_id: String) {
+        console.log("interpolateX");
+        return new Promise((resolve, reject) => {
+            const insert = this.db.prepare(Db.query_insert_new_interpolated_feature);
+            this.db.run("delete from features where fp_id = ? and interpolated = 1;", fp_id, () => {
+                this.db.all(Db.query_get_interpolate_count, fp_id, (err, rows) => {
+                    let maxFeatureCount = 0;
+                    for (let row of rows) {
+                        const feature = row.feature;
+                        const feature_count = row.feature_count;
+                        if (feature_count < maxFeatureCount) {
+                            break;
+                        }
+                        maxFeatureCount = feature_count;
+
+                        this.db.all(Db.query_get_interpolate_individual_feature, feature, fp_id, (err, rows) => {
+                            let rowMap = {};
+                            for (let iRow of rows) {
+                                if (typeof(rowMap[iRow.x]) === "undefined") {
+                                    rowMap[iRow.x] = [[], []];
+                                }
+
+                                rowMap[iRow.x][0].push(iRow.y);
+                                rowMap[iRow.x][1].push(iRow.value);
+                            }
+
+                            for (let xVal in rowMap) {
+                                let xVals = rowMap[xVal][0];
+                                let yVals = rowMap[xVal][1];
+                                let unKnownVals = [];
+                                let minVal = Math.min(...xVals);
+                                let maxVal = Math.max(...xVals);
+                                for (let i = minVal; i < maxVal; i++) {
+                                    if (xVals.indexOf(i) === -1) {
+                                        unKnownVals.push(i);
+                                    }
+                                }
+                                let nowKnown = LinearInterpolate(unKnownVals, xVals, yVals);
+                                let i = 0;
+                                let done = 0;
+                                for(let unknownY of unKnownVals) {
+                                    insert.run(fp_id, xVal, unknownY, feature, nowKnown[i], () => {
+                                        done++;
+                                        if(done === nowKnown.length){
+                                            resolve();
+                                        }
+                                    });
+                                    i++;
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    }
+
+    interpolateY(fp_id: String) {
+        console.log("interpolateY");
+        return new Promise((resolve, reject) => {
+            const insert = this.db.prepare(Db.query_insert_new_interpolated_feature);
+            this.db.all(Db.query_get_interpolate_count, fp_id, (err, rows) => {
+                let maxFeatureCount = 0;
+                for (let row of rows) {
+                    const feature = row.feature;
+                    const feature_count = row.feature_count;
+                    if (feature_count < maxFeatureCount) {
+                        break;
+                    }
+                    maxFeatureCount = feature_count;
+
+                    this.db.all(Db.query_get_interpolate_individual_feature, feature, fp_id, (err, rows) => {
+                        let rowMap = {};
+                        for (let iRow of rows) {
+                            if (typeof(rowMap[iRow.y]) === "undefined") {
+                                rowMap[iRow.y] = [[], []];
+                            }
+
+                            rowMap[iRow.y][0].push(iRow.x);
+                            rowMap[iRow.y][1].push(iRow.value);
+                        }
+
+                        for (let yVal in rowMap) {
+                            let xVals = rowMap[yVal][0];
+                            let yVals = rowMap[yVal][1];
+
+                            let unKnownVals = [];
+                            let minVal = Math.min(...xVals);
+                            let maxVal = Math.max(...xVals);
+                            for (let i = minVal; i < maxVal; i++) {
+                                if (xVals.indexOf(i) === -1) {
+                                    unKnownVals.push(i);
+                                }
+                            }
+                            let nowKnown = LinearInterpolate(unKnownVals, xVals, yVals);
+                            let i = 0;
+                            let done = 0;
+                            for (let unknownX of unKnownVals) {
+                                insert.run(fp_id, unknownX, yVal, feature, nowKnown[i], () => {
+                                    done++;
+                                    if (done === nowKnown.length) {
+                                        resolve();
+                                    }
+                                });
+                                i++;
+                            }
+                        }
+                    });
+                }
             });
         });
     }

@@ -1,0 +1,33 @@
+'use strict';
+
+var _Db = require('./Db');
+
+var _Db2 = _interopRequireDefault(_Db);
+
+var _Log = require('./Log');
+
+var _Log2 = _interopRequireDefault(_Log);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var pjson = require('../../package.json');
+var commands = require('commander');
+
+commands.option('--reindex', 'Reindex').option('--interpolate', 'Interpolate').parse(process.argv);
+
+var log = new _Log2.default({
+    logfolder: pjson.builder_log_folder,
+    filename: "rest.log",
+    filesize: 5000000,
+    numfiles: 3
+});
+
+var db = new _Db2.default(log, pjson.builder_db_name);
+
+if (commands.reindex) {
+    db.reindex();
+} else if (commands.interpolate) {
+    db.interpolate('336c6582c283421c28479e8801e8edfb');
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9zZXJ2ZXIvQ29tbWFuZExpbmUuZXM2Il0sIm5hbWVzIjpbInBqc29uIiwicmVxdWlyZSIsImNvbW1hbmRzIiwib3B0aW9uIiwicGFyc2UiLCJwcm9jZXNzIiwiYXJndiIsImxvZyIsImxvZ2ZvbGRlciIsImJ1aWxkZXJfbG9nX2ZvbGRlciIsImZpbGVuYW1lIiwiZmlsZXNpemUiLCJudW1maWxlcyIsImRiIiwiYnVpbGRlcl9kYl9uYW1lIiwicmVpbmRleCIsImludGVycG9sYXRlIl0sIm1hcHBpbmdzIjoiOztBQUFBOzs7O0FBQ0E7Ozs7OztBQUVBLElBQU1BLFFBQVFDLFFBQVEsb0JBQVIsQ0FBZDtBQUNBLElBQU1DLFdBQVdELFFBQVEsV0FBUixDQUFqQjs7QUFFQUMsU0FDS0MsTUFETCxDQUNZLFdBRFosRUFDeUIsU0FEekIsRUFFS0EsTUFGTCxDQUVZLGVBRlosRUFFNkIsYUFGN0IsRUFHS0MsS0FITCxDQUdXQyxRQUFRQyxJQUhuQjs7QUFLQSxJQUFNQyxNQUFNLGtCQUFXO0FBQ25CQyxlQUFXUixNQUFNUyxrQkFERTtBQUVuQkMsY0FBVSxVQUZTO0FBR25CQyxjQUFVLE9BSFM7QUFJbkJDLGNBQVU7QUFKUyxDQUFYLENBQVo7O0FBT0EsSUFBTUMsS0FBSyxpQkFBT04sR0FBUCxFQUFZUCxNQUFNYyxlQUFsQixDQUFYOztBQUVBLElBQUdaLFNBQVNhLE9BQVosRUFBcUI7QUFDakJGLE9BQUdFLE9BQUg7QUFDSCxDQUZELE1BRU8sSUFBSWIsU0FBU2MsV0FBYixFQUEwQjtBQUM3QkgsT0FBR0csV0FBSCxDQUFlLGtDQUFmO0FBQ0giLCJmaWxlIjoiQ29tbWFuZExpbmUuanMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgRGIgZnJvbSAnLi9EYic7XG5pbXBvcnQgTG9nZ2VyIGZyb20gJy4vTG9nJztcblxuY29uc3QgcGpzb24gPSByZXF1aXJlKCcuLi8uLi9wYWNrYWdlLmpzb24nKTtcbmNvbnN0IGNvbW1hbmRzID0gcmVxdWlyZSgnY29tbWFuZGVyJyk7XG5cbmNvbW1hbmRzXG4gICAgLm9wdGlvbignLS1yZWluZGV4JywgJ1JlaW5kZXgnKVxuICAgIC5vcHRpb24oJy0taW50ZXJwb2xhdGUnLCAnSW50ZXJwb2xhdGUnKVxuICAgIC5wYXJzZShwcm9jZXNzLmFyZ3YpO1xuXG5jb25zdCBsb2cgPSBuZXcgTG9nZ2VyKHtcbiAgICBsb2dmb2xkZXI6IHBqc29uLmJ1aWxkZXJfbG9nX2ZvbGRlcixcbiAgICBmaWxlbmFtZTogXCJyZXN0LmxvZ1wiLFxuICAgIGZpbGVzaXplOiA1MDAwMDAwLFxuICAgIG51bWZpbGVzOiAzXG59KTtcblxuY29uc3QgZGIgPSBuZXcgRGIobG9nLCBwanNvbi5idWlsZGVyX2RiX25hbWUpO1xuXG5pZihjb21tYW5kcy5yZWluZGV4KSB7XG4gICAgZGIucmVpbmRleCgpO1xufSBlbHNlIGlmIChjb21tYW5kcy5pbnRlcnBvbGF0ZSkge1xuICAgIGRiLmludGVycG9sYXRlKCczMzZjNjU4MmMyODM0MjFjMjg0NzllODgwMWU4ZWRmYicpO1xufSJdfQ==
+//# sourceMappingURL=CommandLine.js.map
