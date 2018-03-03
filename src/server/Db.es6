@@ -160,11 +160,17 @@ class Db {
                     return;
                 }
                 const length = rows.length;
-                let fp_id, x, y, feature, value;
+                let fp_id, x, y, feature, value, maxX = 0, maxY = 0;
                 for (let i = 0; i < length; i++) {
                     fp_id = rows[i].fp_id;
                     x = rows[i].x;
                     y = rows[i].y;
+                    if(x > maxX){
+                        maxX = x;
+                    }
+                    if(y > maxY) {
+                        maxY = y;
+                    }
                     feature = rows[i].feature;
                     value = rows[i].value;
                     if (this.featuresCache[fp_id] === undefined) {
@@ -177,7 +183,9 @@ class Db {
 
                     this.featuresCache[fp_id][coord][feature] = value;
                 }
-                this.log.log("Features Cache created: " + JSON.stringify(Object.keys(this.featuresCache)));
+                this.featuresCache[fp_id]["max_x"] = maxX;
+                this.featuresCache[fp_id]["max_y"] = maxY;
+                this.log.log("Features Cache created");
                 if (resolve) {
                     resolve();
                 }
@@ -190,6 +198,20 @@ class Db {
             return false;
         }
         return this.featuresCache[fp_id];
+    }
+
+    getMaxX(fp_id) {
+        if(this.featuresCache[fp_id] === undefined){
+            return false;
+        }
+        return this.featuresCache[fp_id]["max_x"];
+    }
+
+    getMaxY(fp_id) {
+        if(this.featuresCache[fp_id] === undefined){
+            return false;
+        }
+        return this.featuresCache[fp_id]["max_y"];
     }
 
     getFeatureValue(fp_id, coord, feature){

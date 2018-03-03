@@ -9,8 +9,10 @@ import Compass from './Compass';
 import State from './State';
 import WebSocketClient from './WebSocketClient';
 import LocalizationFinishedHandler from './LocalizationFinishedHandler';
+import Phone from "./Phone";
 
 let debug = Registry.console.debug;
+let superDebug = Registry.console.superDebug;
 
 class Main{
     /**
@@ -25,6 +27,7 @@ class Main{
         let isNode = (typeof process !== "undefined" && typeof require !== "undefined");
         this.isNodeWebkit = typeof(GLOBAL_NW) !== "undefined" && GLOBAL_NW;
         this.systemId = SYSTEM_ID;
+        this.mode = "FINGERPRINTING";
 
 
         this.state = new State(this);
@@ -98,25 +101,39 @@ class Main{
         $(this.grid.getOverlay()).off();
         $(this.grid.getOverlay()).on({
             "mousedown": (event) =>{
-                this.grid.overlayMouseDown(event);
+                if(this.mode === "FINGERPRINTING") {
+                    this.grid.overlayMouseDown(event);
+                }
             },
             "mouseup": (event) => {
-                this.grid.overlayMouseUp(event);
+                if(this.mode === "FINGERPRINTING") {
+                    this.grid.overlayMouseUp(event);
+                }
             },
             "mousemove": (event) => {
-                this.grid.overlayMouseMove(event);
+                if(this.mode === "FINGERPRINTING") {
+                    this.grid.overlayMouseMove(event);
+                }
             },
             "click": (event) => {
-                this.grid.overlayClicked(event);
+                if(this.mode === "FINGERPRINTING") {
+                    this.grid.overlayClicked(event);
+                }
             },
             "touchstart": (event) => {
-                this.grid.overlayTouchStart(event);
+                if(this.mode === "FINGERPRINTING") {
+                    this.grid.overlayTouchStart(event);
+                }
             },
             "touchmove": (event) => {
-                this.grid.overlayTouchMove(event);
+                if(this.mode === "FINGERPRINTING") {
+                    this.grid.overlayTouchMove(event);
+                }
             },
             "touchend": (event) => {
-                this.grid.overlayTouchEnd(event);
+                if(this.mode === "FINGERPRINTING") {
+                    this.grid.overlayTouchEnd(event);
+                }
             }
         });
 
@@ -204,6 +221,23 @@ class Main{
         }
     }
 
+    setPhoneRotation(rot) {
+        if(typeof(this.phone) !== "undefined") {
+            this.phone.setRotation(rot * (Math.PI / 180));
+            this.grid.redraw();
+        }
+    }
+
+    setLocalizationResult(x, y, id) {
+        this.phone = new Phone(this, x, y, id);
+        this.grid.setPhone(this.phone);
+        this.grid.redraw();
+    }
+
+    setMode(mode) {
+        this.mode = mode;
+    }
+
 }
 
 const m = new Main();
@@ -211,8 +245,8 @@ window.loadFloorPlan = function(fp){
     m.loadFloorPlan(fp);
 };
 
-window.clickCanvas = function(x, y){
-    m.clickCanvasXY(x, y);
+window.setLocalizationResult = function(x, y, id){
+    m.setLocalizationResult(x, y, id);
 };
 
 window.toggleScannedArea = function(){
@@ -224,7 +258,11 @@ window.updateScannedArea = function(area){
     m.updateScannedArea(data);
 };
 
-window.loadLocalizationResponse = function(res) {
-    const data = JSON.parse(res);
-    m.localizationFinishedHandler.onLocalize(data);
+window.setPhoneRotation = function(rotation) {
+    const rot = Number(rotation);
+    m.setPhoneRotation(rot);
+};
+
+window.setMode = function(mode) {
+    m.setMode(mode);
 };

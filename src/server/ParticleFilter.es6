@@ -11,6 +11,7 @@ class ParticleFilter {
         this.allParticles = this.db.getFeaturesCache(this.fp_id);
         this.guess = [0,0];
         this.oldParticles = [];
+        this.numParticles = 20;
     }
 
     setParticles(particles){
@@ -28,24 +29,26 @@ class ParticleFilter {
 
     initializeParticles(){
         this.allParticles = this.db.getFeaturesCache(this.fp_id);
-        const keys = Object.keys(this.allParticles);
-        const keyLength = keys.length;
-        let maxX = 0;
-        let maxY = 0;
-        for(let i = 0; i < keyLength; i++){
-            let [x, y] = keys[i].split("_");
-            [x, y] = [Number(x), Number(y)];
 
-            if(x > maxX) maxX = x;
-            if(y > maxY) maxY = y;
-            this.particles.push({
-                x: x,
-                y: y,
+        const maxX = this.db.getMaxX(this.fp_id);
+        const maxY = this.db.getMaxY(this.fp_id);
+
+        let newParticles = [];
+        while (newParticles.length < this.numParticles) {
+            let c_x = Math.floor(Math.random() * maxX);
+            let c_y = Math.floor(Math.random() * maxY);
+            let key = c_x + "_" + c_y;
+            if(this.allParticles[key] === undefined){
+                continue;
+            }
+            let p = {
+                x: c_x,
+                y: c_y,
                 weight: 0
-            });
+            };
+            newParticles.push(p);
         }
-        this.maxX = maxX;
-        this.maxY = maxY;
+        this.particles = newParticles;
     }
 
     getParticleWeight(coord, weight){

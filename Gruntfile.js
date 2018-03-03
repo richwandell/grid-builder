@@ -46,12 +46,20 @@ module.exports = function (grunt) {
                     expand: true
                 }]
             },
-            second: {
+            osx_android: {
                 files: [{
                     cwd: 'public/builder/',
                     src: '**/*.*',
                     dest: '/Users/richwandell/AndroidStudioProjects/indoorlocation/app/src/main/assets/',
                     expand: true
+                }]
+            },
+            windows_android: {
+                files: [{
+                    expand: true,
+                    cwd: 'public/builder/',
+                    src: '**/*.*',
+                    dest: 'C:\\Users\\rich\\AndroidStudioProjects\\indoorlocation\\app\\src\\main\\assets\\'
                 }]
             }
         },
@@ -110,15 +118,15 @@ module.exports = function (grunt) {
                         PROTOCOL: JSON.stringify(pkg.builder_protocol),
                         SYSTEM_ID: JSON.stringify(id)
                     }),
-                    new webpack.optimize.UglifyJsPlugin({
-                        compress: {
-                            warnings: false,
-                        },
-                        output: {
-                            comments: false,
-                        },
-                        sourceMap: true
-                    }),
+                    // new webpack.optimize.UglifyJsPlugin({
+                    //     compress: {
+                    //         warnings: false,
+                    //     },
+                    //     output: {
+                    //         comments: false,
+                    //     },
+                    //     sourceMap: true
+                    // }),
                 ]
             }
         },

@@ -6,6 +6,7 @@ import Macbook from './Macbook';
 
 let debug = Registry.console.debug;
 let superDebug = Registry.console.superDebug;
+let Android = window.Android || {};
 
 class Grid{
 
@@ -310,13 +311,13 @@ class Grid{
     }
 
     setAndroidSize(){
+        debug("Grid.setAndroidSize");
         if(this.container.isAndroid){
             let size = this.getCurrentSize();
+
             Android.setCurrentSize(
                 parseInt(size[0]),
-                parseInt(size[1]),
-                Number(this.hgrid_spaces),
-                Number(this.vgrid_spaces)
+                parseInt(size[1])
             );
         }
     }
@@ -548,7 +549,7 @@ class Grid{
                 }
             }
 
-            if(selected_grid[i] || selected_grid[i] === ""){
+            if((selected_grid[i] || selected_grid[i] === "") && this.container.mode === "FINGERPRINTING"){
                 for(let y = 0; y < selected_grid[i].length; y++){
                     if(selected_grid[i][y] || selected_grid[i][y] === ""){
                         c.fillStyle = "green";

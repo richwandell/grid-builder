@@ -27,12 +27,17 @@ class ImageAsset {
         this.tickX = 0;
         this.tickY = 0;
         this.isTheAnimator = false;
+        this.rotation = 0;
         if(ImageAsset.images[type] === undefined){
             ImageAsset.images[type] = {
                 asset: document.createElement("img"),
                 loaded: false
             }
         }
+    }
+
+    setRotation(rot) {
+        this.rotation = rot;
     }
 
     stopAnimation(){
@@ -93,7 +98,19 @@ class ImageAsset {
             [x, y, w, h] = this.container.grid.getCanvasCoordinates(this.x, this.y);
         }
 
-        ctx.drawImage(img.asset, (x + w / 2) - (imgWidth / 2), (y + h / 2) - (imgHeight / 2));
+        let tx = (x + w / 2) - (imgWidth / 2);
+        let ty = (y + h / 2) - (imgHeight / 2);
+
+        ctx.translate(tx, ty);
+        ctx.rotate(this.rotation);
+
+        ctx.drawImage(img.asset, 0, 0);
+
+        ctx.rotate(-this.rotation);
+        ctx.translate(-tx, -ty);
+
+
+
 
         if (this.animating) {
             if (ImageAsset.ANIMATING === 1 || this.isTheAnimator) {
@@ -110,6 +127,7 @@ class ImageAsset {
         let img = ImageAsset.images[this.type];
         if(img.loaded){
             this.drawAnimation(ctx, img);
+
             return;
         }
         img.asset.src = image;
