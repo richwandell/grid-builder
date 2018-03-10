@@ -53,7 +53,49 @@ class Grid{
         this.showWeights = false;
         this.showParticles = false;
         this.showLines = false;
+        this.generatingWalk = false;
+        this.walk = [];
+        this.steps = [];
+        this.showSteps = false;
+        this.trail = [];
+        this.showTrail = false;
         this.setAndroidSize();
+    }
+
+    toggleGuessTrail(e) {
+        if(!this.showTrail) {
+            this.trail = [];
+            this.showTrail = true;
+        } else {
+            this.showTrail = false;
+        }
+        $(e.target).toggleClass("btn-success");
+        this.redraw();
+    }
+
+    toggleSteps(e) {
+        if(!this.showSteps) {
+            this.showSteps = true;
+        } else {
+            this.showSteps = false;
+        }
+        $(e.target).toggleClass("btn-success");
+        this.redraw();
+    }
+
+    startWalk(e) {
+        if(!this.generatingWalk) {
+            this.walk = [];
+            this.generatingWalk = true;
+        } else {
+            this.walk = [];
+            this.generatingWalk = false;
+        }
+        $(e.target).toggleClass("btn-success");
+    }
+
+    setSteps(steps) {
+        this.steps = steps;
     }
 
     toggleWeights(){
@@ -389,6 +431,11 @@ class Grid{
                 this.multi_selected_grid[x][y] = "";
             }
         }
+
+        if(this.generatingWalk) {
+            this.walk.push([ex, ey]);
+            console.log(JSON.stringify(this.walk));
+        }
     }
 
     overlayMouseMove(event) {
@@ -603,6 +650,30 @@ class Grid{
                         );
                     }
                 }
+            }
+        }
+
+        if(typeof(this.steps) !== "undefined" && this.showSteps) {
+            for (let coord of this.steps) {
+                co.fillStyle = "rgb(0, 255, 0)";
+                co.fillRect(
+                    (wi / ho) * coord[0],
+                    (he / vi) * coord[1],
+                    (wi / ho),
+                    (he / vi)
+                );
+            }
+        }
+
+        if(typeof(this.trail) !== "undefined" && this.showTrail) {
+            for (let coord of this.trail) {
+                co.fillStyle = "rgb(0, 255, 255)";
+                co.fillRect(
+                    (wi / ho) * coord[0],
+                    (he / vi) * coord[1],
+                    (wi / ho),
+                    (he / vi)
+                );
             }
         }
 

@@ -631,6 +631,33 @@ class Db {
             });
         });
     }
+
+    static query_get_latest_scan_result = `
+    select * from scan_results
+    where fp_id = ?
+    and x = ? and y = ?
+    and date(created) = (
+      select
+        date(max(created))
+      from
+        scan_results
+      where
+        fp_id = ?
+        and x = ? and y = ?
+    );
+    `;
+
+
+    getLatestScanResults(fpId, x, y, step) {
+        return new Promise((resolve, reject) => {
+            this.db.all(Db.query_get_latest_scan_result, fpId, x, y, fpId, x, y, (err, rows) => {
+                if(err) {
+                    reject(err);
+                }
+                resolve([rows, step]);
+            });
+        });
+    }
 }
 
 

@@ -1,8 +1,8 @@
 import Logger from './Log';
+import Utils from './Utils';
 
 const dgram = require('dgram');
 const fs = require("fs");
-const Utils = require('./Utils.js');
 const pjson = require('../../package.json');
 const Server = require('node-ssdp').Server;
 let builder = false;

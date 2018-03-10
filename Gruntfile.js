@@ -65,12 +65,12 @@ module.exports = function (grunt) {
         },
         watch: {
             dev: {
-                files: ['src/**/*.less', 'src/builder/**/*', 'src/builder.html', 'src/server/*'],
+                files: ['src/**/*.less', 'src/builder/**/*', 'src/builder.html'],
                 tasks: grunt_watch_tasks
             }
         },
         clean: {
-            temp: ['public/builder/**', 'public/server/**']
+            temp: ['public/builder/**']
         },
         less: {
             dev: {
@@ -129,30 +129,6 @@ module.exports = function (grunt) {
                     // }),
                 ]
             }
-        },
-        nwjs: {
-            options: {
-                platforms: ['osx64'],
-                buildDir: './dist',
-                flavor: 'sdk',
-                version: '0.21.5'
-            },
-            src: ['./**/*']
-        },
-        babel: {
-            options: {
-                sourceMap: true,
-                presets: ['es2015', 'stage-0']
-            },
-            dist: {
-                files: [{
-                    expand: true,
-                    cwd: 'src/server',
-                    src: ['*.es6'],
-                    dest: 'public/server/',
-                    ext: '.js'
-                }]
-            }
         }
     });
 
@@ -160,8 +136,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-less');
-    grunt.loadNpmTasks('grunt-nw-builder');
-    grunt.loadNpmTasks('grunt-babel');
     grunt.loadNpmTasks('grunt-webpack');
 
     grunt.registerTask('dist', grunt_watch_tasks);

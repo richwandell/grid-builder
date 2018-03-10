@@ -2,10 +2,11 @@ import Knn from './Knn';
 import KMeans from './KMeans';
 import ParticleFilter from './ParticleFilter';
 import Features from './Features';
+import Utils from './Utils';
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const Utils = require('./Utils.js');
+
 const http = require('http');
 const fs = require("fs");
 
@@ -162,18 +163,22 @@ class RestServer{
         res.header("Cache-Control", "no-cache");
     }
 
-    moveParticles(data, id) {
+    moveParticles(data, id, particleNumber, particleCutoff, alphaValue) {
         let stateParticles = [];
         if (this.worker.particles[id] !== undefined) {
             stateParticles = this.worker.particles[id];
         }
-        let pf = new ParticleFilter(this.db, data.fp_id);
+        let previousState = [];
+        if(this.worker.previousState[id] !== undefined) {
+            previousState = this.worker.previousState[id];
+        }
+        let pf = new ParticleFilter(this.db, data.fp_id, particleNumber, particleCutoff, alphaValue);
         pf.setParticles(stateParticles);
         this.worker.trackingLog.debug(data.ap_ids);
 
         const f = new Features();
         const features = f.makeFeatures(data.ap_ids);
-        pf.move(features);
+        pf.move(features, previousState);
         const allParticles = pf.getParticles();
         this.worker.particles[id] = allParticles;
 
@@ -197,12 +202,29 @@ class RestServer{
         const data = req.body;
         const id = data.device_id;
         const fp_id = data.fp_id;
+        let steps = [];
+        if(data.steps) {
+            steps = data.steps;
+        }
+        let particleNumber = 20;
+        if(data.particleNumber) {
+            particleNumber = Number(data.particleNumber);
+        }
+        let particleCutoff = 20;
+        if(data.particleCutoff) {
+            particleCutoff = data.particleCutoff;
+        }
+        let alphaValue = 2;
+        if(data.alphaValue) {
+            alphaValue = data.alphaValue;
+        }
 
         this.db.createFeaturesCache(fp_id)
-            .then(() => this.moveParticles(data, id))
+            .then(() => this.moveParticles(data, id, particleNumber, particleCutoff, alphaValue))
             .then(this.makeKMeans)
             .then((args) => {
                 let [particles, unique, clusters, guess, allParticles] = args;
+                this.worker.setPreviousState(id, guess);
                 res.send({
                     success: true,
                     id: id,
@@ -221,7 +243,8 @@ class RestServer{
                     neighbors: unique,
                     clusters: clusters,
                     fp_id: data.fp_id,
-                    all_particles: allParticles
+                    all_particles: allParticles,
+                    steps: steps
                 });
             }
         );
@@ -280,6 +303,16 @@ class RestServer{
 
         app.get("/rest/getScannedCoords/:fp_id", this.jsonHeaders, (req, res) => {
             this.getScannedCoords(req, res);
+        });
+
+        app.post("/rest/resetLocalizer", this.jsonHeaders, (req, res) => {
+            const data = req.body;
+            const fp_id = data.fp_id;
+            const id = data.device_id;
+
+            this.db.clearFeaturesCache(fp_id);
+            delete this.worker.particles[id];
+            res.send({success: true});
         });
 
         this.server = http.createServer(app);

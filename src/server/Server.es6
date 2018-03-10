@@ -8,7 +8,11 @@ const numCPUs = require('os').cpus().length;
 var debug = false;
 
 process.execArgv.forEach((item) => {
-    if(item.indexOf('--debug') > -1 || item.indexOf('--debug-brk') > -1){
+    if(
+        item.indexOf('--debug') > -1
+        || item.indexOf('--debug-brk') > -1
+        || item.indexOf('--inspect') > -1
+    ){
         debug = true;
     }
 });
@@ -28,10 +32,23 @@ class Server {
         }
     }
 
+    setPreviousState(id, newState) {
+        if(typeof(this.previousState[id]) !== "undefined") {
+            let state = this.previousState[id];
+            state.shift();
+            state.push(newState);
+            this.previousState[id] = state;
+            return;
+        }
+
+        this.previousState[id] = [newState, newState];
+    }
+
     constructor(numWorker: Number, debug: boolean) {
         this.debug = debug;
         this.workers = [];
         this.particles = {};
+        this.previousState = {};
 
         this.configure();
 
@@ -98,7 +115,8 @@ class Server {
                     type: message.type,
                     particles: message.particles,
                     neighbors: message.neighbors,
-                    clusters: message.clusters
+                    clusters: message.clusters,
+                    steps: message.steps
                 });
                 if(!this.debug) {
                     this.messageWorkers(message);

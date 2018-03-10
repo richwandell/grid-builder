@@ -56,6 +56,18 @@ class Main{
     setupEvents(){
         debug("Main.setupEvents");
 
+        $("#start_walk").click((e) => {
+            this.grid.startWalk(e);
+        });
+
+        $("#toggle_steps").click((e) => {
+            this.grid.toggleSteps(e);
+        });
+
+        $("#toggle_guess_trail").click((e) => {
+            this.grid.toggleGuessTrail(e);
+        });
+
         //First setup layout events
         $("#builder_image_input").change((event) => {
             this.layout.imageChanged(event);

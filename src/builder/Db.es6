@@ -121,6 +121,7 @@ class Db {
 
     getUpdates() {
         debug("Db.getUpdates");
+        this.layoutImages = [];
         $.ajax({
             url: this.DSN + "/rest/floorplans",
             method: "get",

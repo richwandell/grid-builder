@@ -11,7 +11,6 @@
     "memored": "^1.1.1",
     "node-ssdp": "^2.8.0",
     "node-wifi-scanner": "^1.0.0",
-    "nw": "^0.19.1",
     "opn-cli": "^3.1.0",
     "request": "^2.81.0",
     "sqlite3": "^3.1.8",
@@ -45,8 +44,9 @@
     "webpack": "^2.2.1"
   },
   "scripts": {
-    "start-server": "node public/server/Server.js -r babel-register",
-    "debug-server": "node --debug public/server/Server.js -r babel-register",
+    "start-server": "./node_modules/.bin/babel-node src/server/Server.es6",
+    "debug-server-windows": "./node_modules/.bin/babel-node.cmd --inspect src/server/Server.es6",
+    "debug-server": "./node_modules/.bin/babel-node --inspect src/server/Server.es6",
     "start-app": "./node_modules/.bin/nwbuild -r .",
     "open-browser": "opn public/builder/builder.html",
     "speed-test": "node_modules/.bin/babel-node test/SpeedTest.es6",
@@ -55,17 +55,6 @@
   },
   "main": "public/builder/builder.html",
   "node-main": "public/server/Server.js",
-  "window": {
-    "title": "Grid Builder",
-    "icon": "desktop/icon24.png",
-    "toolbar": true,
-    "frame": true,
-    "width": 1000,
-    "height": 700,
-    "position": "mouse",
-    "min_width": 500,
-    "min_height": 500
-  },
   "builder_log_folder": "log",
   "builder_protocol": "http",
   "builder_host_name": "localhost",

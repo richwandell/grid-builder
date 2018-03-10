@@ -15,16 +15,20 @@ class LocalizationFinishedHandler {
     onLocalize(data) {
         debug("LocalizationFinishedHandler.onLocalize");
         const id = data.id, guess = data.guess, type = data.type, particles = data.particles,
-            neighbors = data.neighbors, clusters = data.clusters;
+            neighbors = data.neighbors, clusters = data.clusters, steps = data.steps;
 
         switch(type){
             case "PHONE":
                 const ph = new Phone(this.container, guess[0], guess[1], id, particles, neighbors, clusters);
+                this.container.grid.trail.push(guess);
+                this.container.grid.setSteps(steps);
                 this.container.grid.setPhone(ph);
                 break;
 
             case "COMPUTER":
                 const co = new Macbook(this.container, guess[0], guess[1], id, particles, neighbors, clusters);
+                this.container.grid.trail.push(guess);
+                this.container.grid.setSteps(steps);
                 this.container.grid.setComputer(co);
                 break;
         }

@@ -2,7 +2,7 @@ import Db from './Db';
 
 class ParticleFilter {
 
-    constructor(db: Db, fp_id: string){
+    constructor(db: Db, fp_id: string, particleNumber, particleCutoff, alphaValue){
         this.fp_id = fp_id;
         this.db = db;
         this.particles = [];
@@ -11,7 +11,9 @@ class ParticleFilter {
         this.allParticles = this.db.getFeaturesCache(this.fp_id);
         this.guess = [0,0];
         this.oldParticles = [];
-        this.numParticles = 20;
+        this.numParticles = particleNumber;
+        this.particleCutoff = particleCutoff;
+        this.alphaValue = alphaValue;
     }
 
     setParticles(particles){
@@ -29,21 +31,21 @@ class ParticleFilter {
 
     initializeParticles(){
         this.allParticles = this.db.getFeaturesCache(this.fp_id);
-
-        const maxX = this.db.getMaxX(this.fp_id);
-        const maxY = this.db.getMaxY(this.fp_id);
-
         let newParticles = [];
+        // Make a list of possible coordinates for particles
+        let possibleParticleKeys = Object.keys(this.allParticles);
+        possibleParticleKeys.splice(possibleParticleKeys.indexOf("max_x"), 1);
+        possibleParticleKeys.splice(possibleParticleKeys.indexOf("max_y"), 1);
         while (newParticles.length < this.numParticles) {
-            let c_x = Math.floor(Math.random() * maxX);
-            let c_y = Math.floor(Math.random() * maxY);
-            let key = c_x + "_" + c_y;
-            if(this.allParticles[key] === undefined){
+            let key = possibleParticleKeys[Math.floor(Math.random() * possibleParticleKeys.length)];
+            let [x, y] = key.split("_");
+
+            if(this.allParticles[key] === undefined || isNaN(Number(x)) || isNaN(Number(y))){
                 continue;
             }
             let p = {
-                x: c_x,
-                y: c_y,
+                x: Number(x),
+                y: Number(y),
                 weight: 0
             };
             newParticles.push(p);
@@ -59,9 +61,10 @@ class ParticleFilter {
         return w;
     }
 
-    move(features){
+    move(features, previousState = []){
         if(this.particles.length === 0) this.initializeParticles();
         this.oldParticles = [];
+        this.previousState = previousState;
         const featureKeys = Object.keys(features);
         const featureKeysLength = featureKeys.length;
 
@@ -78,8 +81,6 @@ class ParticleFilter {
                     let featureValue = features[feature];
                     let diff = Math.abs(testValue - featureValue);
                     particle.weight += Math.pow(diff, 2);
-                } else {
-                    particle.weight += Math.pow(testValue, 2);
                 }
             }
             particle.weight = this.getParticleWeight(x_y, particle.weight);
@@ -88,11 +89,35 @@ class ParticleFilter {
         this.resample();
     }
 
+    previousStateSame(xOrY) {
+        if(typeof(this.previousState[0]) === "undefined") {
+            return true;
+        }
+        if(typeof(this.previousState[0][0]) === "undefined"){
+            return true;
+        }
+        if(typeof(this.previousState[1][0]) === "undefined"){
+            return true;
+        }
+        if(typeof(this.previousState[1][1]) === "undefined"){
+            return true;
+        }
+        if(xOrY === 0 && this.previousState[0][0] === this.previousState[1][0]){
+            return true;
+        }
+        if(xOrY === 1 && this.previousState[0][1] === this.previousState[1][1]){
+            return true;
+        }
+        return false;
+    }
+
     resample(){
         let goodX = [];
         let goodY = [];
         let usedXy = [];
 
+
+        //Sort particles by weight
         this.particles = this.particles.sort((a, b) => {
             if(a.weight >= b.weight){
                 return 1;
@@ -101,8 +126,7 @@ class ParticleFilter {
             }
         });
         this.uniqueParticles = [];
-        const particleLength = this.particles.length;
-        for(let i = 0; i < particleLength / 5; i++){
+        for(let i = 0; i < this.particleCutoff; i++){
             const old = this.particles[i];
             let gx = old.x;
             let gy = old.y;
@@ -118,9 +142,21 @@ class ParticleFilter {
             }
             if(goodX.indexOf(gx) === -1) {
                 goodX.push(gx);
+                let l, r;
+                if(this.previousStateSame(0)) {
+                    l = Math.max(0, gx - 2);
+                    r = gx + 2;
+                }else if(this.previousState[0][0] < this.previousState[1][0]) {
+                    l = Math.max(0, gx - 1);
+                    r = gx + 2;
+                } else {
+                    l = Math.max(0, gx - 2);
+                    r = gx + 1;
+                }
 
-                let l = Math.max(0, gx - 2);
-                let r = gx + 2;
+                l = Math.max(0, gx - this.alphaValue);
+                r = gx + this.alphaValue;
+
                 for(; l <= r; l++) {
                     if (goodX.indexOf(l) === -1){
                         goodX.push(l);
@@ -130,8 +166,21 @@ class ParticleFilter {
 
             if(goodY.indexOf(gy) === -1) {
                 goodY.push(gy);
-                let l = Math.max(0, gy - 2);
-                let r = gy + 2;
+                let l, r;
+                if(this.previousStateSame(1)) {
+                    l = Math.max(0, gy - 2);
+                    r = gy + 2;
+                } else if(this.previousState[0][1] < this.previousState[1][1]){
+                    l = Math.max(0, gy - 1);
+                    r = gy + 2;
+                } else {
+                    l = Math.max(0, gy - 2);
+                    r = gy + 1;
+                }
+
+                l = Math.max(0, gy - this.alphaValue);
+                r = gy + this.alphaValue;
+
                 for(; l <= r; l++) {
                     if (goodY.indexOf(l) === -1){
                         goodY.push(l);
@@ -143,7 +192,7 @@ class ParticleFilter {
         let newParticles = [];
         this.particleCoords = [];
         usedXy = [];
-        while (newParticles.length < particleLength) {
+        while (newParticles.length < this.particles.length) {
             let c_x = goodX[Math.floor(Math.random() * goodX.length)];
             let c_y = goodY[Math.floor(Math.random() * goodY.length)];
             let key = c_x + "_" + c_y;
