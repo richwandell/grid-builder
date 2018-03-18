@@ -1,4 +1,5 @@
 import Db from './Db';
+import csim from 'compute-cosine-similarity';
 
 class ParticleFilter {
 
@@ -55,9 +56,6 @@ class ParticleFilter {
 
     getParticleWeight(coord, weight){
         let w = Math.sqrt(weight);
-        if (Math.round(w) === 0) {
-           w = Infinity;
-        }
         return w;
     }
 
@@ -69,23 +67,34 @@ class ParticleFilter {
         const featureKeysLength = featureKeys.length;
 
         const particleLength = this.particles.length;
-
         for(let i = 0; i < particleLength; i++){
             let particle = this.particles[i];
             let x_y = particle.x + "_" + particle.y;
 
+            let particleValues = [];
+            let featureValues = [];
             for(let j = 0; j < featureKeysLength; j++){
                 let feature = featureKeys[j];
                 let testValue = this.db.getFeatureValue(this.fp_id, x_y, feature);
-                if(testValue){
-                    let featureValue = features[feature];
-                    let diff = Math.abs(testValue - featureValue);
-                    particle.weight += Math.pow(diff, 2);
+                let featureValue = features[feature];
+
+                if(testValue !== false) {
+                    particleValues.push(testValue);
+                    featureValues.push(featureValue);
                 }
+                // if(testValue !== false){
+                //     let diff = testValue - featureValue;
+                //     particle.weight += Math.pow(diff, 2);
+                // } else {
+                //     particle.weight += Math.pow(featureValue, 2);
+                // }
             }
-            particle.weight = this.getParticleWeight(x_y, particle.weight);
+
+            let similarity = csim(particleValues, featureValues);
+            particle.weight = similarity;
             this.oldParticles.push({x: particle.x, y: particle.y, weight: particle.weight});
         }
+
         this.resample();
     }
 
@@ -120,9 +129,9 @@ class ParticleFilter {
         //Sort particles by weight
         this.particles = this.particles.sort((a, b) => {
             if(a.weight >= b.weight){
-                return 1;
-            }else{
                 return -1;
+            }else{
+                return 1;
             }
         });
         this.uniqueParticles = [];
@@ -143,17 +152,6 @@ class ParticleFilter {
             if(goodX.indexOf(gx) === -1) {
                 goodX.push(gx);
                 let l, r;
-                if(this.previousStateSame(0)) {
-                    l = Math.max(0, gx - 2);
-                    r = gx + 2;
-                }else if(this.previousState[0][0] < this.previousState[1][0]) {
-                    l = Math.max(0, gx - 1);
-                    r = gx + 2;
-                } else {
-                    l = Math.max(0, gx - 2);
-                    r = gx + 1;
-                }
-
                 l = Math.max(0, gx - this.alphaValue);
                 r = gx + this.alphaValue;
 
@@ -167,17 +165,6 @@ class ParticleFilter {
             if(goodY.indexOf(gy) === -1) {
                 goodY.push(gy);
                 let l, r;
-                if(this.previousStateSame(1)) {
-                    l = Math.max(0, gy - 2);
-                    r = gy + 2;
-                } else if(this.previousState[0][1] < this.previousState[1][1]){
-                    l = Math.max(0, gy - 1);
-                    r = gy + 2;
-                } else {
-                    l = Math.max(0, gy - 2);
-                    r = gy + 1;
-                }
-
                 l = Math.max(0, gy - this.alphaValue);
                 r = gy + this.alphaValue;
 

@@ -27,15 +27,15 @@ export class WalkAnalyzer {
         }
 
         this.particleNumbers = [
-           400, 400, 200, 200
+           400, 400, 400, 400, 400
         ];
 
         this.particleCutoff = [
-            10
+            30
         ];
 
         this.alphaValues = [
-            1, 1, 2, 2, 3, 3, 4, 4
+            2
         ];
 
         this.resetLocalizer().then(() => {

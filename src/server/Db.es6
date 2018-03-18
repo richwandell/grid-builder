@@ -14,27 +14,33 @@ class Db {
     static query_update_layout = "update layout_images set layout_image = ?, floor_plan_name = ? where id = ?;";
     static query_insert_scan_results = "insert into scan_results values (?, ?, ?, ?, ?, ?, ?, ?);";
     static query_get_scan_results = "select * from scan_results;";
-    static query_get_for_kalman = "SELECT s.fp_id, s.ap_id, s.x, s.y, "
-    + "group_concat(s.value) `values`, "
-    + "case when k.kalman is null then avg(s.value) else k.kalman end `cest`, "
-    + "k.kalman FROM scan_results s left join "
-    + "kalman_estimates k on s.fp_id = k.fp_id and s.ap_id = k.ap_id and s.x = k.x and s.y = k.y "
-    + " where s.fp_id = ? and s.value != 0 and s.x = ? and s.y = ? GROUP BY s.fp_id, s.ap_id, s.x, s.y;";
+    static query_get_for_kalman = `
+        SELECT s.fp_id, s.ap_id, s.x, s.y, 
+        group_concat(s.value) values, 
+        case when k.kalman is null then avg(s.value) else k.kalman end cest, 
+        k.kalman FROM scan_results s left join
+        kalman_estimates k on s.fp_id = k.fp_id and s.ap_id = k.ap_id and s.x = k.x and s.y = k.y 
+        where s.fp_id = ? and s.value != 0 and s.x = ? and s.y = ? GROUP BY s.fp_id, s.ap_id, s.x, s.y;
+    `;
     static query_insert_kalman_estimates = "insert or ignore into kalman_estimates values (?, ?, ?, ?, ?);";
     static query_update_kalman_estimates = "update kalman_estimates set kalman = ? where fp_id = ? and ap_id = ? and "
     + " x = ? and y = ?;";
-    static query_update_features = "insert into features "
-    + " select k.fp_id, k.x, k.y, k.ap_id || k1.ap_id as feature, abs(k.kalman - k1.kalman) as value "
-    + " from kalman_estimates k join kalman_estimates k1 on k.fp_id = k1.fp_id and k.x = k1.x and k.y = k1.y"
-    + " where value != 0 and k.fp_id = ? and k1.fp_id = ? and k.x = ? and k1.x = ? and k.y = ? and k1.y = ?";
+    static query_update_features = `
+        insert into features 
+        select k.fp_id, k.x, k.y, k.ap_id || k1.ap_id as feature, abs(k.kalman - k1.kalman) as value 
+        from kalman_estimates k join kalman_estimates k1 on k.fp_id = k1.fp_id and k.x = k1.x and k.y = k1.y
+        where value != 0 and k.fp_id = ? and k1.fp_id = ? and k.x = ? and k1.x = ? and k.y = ? and k1.y = ?
+    `;
     static query_update_oldest_features = "select k.fp_id, k.x, k.y, k.ap_id || k1.ap_id as feature, "
     + " abs(k.kalman - k1.kalman) as value, :scan_id: s_id from kalman_estimates k join "
     + " kalman_estimates k1 on k.fp_id = k1.fp_id and k.x = k1.x and k.y = k1.y and k.ap_id < k1.ap_id where"
     + " k.kalman != 0 and k1.kalman != 0 and k.fp_id = ? and k1.fp_id = ?;";
     static query_get_features = "select f.*, abs(value - :feature_value:) diff from features f "
     + " where f.feature = ? and f.fp_id = ? order by diff asc;";
-    static query_get_scanned_coords = "select count(*) as num_features, x, y from features where fp_id = ? "
-    + " group by x, y;";
+    static query_get_scanned_coords = `
+        select count(*) as num_features, x, y from kalman_estimates where fp_id = ? 
+        group by x, y;
+    `;
     static query_get_min_sid = "select min(s_id) from features where fp_id = ?";
     static query_get_scan_id = "select value + 1 as value from settings where key = 'scan_id';";
     static query_update_scan_id = "update settings set value = value + 1 where key = 'scan_id';";
@@ -154,37 +160,37 @@ class Db {
                 resolve();
                 return;
             }
-            this.db.all("select * from features where fp_id = ?;", fp_id, (err, rows) => {
+            this.db.all("select * from kalman_estimates where fp_id = ?;", fp_id, (err, rows) => {
                 if (err) {
                     reject();
                     return;
                 }
                 const length = rows.length;
-                let fp_id, x, y, feature, value, maxX = 0, maxY = 0;
-                for (let i = 0; i < length; i++) {
-                    fp_id = rows[i].fp_id;
-                    x = rows[i].x;
-                    y = rows[i].y;
-                    if(x > maxX){
-                        maxX = x;
-                    }
-                    if(y > maxY) {
-                        maxY = y;
-                    }
-                    feature = rows[i].feature;
-                    value = rows[i].value;
-                    if (this.featuresCache[fp_id] === undefined) {
-                        this.featuresCache[fp_id] = {};
-                    }
-                    let coord = x + "_" + y;
-                    if (this.featuresCache[fp_id][coord] === undefined) {
-                        this.featuresCache[fp_id][coord] = {};
-                    }
 
-                    this.featuresCache[fp_id][coord][feature] = value;
+                let fp_id, x, y, feature, value, maxX = 0, maxY = 0;
+                for(let row of rows) {
+                    fp_id = row.fp_id;
+
+                    for(let row1 of rows) {
+                        if(row.x === row1.x && row.y === row1.y) {
+                            let feature1 = row.ap_id + row1.ap_id;
+                            let feature2 = row1.ap_id + row.ap_id;
+                            let value = Math.abs(row.kalman - row1.kalman);
+
+                            if (this.featuresCache[fp_id] === undefined) {
+                                this.featuresCache[fp_id] = {};
+                            }
+                            let coord = row.x + "_" + row.y;
+                            if (this.featuresCache[fp_id][coord] === undefined) {
+                                this.featuresCache[fp_id][coord] = {};
+                            }
+
+                            this.featuresCache[fp_id][coord][feature1] = value;
+                            this.featuresCache[fp_id][coord][feature2] = value;
+                        }
+                    }
                 }
-                this.featuresCache[fp_id]["max_x"] = maxX;
-                this.featuresCache[fp_id]["max_y"] = maxY;
+
                 this.log.log("Features Cache created");
                 if (resolve) {
                     resolve();
