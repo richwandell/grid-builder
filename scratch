@@ -1,0 +1,11 @@
+.\node_modules\.bin\babel-node.cmd --inspect .\src\server\CommandLine.es6 --generate-walk 786a1914c87dc51701f5c97b7ec29fdd "test/walk_analysis/work_walk1/work-steps1.json" "test/walk_analysis/work_walk1/work-walk1.json"
+
+.\node_modules\.bin\babel-node.cmd --inspect .\src\server\CommandLine.es6 --analyze-walk
+ "test/walk_analysis/home_walk1/home-walk1.json" "test/walk_analysis/home_walk1/home-walk1-result.json"
+
+ .\node_modules\.bin\babel-node.cmd .\src\server\CommandLine.es6 --analyze-walk "test/walk_analysis/home_walk1/home-walk2.json" "test/walk_analysis/home_walk1/home-walk1-result.json"
+
+
+.\node_modules\.bin\babel-node.cmd --inspect .\src\server\CommandLine.es6 --analyze-walk "local" "test/walk_analysis/home_walk1/home-walk2.json" "test/walk_analysis/home_walk1/home-walk1-result.json"
+
+

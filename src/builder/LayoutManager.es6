@@ -90,6 +90,16 @@ class LayoutManager {
 
     resetFromDb(event, id){
         debug("LayoutManager.resetFromDb");
+
+        $("#builder_select_existing").html("");
+        let ok = [];
+        event.target.result = event.target.result.filter((item) => {
+            let should = ok.indexOf(item.id) === -1;
+            if(should) {
+                ok.push(item.id);
+            }
+            return should;
+        });
         $(event.target.result).each(function(i, el){
             $("#builder_select_existing").append("<option value='" + el.id + "'>" + el.name + "</option>");
         });

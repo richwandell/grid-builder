@@ -1,7 +1,11 @@
 import KalmanFilter from './KalmanFilter';
+import {BilinearInterpolator} from "./Interpolation";
 
 let sqlite3 = require('sqlite3').verbose();
 let LinearInterpolate = require('everpolate').linear;
+const {exec} = require('child_process');
+const path = require("path");
+const fs = require('fs');
 
 class Db {
 
@@ -129,6 +133,7 @@ class Db {
     ];
 
     constructor(log, database = "db.sqlite3"){
+        this.databaseFilePath = path.resolve(`db/${database}`);
         this.log = log;
         this.log.debug("Db.constructor");
 
@@ -160,44 +165,85 @@ class Db {
                 resolve();
                 return;
             }
-            this.db.all("select * from kalman_estimates where fp_id = ?;", fp_id, (err, rows) => {
-                if (err) {
-                    reject();
-                    return;
+            this.featuresCache[fp_id] = {};
+            let dbFilePath = this.databaseFilePath;
+            let outputFilePath = path.resolve(`db/cache/fcache-${fp_id}.json`);
+
+
+            // this.createFeaturesCacheOld(fp_id, resolve, reject);
+            // return;
+            //
+            try {
+                if (!fs.existsSync("db/cache")){
+                    fs.mkdirSync("db/cache");
                 }
-                const length = rows.length;
-
-                let fp_id, x, y, feature, value, maxX = 0, maxY = 0;
-                for(let row of rows) {
-                    fp_id = row.fp_id;
-
-                    for(let row1 of rows) {
-                        if(row.x === row1.x && row.y === row1.y) {
-                            let feature1 = row.ap_id + row1.ap_id;
-                            let feature2 = row1.ap_id + row.ap_id;
-                            let value = Math.abs(row.kalman - row1.kalman);
-
-                            if (this.featuresCache[fp_id] === undefined) {
-                                this.featuresCache[fp_id] = {};
-                            }
-                            let coord = row.x + "_" + row.y;
-                            if (this.featuresCache[fp_id][coord] === undefined) {
-                                this.featuresCache[fp_id][coord] = {};
-                            }
-
-                            this.featuresCache[fp_id][coord][feature1] = value;
-                            this.featuresCache[fp_id][coord][feature2] = value;
-                        }
-                    }
-                }
-
-                this.log.log("Features Cache created");
-                if (resolve) {
+                let data = fs.readFileSync(outputFilePath, "utf8");
+                try {
+                    this.featuresCache[fp_id] = JSON.parse(data);
                     resolve();
+                    return;
+                }catch(e){}
+            }catch(e) {}
+
+            let cmd = `java -jar fcc.jar -d ${dbFilePath} -f ${fp_id} -o ${outputFilePath} -i true`;
+
+            let child = exec(cmd, (err, stdout, stderr) => {
+                try {
+                    this.featuresCache[fp_id] = JSON.parse(stdout);
+                }catch(e) {
+                    let data = fs.readFileSync(outputFilePath, "utf8");
+                    this.featuresCache[fp_id] = JSON.parse(data);
                 }
+                resolve();
             });
         });
     }
+
+    createFeaturesCacheOld(fp_id, resolve, reject) {
+        this.db.all("select * from kalman_estimates where fp_id = ?;", fp_id, (err, rows) => {
+            if (err) {
+                reject();
+                return;
+            }
+
+            let fp_id, x, y, feature, value, maxX = 0, maxY = 0;
+            let allFeatures = [];
+            for(let row of rows) {
+                fp_id = row.fp_id;
+
+                for(let row1 of rows) {
+                    if(row.x === row1.x && row.y === row1.y) {
+                        let feature1 = row.ap_id + row1.ap_id;
+                        let feature2 = row1.ap_id + row.ap_id;
+                        let value = Math.abs(row.kalman - row1.kalman);
+
+                        let coord = row.x + "_" + row.y;
+                        if (this.featuresCache[fp_id][coord] === undefined) {
+                            this.featuresCache[fp_id][coord] = {};
+                        }
+
+                        this.featuresCache[fp_id][coord][feature1] = value;
+                        // this.featuresCache[fp_id][coord][feature2] = value;
+                        allFeatures.push(feature1);
+                        // allFeatures.push(feature2);
+                        if(row.x > maxX) maxX = row.x;
+                        if(row.y > maxY) maxY = row.y;
+                    }
+                }
+            }
+            let interpolator = new BilinearInterpolator(this.featuresCache[fp_id], allFeatures, maxX, maxY);
+            this.featuresCache[fp_id] = interpolator.interpolate();
+
+            this.log.log("Features Cache created");
+
+            if (resolve) {
+
+                resolve();
+            }
+        });
+    }
+
+
 
     getFeaturesCache(fp_id){
         if(this.featuresCache[fp_id] === undefined){
@@ -343,7 +389,23 @@ class Db {
     getScannedCoords(fp_id, cb){
         this.log.debug("Db.getScannedCoords");
         let db = this.db;
-        db.all(Db.query_get_scanned_coords, fp_id, cb);
+
+        this.createFeaturesCache(fp_id)
+            .then(() => {
+                let cache = this.getFeaturesCache(fp_id);
+
+                let results = [];
+                for(let key of Object.keys(cache)) {
+                    let num_features = Object.keys(cache[key]).length;
+                    let [x, y] = key.split("_");
+                    results.push({
+                        x: x,
+                        y: y,
+                        num_features: num_features
+                    })
+                }
+                cb(null, results);
+            });
     }
 
     getFloorPlans(cb) {

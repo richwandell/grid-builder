@@ -12,7 +12,7 @@ module.exports = function (grunt) {
         fs.writeFileSync(".uuid", id);
     }
 
-    var grunt_watch_tasks = ['clean', 'babel', 'webpack', 'less:dev', 'copy:first'];
+    var grunt_watch_tasks = ['clean', 'webpack', 'less:dev', 'copy:first'];
 
     var pkg  = grunt.file.readJSON("./package.json");
     grunt.initConfig({
@@ -118,16 +118,39 @@ module.exports = function (grunt) {
                         PROTOCOL: JSON.stringify(pkg.builder_protocol),
                         SYSTEM_ID: JSON.stringify(id)
                     }),
-                    // new webpack.optimize.UglifyJsPlugin({
-                    //     compress: {
-                    //         warnings: false,
-                    //     },
-                    //     output: {
-                    //         comments: false,
-                    //     },
-                    //     sourceMap: true
-                    // }),
                 ]
+            }
+        },
+        exec: {
+            home_walk1_rest: {
+                cmd: ".\\node_modules\\.bin\\babel-node.cmd .\\src\\server\\CommandLine.es6 " +
+                "--analyze-walk \"rest\" \"test/walk_analysis/home/walk1/home-walk1.json\" " +
+                "\"test/walk_analysis/home_walk1/home-walk1-result.json\" "
+            },
+            home_half_database_rest: {
+                cmd: ".\\node_modules\\.bin\\babel-node.cmd .\\src\\server\\CommandLine.es6 " +
+                "--analyze-walk \"rest\" \"test/walk_analysis/home/home-walk-half-database.json\" " +
+                "\"test/walk_analysis/home_walk1/home-walk1-result.json\" "
+            },
+            home_half_database_local: {
+                cmd: ".\\node_modules\\.bin\\babel-node.cmd .\\src\\server\\CommandLine.es6 " +
+                "--analyze-walk \"local\" \"test/walk_analysis/home/home-walk-half-database.json\" " +
+                "\"test/walk_analysis/home_walk1/home-walk1-result.json\" "
+            },
+            home_20p_rest: {
+                cmd: ".\\node_modules\\.bin\\babel-node.cmd .\\src\\server\\CommandLine.es6 " +
+                "--analyze-walk \"rest\" \"test/walk_analysis/home/walk3/home-walk3.json\" " +
+                "\"test/walk_analysis/home_walk1/home-walk1-result.json\" "
+            },
+            work_walk1_rest: {
+                cmd: ".\\node_modules\\.bin\\babel-node.cmd .\\src\\server\\CommandLine.es6 " +
+                "--analyze-walk \"rest\" \"test/walk_analysis/work/walk1/work-walk1.json\" " +
+                "\"test/walk_analysis/home_walk1/home-walk1-result.json\" "
+            },
+            work_walk1_local: {
+                cmd: ".\\node_modules\\.bin\\babel-node.cmd .\\src\\server\\CommandLine.es6 " +
+                "--analyze-walk \"local\" \"test/walk_analysis/work/walk1/work-walk1.json\" " +
+                "\"test/walk_analysis/home_walk1/home-walk1-result.json\" "
             }
         }
     });
@@ -137,6 +160,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-webpack');
+    grunt.loadNpmTasks('grunt-exec');
 
     grunt.registerTask('dist', grunt_watch_tasks);
 };

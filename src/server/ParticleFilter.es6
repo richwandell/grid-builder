@@ -120,6 +120,67 @@ class ParticleFilter {
         return false;
     }
 
+    testresample() {
+        this.uniqueParticles = [];
+        this.particles = this.particles.sort((a, b) => {
+            if(a.weight >= b.weight){
+                return -1;
+            }else{
+                return 1;
+            }
+        });
+
+        let wc = this.getCumulativeNormalizedWeights(this.particles);
+
+        let newParticles = [];
+        let usedXy = [];
+        while (newParticles.length < this.particles.length) {
+            let r = Math.random() * this.particles.length;
+
+            for(let i = 0; i < wc.length; i++) {
+                if(r < wc[i]) {
+                    let key = this.particles[i].x + "_" + this.particles[i].y;
+                    let p = {
+                        x: this.particles[i].x,
+                        y: this.particles[i].y,
+                        weight: 0
+                    };
+                    if(usedXy.indexOf(key) === -1){
+                        this.uniqueParticles.push({
+                            x: p.x,
+                            y: p.y,
+                            distance: p.weight,
+                            weight: p.weight
+                        });
+                        this.particleCoords.push({
+                            x: p.x,
+                            y: p.y
+                        });
+                        usedXy.push(key);
+                    }
+
+                    newParticles.push(p);
+                    break;
+                }
+            }
+        }
+        this.particles = newParticles;
+    }
+
+    getCumulativeNormalizedWeights(particles) {
+        let highest = particles[0].weight;
+        let lowest = particles[particles.length - 1].weight;
+
+        let wn = particles.map((p) => {
+            return (p.weight - lowest) / (highest - lowest);
+        });
+
+        let wc = [];
+        wn.reduce((a, b, i) => wc.push(a+b), 0);
+
+        return wc;
+    }
+
     resample(){
         let goodX = [];
         let goodY = [];

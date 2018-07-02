@@ -1,7 +1,7 @@
 import Db from './Db';
 import Logger from './Log';
 import {WalkGenerator} from "./WalkGenerator";
-import {WalkAnalyzer} from "./WalkAnalyzer";
+import {RestWalkAnalyzer, LocalWalkAnalyzer} from "./Analyzer";
 
 const pjson = require('../../package.json');
 const commands = require('commander');
@@ -34,7 +34,15 @@ if(commands.reindex) {
         process.exit(1);
     }
 } else if(commands.analyzeWalk) {
-    if(commands.args[0] && commands.args[1]) {
-        let analyzer = new WalkAnalyzer(db, commands.args[0], commands.args[1]);
+    if(commands.args[0] && commands.args[1] && commands.args[2]) {
+        let analyzer;
+        if(commands.args[0] === "rest") {
+            analyzer = new RestWalkAnalyzer(db, commands.args[1], commands.args[2]);
+        } else {
+            analyzer = new LocalWalkAnalyzer(db, commands.args[1], commands.args[2]);
+        }
+        analyzer.run();
+    } else {
+        console.log("missing args for analyzeWalk");
     }
 }
