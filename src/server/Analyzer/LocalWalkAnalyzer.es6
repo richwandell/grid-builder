@@ -69,6 +69,7 @@ export default class LocalWalkAnalyzer extends WalkAnalyzer {
         }
         let averageError = allErrors.reduce((a, b) => a+b) / 5;
         console.log(" average error: " + averageError);
+        process.exit(0);
     }
 
     async runLocalizer(particleNumber, particleCutoff, alphaValue) {
@@ -80,7 +81,7 @@ export default class LocalWalkAnalyzer extends WalkAnalyzer {
 
         for(let apIds of this.walkData.walk) {
             let data = {fp_id: fp_id, ap_ids: apIds};
-            await this.db.createFeaturesCache(fp_id)
+            await this.db.createFeaturesCache(fp_id, this.interpolated)
                 .then(() => this.moveParticles(data, id, particleNumber, particleCutoff, alphaValue))
                 .then(this.makeKMeans)
                 .then((args) => {

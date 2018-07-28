@@ -157,8 +157,9 @@ class Db {
     /**
      *
      * @param fp_id
+     * @param interpolate
      */
-    createFeaturesCache(fp_id){
+    createFeaturesCache(fp_id, interpolate = true){
         return new Promise((resolve, reject) => {
 
             if(this.featuresCache[fp_id] !== undefined) {
@@ -167,7 +168,8 @@ class Db {
             }
             this.featuresCache[fp_id] = {};
             let dbFilePath = this.databaseFilePath;
-            let outputFilePath = path.resolve(`db/cache/fcache-${fp_id}.json`);
+            let inter = interpolate ? "true" : "false";
+            let outputFilePath = path.resolve(`db/cache/fcache-${fp_id}-${inter}.json`);
 
 
             // this.createFeaturesCacheOld(fp_id, resolve, reject);
@@ -185,7 +187,8 @@ class Db {
                 }catch(e){}
             }catch(e) {}
 
-            let cmd = `java -jar fcc.jar -d ${dbFilePath} -f ${fp_id} -o ${outputFilePath} -i true`;
+
+            let cmd = `java -jar fcc.jar -d ${dbFilePath} -f ${fp_id} -o ${outputFilePath} -i ${inter}`;
 
             let child = exec(cmd, (err, stdout, stderr) => {
                 try {

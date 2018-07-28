@@ -3,7 +3,7 @@ const uuid = require('uuid');
 
 export default class WalkAnalyzer {
 
-    constructor(db: Db, walkFile: string, outFile: string) {
+    constructor(db: Db, walkFile: string, outFile: string, interpolated = true) {
         this.db = db;
         let file = fs.readFileSync(walkFile);
         this.walkData = JSON.parse(file);
@@ -11,6 +11,7 @@ export default class WalkAnalyzer {
         this.walk = this.walkData.walk;
         this.fpId = this.walkData.fpId;
         this.outFile = outFile;
+        this.interpolated = interpolated;
 
 
         this.id = uuid.v4();

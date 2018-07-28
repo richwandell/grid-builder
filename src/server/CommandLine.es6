@@ -34,15 +34,29 @@ if(commands.reindex) {
         process.exit(1);
     }
 } else if(commands.analyzeWalk) {
-    if(commands.args[0] && commands.args[1] && commands.args[2]) {
+    try {
+        if(commands.args[0] && commands.args[1] && commands.args[2]) {
+            if(commands.args[0] === "local") {
+                if(typeof(commands.args[3]) === "undefined") {
+                    throw "";
+                }
+            }
+        } else {
+            throw "";
+        }
+
+
+
         let analyzer;
         if(commands.args[0] === "rest") {
             analyzer = new RestWalkAnalyzer(db, commands.args[1], commands.args[2]);
         } else {
-            analyzer = new LocalWalkAnalyzer(db, commands.args[1], commands.args[2]);
+            analyzer = new LocalWalkAnalyzer(db, commands.args[1], commands.args[2], commands.args[3] === "true");
         }
         analyzer.run();
-    } else {
+
+    }catch(e) {
         console.log("missing args for analyzeWalk");
+        process.exit(1);
     }
 }
