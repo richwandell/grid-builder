@@ -3,10 +3,30 @@ const uuid = require('uuid');
 
 export default class WalkAnalyzer {
 
+    makeSteps(walkData) {
+        let steps = [];
+        let s = walkData.total_time_seconds;
+        let a = walkData.steps.length;
+        let stepInterval = s / a;
+
+        let scanInterval = s / walkData.walk.length;
+
+
+
+
+        return steps;
+    }
+
     constructor(db: Db, walkFile: string, outFile: string, interpolated = true) {
         this.db = db;
         let file = fs.readFileSync(walkFile);
         this.walkData = JSON.parse(file);
+        if(
+            typeof(this.walkData.total_time_seconds) !== "undefined"
+            && typeof(this.walkData.seconds_per_scan) !== "undefined"
+        ) {
+            this.walkData.steps = this.makeSteps(this.walkData);
+        }
         this.steps = this.walkData.steps;
         this.walk = this.walkData.walk;
         this.fpId = this.walkData.fpId;

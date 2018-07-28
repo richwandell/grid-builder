@@ -14,7 +14,7 @@ export default class RestWalkAnalyzer extends WalkAnalyzer {
         this.guesses = [];
         this.experimentResults = [];
         this.particleNumbers = [
-            200, 200, 200, 200, 200
+            400, 400, 400, 400, 400
         ];
 
         this.particleCutoff = [

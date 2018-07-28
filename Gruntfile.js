@@ -2,6 +2,7 @@ var webpack = require('webpack');
 var uuid = require('uuid');
 var fs = require('fs');
 
+var isWin = process.platform === "win32";
 
 module.exports = function (grunt) {
     var id = uuid.v4();
@@ -15,6 +16,18 @@ module.exports = function (grunt) {
     var grunt_watch_tasks = ['clean', 'webpack', 'less:dev', 'copy:first'];
 
     var pkg  = grunt.file.readJSON("./package.json");
+
+    function walkCommand(inputFile, localRest, interpolate) {
+        let outputFile = inputFile.replace(".json", "-result.json");
+        if(isWin){
+            return ".\\node_modules\\.bin\\babel-node.cmd .\\src\\server\\CommandLine.es6 " +
+                "--analyze-walk \"" + localRest + "\" \"" + inputFile + "\" " +
+                "\"" + outputFile +"\" " + interpolate;
+        }
+        return "./node_modules/.bin/babel-node ./src/server/CommandLine.es6 " +
+            "--analyze-walk " + localRest + " " + inputFile + " " + outputFile + " " + interpolate;
+    }
+
     grunt.initConfig({
         pkg: pkg,
         copy: {
@@ -123,49 +136,31 @@ module.exports = function (grunt) {
         },
         exec: {
             home_walk1_rest: {
-                cmd: ".\\node_modules\\.bin\\babel-node.cmd .\\src\\server\\CommandLine.es6 " +
-                "--analyze-walk \"rest\" \"test/walk_analysis/home/walk1/home-walk1.json\" " +
-                "\"test/walk_analysis/home_walk1/home-walk1-result.json\" "
+                cmd: walkCommand("test/walk_analysis/home/fp1/walk1.json", "rest", "")
             },
             home_walk1_local_ni: {
-                cmd: ".\\node_modules\\.bin\\babel-node.cmd .\\src\\server\\CommandLine.es6 " +
-                "--analyze-walk \"local\" \"test/walk_analysis/home/walk1/home-walk1.json\" " +
-                "\"test/walk_analysis/home_walk1/home-walk1-result.json\" false"
+                cmd: walkCommand("test/walk_analysis/home/fp1/walk1.json", "local", "false")
             },
             home_walk1_local_i: {
-                cmd: ".\\node_modules\\.bin\\babel-node.cmd .\\src\\server\\CommandLine.es6 " +
-                "--analyze-walk \"local\" \"test/walk_analysis/home/walk1/home-walk1.json\" " +
-                "\"test/walk_analysis/home_walk1/home-walk1-result.json\" true"
+                cmd: walkCommand("test/walk_analysis/home/fp1/walk1.json", "local", "true")
             },
             home_half_database_rest: {
-                cmd: ".\\node_modules\\.bin\\babel-node.cmd .\\src\\server\\CommandLine.es6 " +
-                "--analyze-walk \"rest\" \"test/walk_analysis/home/home-walk-half-database.json\" " +
-                "\"test/walk_analysis/home_walk1/home-walk1-result.json\" "
+                cmd: walkCommand("test/walk_analysis/home/half_db/walk1.json", "rest", "")
             },
             home_half_database_local_ni: {
-                cmd: ".\\node_modules\\.bin\\babel-node.cmd .\\src\\server\\CommandLine.es6 " +
-                "--analyze-walk \"local\" \"test/walk_analysis/home/home-walk-half-database.json\" " +
-                "\"test/walk_analysis/home_walk1/home-walk1-result.json\" false"
+                cmd: walkCommand("test/walk_analysis/home/half_db/walk1.json", "local", "false")
             },
             home_half_database_local_i: {
-                cmd: ".\\node_modules\\.bin\\babel-node.cmd .\\src\\server\\CommandLine.es6 " +
-                "--analyze-walk \"local\" \"test/walk_analysis/home/home-walk-half-database.json\" " +
-                "\"test/walk_analysis/home_walk1/home-walk1-result.json\" true"
+                cmd: walkCommand("test/walk_analysis/home/half_db/walk1.json", "local", "true")
             },
             home_20p_rest: {
-                cmd: ".\\node_modules\\.bin\\babel-node.cmd .\\src\\server\\CommandLine.es6 " +
-                "--analyze-walk \"rest\" \"test/walk_analysis/home/walk3/home-walk3.json\" " +
-                "\"test/walk_analysis/home_walk1/home-walk1-result.json\" "
+                cmd: walkCommand("test/walk_analysis/home/20p/walk1.json", "rest", "")
             },
             work_walk1_rest: {
-                cmd: ".\\node_modules\\.bin\\babel-node.cmd .\\src\\server\\CommandLine.es6 " +
-                "--analyze-walk \"rest\" \"test/walk_analysis/work/walk1/work-walk1.json\" " +
-                "\"test/walk_analysis/home_walk1/home-walk1-result.json\" "
+                cmd: walkCommand("test/walk_analysis/work/walk1/work-walk1.json", "rest", "")
             },
             work_walk1_local: {
-                cmd: ".\\node_modules\\.bin\\babel-node.cmd --inspect .\\src\\server\\CommandLine.es6 " +
-                "--analyze-walk \"local\" \"test/walk_analysis/work/walk1/work-walk1.json\" " +
-                "\"test/walk_analysis/home_walk1/home-walk1-result.json\" "
+                cmd: walkCommand("test/walk_analysis/work/walk1/work-walk1.json", "local", "false")
             }
         }
     });

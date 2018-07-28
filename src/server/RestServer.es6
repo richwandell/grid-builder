@@ -219,7 +219,11 @@ class RestServer{
             alphaValue = data.alphaValue;
         }
 
-        this.db.createFeaturesCache(fp_id)
+        if(false) {
+            this.saveWalkToFile(data);
+        }
+
+        this.db.createFeaturesCache(fp_id, false)
             .then(() => this.moveParticles(data, id, particleNumber, particleCutoff, alphaValue))
             .then(this.makeKMeans)
             .then((args) => {
@@ -248,6 +252,26 @@ class RestServer{
                 });
             }
         );
+    }
+
+    saveWalkToFile(data){
+        let dir = "db/walk_data";
+
+        if (!fs.existsSync(dir)){
+            fs.mkdirSync(dir);
+        }
+
+        let walkData = {};
+
+        try {
+            walkData = JSON.parse(fs.readFileSync(`${dir}/${id}.json`, "utf8"));
+        }catch(e){
+            walkData = {walk: [], fpId: fp_id}
+        }
+
+        walkData.walk.push(data.ap_ids);
+
+        fs.writeFileSync(`${dir}/${id}.json`, JSON.stringify(walkData));
     }
 
     notifyListeners(data: Object) {

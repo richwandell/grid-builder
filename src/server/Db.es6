@@ -20,7 +20,7 @@ class Db {
     static query_get_scan_results = "select * from scan_results;";
     static query_get_for_kalman = `
         SELECT s.fp_id, s.ap_id, s.x, s.y, 
-        group_concat(s.value) values, 
+        group_concat(s.value) \`values\`, 
         case when k.kalman is null then avg(s.value) else k.kalman end cest, 
         k.kalman FROM scan_results s left join
         kalman_estimates k on s.fp_id = k.fp_id and s.ap_id = k.ap_id and s.x = k.x and s.y = k.y 
@@ -389,26 +389,57 @@ class Db {
         });
     }
 
-    getScannedCoords(fp_id, cb){
+    getScannedCoords2(fp_id, cb) {
         this.log.debug("Db.getScannedCoords");
         let db = this.db;
 
-        this.createFeaturesCache(fp_id)
-            .then(() => {
-                let cache = this.getFeaturesCache(fp_id);
+        let sql = `
+            select 
+                x, y 
+            from 
+                kalman_estimates          
+            where
+                fp_id = ?
+            group by x, y    `;
 
-                let results = [];
-                for(let key of Object.keys(cache)) {
-                    let num_features = Object.keys(cache[key]).length;
-                    let [x, y] = key.split("_");
-                    results.push({
-                        x: x,
-                        y: y,
-                        num_features: num_features
-                    })
-                }
-                cb(null, results);
-            });
+        this.db.all(sql, fp_id, (err, rows) => {
+            let results = [];
+            let num_features = rows.length;
+            for(let row of rows) {
+                let x = row.x;
+                let y = row.y;
+
+                results.push({
+                    x: x,
+                    y: y,
+                    num_features: num_features
+                })
+            }
+            cb(null, results);
+        });
+    }
+
+    getScannedCoords(fp_id, cb){
+        this.log.debug("Db.getScannedCoords");
+        this.getScannedCoords2(fp_id, cb);
+        // let db = this.db;
+        //
+        // this.createFeaturesCache(fp_id)
+        //     .then(() => {
+        //         let cache = this.getFeaturesCache(fp_id);
+        //
+        //         let results = [];
+        //         for(let key of Object.keys(cache)) {
+        //             let num_features = Object.keys(cache[key]).length;
+        //             let [x, y] = key.split("_");
+        //             results.push({
+        //                 x: x,
+        //                 y: y,
+        //                 num_features: num_features
+        //             })
+        //         }
+        //         cb(null, results);
+        //     });
     }
 
     getFloorPlans(cb) {
