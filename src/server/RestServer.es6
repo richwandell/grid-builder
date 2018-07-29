@@ -223,7 +223,7 @@ class RestServer{
             this.saveWalkToFile(data);
         }
 
-        this.db.createFeaturesCache(fp_id, false)
+        this.db.createFeaturesCache(fp_id)
             .then(() => this.moveParticles(data, id, particleNumber, particleCutoff, alphaValue))
             .then(this.makeKMeans)
             .then((args) => {

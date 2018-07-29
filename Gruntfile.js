@@ -20,11 +20,11 @@ module.exports = function (grunt) {
     function walkCommand(inputFile, localRest, interpolate) {
         let outputFile = inputFile.replace(".json", "-result.json");
         if(isWin){
-            return ".\\node_modules\\.bin\\babel-node.cmd .\\src\\server\\CommandLine.es6 " +
+            return ".\\node_modules\\.bin\\babel-node.cmd --inspect .\\src\\server\\CommandLine.es6 " +
                 "--analyze-walk \"" + localRest + "\" \"" + inputFile + "\" " +
                 "\"" + outputFile +"\" " + interpolate;
         }
-        return "./node_modules/.bin/babel-node ./src/server/CommandLine.es6 " +
+        return "./node_modules/.bin/babel-node --inspect ./src/server/CommandLine.es6 " +
             "--analyze-walk " + localRest + " " + inputFile + " " + outputFile + " " + interpolate;
     }
 
@@ -161,7 +161,44 @@ module.exports = function (grunt) {
             },
             work_walk1_local: {
                 cmd: walkCommand("test/walk_analysis/work/walk1/work-walk1.json", "local", "false")
-            }
+            },
+            work_real_walk1_rest: {
+                cmd: walkCommand("test/walk_analysis/work/fp2/real_walk1.json", "rest", "")
+            },
+            work_real_walk1_local_ni: {
+                cmd: walkCommand("test/walk_analysis/work/fp2/real_walk1.json", "local", "false")
+            },
+            work_real_walk1_local_i: {
+                cmd: walkCommand("test/walk_analysis/work/fp2/real_walk1.json", "local", "true")
+            },
+            work_real_walk2_rest: {
+                cmd: walkCommand("test/walk_analysis/work/fp2/real_walk2.json", "rest", "")
+            },
+            work_real_walk2_local_ni: {
+                cmd: walkCommand("test/walk_analysis/work/fp2/real_walk2.json", "local", "false")
+            },
+            work_real_walk2_local_i: {
+                cmd: walkCommand("test/walk_analysis/work/fp2/real_walk2.json", "local", "true")
+            },
+            work_real_walk3_rest: {
+                cmd: walkCommand("test/walk_analysis/work/fp2/real_walk3.json", "rest", "")
+            },
+            work_real_walk3_local_ni: {
+                cmd: walkCommand("test/walk_analysis/work/fp2/real_walk3.json", "local", "false")
+            },
+            work_real_walk3_local_i: {
+                cmd: walkCommand("test/walk_analysis/work/fp2/real_walk3.json", "local", "true")
+            },
+            work_gen_walk1_rest: {
+                cmd: walkCommand("test/walk_analysis/work/fp2/gen_walk1.json", "rest", "")
+            },
+            work_gen_walk1_local_ni: {
+                cmd: walkCommand("test/walk_analysis/work/fp2/gen_walk1.json", "local", "false")
+            },
+            work_gen_walk1_local_i: {
+                cmd: walkCommand("test/walk_analysis/work/fp2/gen_walk1.json", "local", "true")
+            },
+
         }
     });
 

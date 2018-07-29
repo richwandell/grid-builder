@@ -7,11 +7,16 @@ export default class WalkAnalyzer {
         let steps = [];
         let s = walkData.total_time_seconds;
         let a = walkData.steps.length;
-        let stepInterval = s / a;
 
         let scanInterval = s / walkData.walk.length;
+        let stepInterval = s / a;
 
-
+        for(let i = 0; i < walkData.walk.length; i++) {
+            let which = (scanInterval / stepInterval) * i;
+            which = Math.round(which);
+            let correctStep = walkData.steps[which];
+            steps.push(correctStep);
+        }
 
 
         return steps;
