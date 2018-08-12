@@ -196,11 +196,11 @@ class ImageAsset {
             let [x, y, w, h] = this.container.grid.getCanvasCoordinates(p.x, p.y);
             ctx.fillStyle = "black";
             ctx.font = "10px Arial";
-            ctx.fillText(Math.round(p.weight), x + 5, y + h - 10);
+            ctx.fillText(Math.round(p.weight * 100) / 100, x + 5, y + h - 10);
 
             ctx1.fillStyle = "black";
             ctx1.font = "10px Arial";
-            ctx1.fillText(Math.round(p.weight), x + 5, y + h - 10);
+            ctx1.fillText(Math.round(p.weight * 100) / 100, x + 5, y + h - 10);
         });
 
     }

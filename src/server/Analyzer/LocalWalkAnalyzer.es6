@@ -53,7 +53,7 @@ export default class LocalWalkAnalyzer extends WalkAnalyzer {
         this.worker = {particles: {}, previousState: {}};
         this.previousState = {};
 
-        let particleNumber = 400;
+        let particleNumber = 600;
         let particleCutoff = 20;
         let alphaValue = 2;
 

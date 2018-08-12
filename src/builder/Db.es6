@@ -27,10 +27,10 @@ class Db {
         }
     }
 
-    getScannedCoords(fp_id, cb){
+    getScannedCoords(fp_id, cb, withInterpolated = false){
         debug("Db.getScannedCoords");
         $.ajax({
-            url: this.DSN + "/rest/getScannedCoords/" + fp_id,
+            url: this.DSN + "/rest/getScannedCoords/" + fp_id + "/" + withInterpolated,
             type: "get",
             dataType: "json",
             success: (res) => {

@@ -14,7 +14,7 @@ export default class RestWalkAnalyzer extends WalkAnalyzer {
         this.guesses = [];
         this.experimentResults = [];
         this.particleNumbers = [
-            400
+            600, 600, 600, 600, 600
         ];
 
         this.particleCutoff = [
@@ -22,7 +22,7 @@ export default class RestWalkAnalyzer extends WalkAnalyzer {
         ];
 
         this.alphaValues = [
-            2, 3
+            2
         ];
     }
 
@@ -72,9 +72,9 @@ export default class RestWalkAnalyzer extends WalkAnalyzer {
         }, (error, res, body) => {
             this.guesses[this.index] = body.guess;
             this.index++;
-            setTimeout(() => {
+            //setTimeout(() => {
                 this.requestLocalization();
-            }, 100);
+            //}, 100);
         });
     }
 

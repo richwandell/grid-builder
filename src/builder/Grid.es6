@@ -45,6 +45,7 @@ class Grid{
         this.touch_cx = false;
         this.touch_cy = false;
         this.show_scanned_area = false;
+        this.show_interpolation = false;
         this.phones = [];
         this.phoneIds = [];
         this.computers = [];
@@ -62,6 +63,16 @@ class Grid{
         this.setAndroidSize();
     }
 
+    toggleAllOptions(e) {
+        this.toggleGuessTrail();
+        this.toggleLines();
+        this.toggleParticles();
+        this.toggleScannedArea();
+        this.toggleSteps();
+        this.toggleWeights();
+        this.toggleInterpolation();
+    }
+
     toggleGuessTrail(e) {
         if(!this.showTrail) {
             this.trail = [];
@@ -69,7 +80,7 @@ class Grid{
         } else {
             this.showTrail = false;
         }
-        $(e.target).toggleClass("btn-success");
+        $("#toggle_guess_trail").toggleClass("btn-success");
         this.redraw();
     }
 
@@ -79,7 +90,7 @@ class Grid{
         } else {
             this.showSteps = false;
         }
-        $(e.target).toggleClass("btn-success");
+        $("#toggle_steps").toggleClass("btn-success");
         this.redraw();
     }
 
@@ -199,6 +210,29 @@ class Grid{
         }
     }
 
+    updateInterpolatedArea(area){
+
+        let u = (res) => {
+            let tmp_grid = [];
+            res.forEach(function(row){
+                if(typeof(tmp_grid[row.x]) == "undefined"){
+                    tmp_grid[row.x] = [];
+                }
+                tmp_grid[row.x][row.y] = row.num_features;
+            });
+            this.scanned_grid = tmp_grid;
+            this.show_scanned_area = true;
+            this.show_interpolation = true;
+            this.redraw();
+        };
+
+        if(area){
+            u(area);
+        }else{
+            this.container.db.getScannedCoords(this.container.state.getId(), u, true);
+        }
+    }
+
     toggleScannedArea(event){
         if(this.show_scanned_area == false){
             this.updateScannedArea();
@@ -208,6 +242,21 @@ class Grid{
         }else{
             this.show_scanned_area = false;
             $("#toggle_scanned_area")
+                .removeClass("btn-success")
+                .addClass("btn-default");
+            this.redraw();
+        }
+    }
+
+    toggleInterpolation() {
+        if(this.show_interpolation == false) {
+            this.updateInterpolatedArea();
+            $("#toggle_interpolation")
+                .removeClass("btn-default")
+                .addClass("btn-success");
+        } else {
+            this.show_interpolation = false;
+            $("#toggle_interpolation")
                 .removeClass("btn-success")
                 .addClass("btn-default");
             this.redraw();

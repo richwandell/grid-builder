@@ -7,45 +7,81 @@ const database = new Db(log);
 
 let db = database.getDatabase();
 
-let goodMarks = [[0,0],[2,0],[4,0],[4,2],[2,2],[0,2],[0,4],[2,4],[4,4],[4,6],[1,6],[0,6],[0,4],[0,8],[3,8],[3,10],[1,10],[1,10],[0,10],[0,12],[2,12],[4,12],[3,14],[1,14],[0,16],[2,16],[4,16],[3,18],[1,18],[0,20],[2,20],[4,20],[3,21],[1,21]];
+let goodMarks = [[1,8],[6,8],[6,13],[1,13],[1,10],[3,10],[6,10],[8,16],[8,12],[8,9],[8,6],[10,5],[10,8],[10,11],[10,14],[12,16],[13,14],[12,12],[13,10],[12,8],[13,6],[15,5],[15,7],[15,9],[15,11],[15,13],[15,15],[17,16],[18,14],[17,12],[18,10],[17,8],[18,6],[20,5],[20,3],[21,1],[23,1],[24,3],[22,4],[22,6],[22,9],[22,12],[22,15],[20,13],[20,11],[20,9],[20,7],[16,11]];
 
-let oldId = '336c6582c283421c28479e8801e8edfa';
+let oldId = '6230626FC6FF77D1880E408B3EA8F70F';
+let newId = '29D98534E721A75CBBE2D02E737D7231';
 
-db.all(`
-    select * from layout_images where id = '${oldId}'
-`, (err, rows) => {
-    let newName = 'home 20%';
-    let row = rows[0];
-    let newId = md5(newName);
-    let layoutImage = JSON.parse(row.layout_image);
-    layoutImage.name = newName;
+for(let mark of goodMarks) {
+    try {
+        db.exec(`
+        insert or ignore into scan_results
+            select
+              null,
+              '${newId}',
+              ap_id,
+              x,
+              y,
+              value,
+              orig_values,
+              created
+            from scan_results
+            where fp_id = '${oldId}'
+            and x = ${mark[0]}
+            and y = ${mark[1]}
+        `);
 
-    // db.run(`
-    // insert into layout_images values (?, ?, ?);
-    // `, newId, JSON.stringify(layoutImage), newName, (err, rows) => {
-    //     console.log(newId);
+        db.exec(`
+        insert or ignore into kalman_estimates
+        select
+          '${newId}',
+          ap_id,
+          x,
+          y,
+          kalman
+        from kalman_estimates
+        where fp_id = '${oldId}'
+        and x = ${mark[0]}
+        and y = ${mark[1]}
+        `);
+    } catch(e) {}
+}
 
-        for(let mark of goodMarks) {
-            try {
-                db.exec(`
-                insert or ignore into kalman_estimates
-                select
-                  '${newId}',
-                  ap_id,
-                  x,
-                  y,
-                  kalman
-                from kalman_estimates
-                where fp_id = '${oldId}'
-                and x = ${mark[0]}
-                and y = ${mark[1]}
-                `);
-            } catch(e){ }
-        }
-    // });
-
-
-});
+// db.all(`
+//     select * from layout_images where id = '${oldId}'
+// `, (err, rows) => {
+//     let newName = 'home 20%';
+//     let row = rows[0];
+//     let newId = md5(newName);
+//     let layoutImage = JSON.parse(row.layout_image);
+//     layoutImage.name = newName;
+//
+//     // db.run(`
+//     // insert into layout_images values (?, ?, ?);
+//     // `, newId, JSON.stringify(layoutImage), newName, (err, rows) => {
+//     //     console.log(newId);
+//
+//         for(let mark of goodMarks) {
+//             try {
+//                 db.exec(`
+//                 insert or ignore into kalman_estimates
+//                 select
+//                   '${newId}',
+//                   ap_id,
+//                   x,
+//                   y,
+//                   kalman
+//                 from kalman_estimates
+//                 where fp_id = '${oldId}'
+//                 and x = ${mark[0]}
+//                 and y = ${mark[1]}
+//                 `);
+//             } catch(e){ }
+//         }
+//     // });
+//
+//
+// });
 
 // db.all(`
 // select * from (
@@ -55,14 +91,14 @@ db.all(`
 // from
 //   kalman_estimates
 // where
-//   fp_id = '5C13DBE7239D26204EBB8CE294DD8CC1'
+//   fp_id = '5675A64DAA4DB63F216D36A170E72942'
 // group by x, y) a
 // group by a.x, a.y;
 // `, (err, rows) => {
 //     let del = db.prepare(`
 //         delete from
 //         kalman_estimates
-//         where fp_id = '5C13DBE7239D26204EBB8CE294DD8CC1'
+//         where fp_id = '5675A64DAA4DB63F216D36A170E72942'
 //         and x = ? and y = ?
 //     `);
 //

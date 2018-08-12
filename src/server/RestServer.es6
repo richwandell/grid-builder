@@ -106,6 +106,8 @@ class RestServer{
             rows.forEach(function(row){
                 if(typeof(row.layout_image) != "undefined"){
                     row.layout_image = JSON.parse(row.layout_image);
+                    row.layout_image.name = row.floor_plan_name;
+                    row.layout_image.id = row.id;
                 }
             });
             res.send(rows);
@@ -117,7 +119,7 @@ class RestServer{
         let db = this.db;
         const data = req.params;
         log.log("/rest/getScannedCoords");
-        db.getScannedCoords(data.fp_id, function(err, rows){
+        db.getScannedCoords(data.fp_id, data.interpolated === "true", function(err, rows){
             res.send(rows);
         });
     }
@@ -235,7 +237,7 @@ class RestServer{
                     guess: guess,
                     type: data.type,
                     particles: particles,
-                    neighbors: unique,
+                    neighbors: unique.slice(0, 5),
                     clusters: clusters
                 });
                 this.notifyListeners({
@@ -244,9 +246,9 @@ class RestServer{
                     guess: guess,
                     type: data.type,
                     particles: particles,
-                    neighbors: unique,
                     clusters: clusters,
                     fp_id: data.fp_id,
+                    neighbors: unique.slice(0, 5),
                     all_particles: allParticles,
                     steps: steps
                 });
@@ -325,7 +327,7 @@ class RestServer{
             this.saveReadings(req, res);
         });
 
-        app.get("/rest/getScannedCoords/:fp_id", this.jsonHeaders, (req, res) => {
+        app.get("/rest/getScannedCoords/:fp_id/:interpolated", this.jsonHeaders, (req, res) => {
             this.getScannedCoords(req, res);
         });
 

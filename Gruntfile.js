@@ -28,6 +28,204 @@ module.exports = function (grunt) {
             "--analyze-walk " + localRest + " " + inputFile + " " + outputFile + " " + interpolate;
     }
 
+    var workFullDb = {
+        work_real_walk1_full_rest: {
+            cmd: walkCommand("test/walk_analysis/work/full_db/real_walk1.json", "rest", "")
+        },
+        work_real_walk1_full_local_ni: {
+            cmd: walkCommand("test/walk_analysis/work/full_db/real_walk1.json", "local", "false")
+        },
+        work_real_walk1_full_local_i: {
+            cmd: walkCommand("test/walk_analysis/work/full_db/real_walk1.json", "local", "true")
+        },
+
+        work_real_walk2_full_rest: {
+            cmd: walkCommand("test/walk_analysis/work/full_db/real_walk2.json", "rest", "")
+        },
+        work_real_walk2_full_local_ni: {
+            cmd: walkCommand("test/walk_analysis/work/full_db/real_walk2.json", "local", "false")
+        },
+        work_real_walk2_full_local_i: {
+            cmd: walkCommand("test/walk_analysis/work/full_db/real_walk2.json", "local", "true")
+        },
+
+        work_real_walk3_full_rest: {
+            cmd: walkCommand("test/walk_analysis/work/full_db/real_walk3.json", "rest", "")
+        },
+        work_real_walk3_full_local_ni: {
+            cmd: walkCommand("test/walk_analysis/work/full_db/real_walk3.json", "local", "false")
+        },
+        work_real_walk3_full_local_i: {
+            cmd: walkCommand("test/walk_analysis/work/full_db/real_walk3.json", "local", "true")
+        },
+
+        work_gen_walk1_full_rest: {
+            cmd: walkCommand("test/walk_analysis/work/full_db/gen_walk1.json", "rest", "")
+        },
+        work_gen_walk1_full_local_ni: {
+            cmd: walkCommand("test/walk_analysis/work/full_db/gen_walk1.json", "local", "false")
+        },
+        work_gen_walk1_full_local_i: {
+            cmd: walkCommand("test/walk_analysis/work/full_db/gen_walk1.json", "local", "true")
+        },
+
+        work_gen_walk2_full_rest: {
+            cmd: walkCommand("test/walk_analysis/work/full_db/gen_walk2.json", "rest", "")
+        },
+        work_gen_walk2_full_local_ni: {
+            cmd: walkCommand("test/walk_analysis/work/full_db/gen_walk2.json", "local", "false")
+        },
+        work_gen_walk2_full_local_i: {
+            cmd: walkCommand("test/walk_analysis/work/full_db/gen_walk2.json", "local", "true")
+        },
+    };
+
+    var workHalfDb = {
+        work_real_walk1_half_rest: {
+            cmd: walkCommand("test/walk_analysis/work/half_db/real_walk1.json", "rest", "")
+        },
+        work_real_walk1_half_local_ni: {
+            cmd: walkCommand("test/walk_analysis/work/half_db/real_walk1.json", "local", "false")
+        },
+        work_real_walk1_half_local_i: {
+            cmd: walkCommand("test/walk_analysis/work/half_db/real_walk1.json", "local", "true")
+        },
+
+        work_real_walk2_half_rest: {
+            cmd: walkCommand("test/walk_analysis/work/half_db/real_walk2.json", "rest", "")
+        },
+        work_real_walk2_half_local_ni: {
+            cmd: walkCommand("test/walk_analysis/work/half_db/real_walk2.json", "local", "false")
+        },
+        work_real_walk2_half_local_i: {
+            cmd: walkCommand("test/walk_analysis/work/half_db/real_walk2.json", "local", "true")
+        },
+
+        work_real_walk3_half_rest: {
+            cmd: walkCommand("test/walk_analysis/work/half_db/real_walk3.json", "rest", "")
+        },
+        work_real_walk3_half_local_ni: {
+            cmd: walkCommand("test/walk_analysis/work/half_db/real_walk3.json", "local", "false")
+        },
+        work_real_walk3_half_local_i: {
+            cmd: walkCommand("test/walk_analysis/work/half_db/real_walk3.json", "local", "true")
+        },
+
+        work_gen_walk1_half_rest: {
+            cmd: walkCommand("test/walk_analysis/work/half_db/gen_walk1.json", "rest", "")
+        },
+        work_gen_walk1_half_local_ni: {
+            cmd: walkCommand("test/walk_analysis/work/half_db/gen_walk1.json", "local", "false")
+        },
+        work_gen_walk1_half_local_i: {
+            cmd: walkCommand("test/walk_analysis/work/half_db/gen_walk1.json", "local", "true")
+        },
+
+        work_gen_walk2_half_rest: {
+            cmd: walkCommand("test/walk_analysis/work/half_db/gen_walk2.json", "rest", "")
+        },
+        work_gen_walk2_half_local_ni: {
+            cmd: walkCommand("test/walk_analysis/work/half_db/gen_walk2.json", "local", "false")
+        },
+        work_gen_walk2_half_local_i: {
+            cmd: walkCommand("test/walk_analysis/work/half_db/gen_walk2.json", "local", "true")
+        },
+    };
+
+    var work20pDb = {
+        work_real_walk1_20p_rest: {
+            cmd: walkCommand("test/walk_analysis/work/20p/real_walk1.json", "rest", "")
+        },
+        work_real_walk1_20p_local_ni: {
+            cmd: walkCommand("test/walk_analysis/work/20p/real_walk1.json", "local", "false")
+        },
+        work_real_walk1_20p_local_i: {
+            cmd: walkCommand("test/walk_analysis/work/20p/real_walk1.json", "local", "true")
+        },
+
+        work_real_walk2_20p_rest: {
+            cmd: walkCommand("test/walk_analysis/work/20p/real_walk2.json", "rest", "")
+        },
+        work_real_walk2_20p_local_ni: {
+            cmd: walkCommand("test/walk_analysis/work/20p/real_walk2.json", "local", "false")
+        },
+        work_real_walk2_20p_local_i: {
+            cmd: walkCommand("test/walk_analysis/work/20p/real_walk2.json", "local", "true")
+        },
+
+        work_real_walk3_20p_rest: {
+            cmd: walkCommand("test/walk_analysis/work/20p/real_walk3.json", "rest", "")
+        },
+        work_real_walk3_20p_local_ni: {
+            cmd: walkCommand("test/walk_analysis/work/20p/real_walk3.json", "local", "false")
+        },
+        work_real_walk3_20p_local_i: {
+            cmd: walkCommand("test/walk_analysis/work/20p/real_walk3.json", "local", "true")
+        },
+
+        work_gen_walk1_20p_rest: {
+            cmd: walkCommand("test/walk_analysis/work/20p/gen_walk1.json", "rest", "")
+        },
+        work_gen_walk1_20p_local_ni: {
+            cmd: walkCommand("test/walk_analysis/work/20p/gen_walk1.json", "local", "false")
+        },
+        work_gen_walk1_20p_local_i: {
+            cmd: walkCommand("test/walk_analysis/work/20p/gen_walk1.json", "local", "true")
+        },
+
+        work_gen_walk2_20p_rest: {
+            cmd: walkCommand("test/walk_analysis/work/20p/gen_walk2.json", "rest", "")
+        },
+        work_gen_walk2_20p_local_ni: {
+            cmd: walkCommand("test/walk_analysis/work/20p/gen_walk2.json", "local", "false")
+        },
+        work_gen_walk2_20p_local_i: {
+            cmd: walkCommand("test/walk_analysis/work/20p/gen_walk2.json", "local", "true")
+        },
+    };
+
+    var workOld = {
+        work_old_rest: {
+            cmd: walkCommand("test/walk_analysis/work/old/walk1.json", "rest", "")
+        },
+        work_old_local_ni: {
+            cmd: walkCommand("test/walk_analysis/work/old/walk1.json", "local", "false")
+        },
+        work_old_local_i: {
+            cmd: walkCommand("test/walk_analysis/work/old/walk1.json", "local", "true")
+        },
+    };
+
+    var homeFullDb = {
+        home_walk1_rest: {
+            cmd: walkCommand("test/walk_analysis/home/fp1/walk1.json", "rest", "")
+        },
+        home_walk1_local_ni: {
+            cmd: walkCommand("test/walk_analysis/home/fp1/walk1.json", "local", "false")
+        },
+        home_walk1_local_i: {
+            cmd: walkCommand("test/walk_analysis/home/fp1/walk1.json", "local", "true")
+        },
+    };
+
+    var homeHalfDb = {
+        home_half_database_rest: {
+            cmd: walkCommand("test/walk_analysis/home/half_db/walk1.json", "rest", "")
+        },
+        home_half_database_local_ni: {
+            cmd: walkCommand("test/walk_analysis/home/half_db/walk1.json", "local", "false")
+        },
+        home_half_database_local_i: {
+            cmd: walkCommand("test/walk_analysis/home/half_db/walk1.json", "local", "true")
+        },
+    };
+
+    var home20pDb = {
+        home_20p_rest: {
+            cmd: walkCommand("test/walk_analysis/home/20p/walk1.json", "rest", "")
+        },
+    };
+
     grunt.initConfig({
         pkg: pkg,
         copy: {
@@ -135,70 +333,8 @@ module.exports = function (grunt) {
             }
         },
         exec: {
-            home_walk1_rest: {
-                cmd: walkCommand("test/walk_analysis/home/fp1/walk1.json", "rest", "")
-            },
-            home_walk1_local_ni: {
-                cmd: walkCommand("test/walk_analysis/home/fp1/walk1.json", "local", "false")
-            },
-            home_walk1_local_i: {
-                cmd: walkCommand("test/walk_analysis/home/fp1/walk1.json", "local", "true")
-            },
-            home_half_database_rest: {
-                cmd: walkCommand("test/walk_analysis/home/half_db/walk1.json", "rest", "")
-            },
-            home_half_database_local_ni: {
-                cmd: walkCommand("test/walk_analysis/home/half_db/walk1.json", "local", "false")
-            },
-            home_half_database_local_i: {
-                cmd: walkCommand("test/walk_analysis/home/half_db/walk1.json", "local", "true")
-            },
-            home_20p_rest: {
-                cmd: walkCommand("test/walk_analysis/home/20p/walk1.json", "rest", "")
-            },
-            work_walk1_rest: {
-                cmd: walkCommand("test/walk_analysis/work/walk1/work-walk1.json", "rest", "")
-            },
-            work_walk1_local: {
-                cmd: walkCommand("test/walk_analysis/work/walk1/work-walk1.json", "local", "false")
-            },
-            work_real_walk1_rest: {
-                cmd: walkCommand("test/walk_analysis/work/fp2/real_walk1.json", "rest", "")
-            },
-            work_real_walk1_local_ni: {
-                cmd: walkCommand("test/walk_analysis/work/fp2/real_walk1.json", "local", "false")
-            },
-            work_real_walk1_local_i: {
-                cmd: walkCommand("test/walk_analysis/work/fp2/real_walk1.json", "local", "true")
-            },
-            work_real_walk2_rest: {
-                cmd: walkCommand("test/walk_analysis/work/fp2/real_walk2.json", "rest", "")
-            },
-            work_real_walk2_local_ni: {
-                cmd: walkCommand("test/walk_analysis/work/fp2/real_walk2.json", "local", "false")
-            },
-            work_real_walk2_local_i: {
-                cmd: walkCommand("test/walk_analysis/work/fp2/real_walk2.json", "local", "true")
-            },
-            work_real_walk3_rest: {
-                cmd: walkCommand("test/walk_analysis/work/fp2/real_walk3.json", "rest", "")
-            },
-            work_real_walk3_local_ni: {
-                cmd: walkCommand("test/walk_analysis/work/fp2/real_walk3.json", "local", "false")
-            },
-            work_real_walk3_local_i: {
-                cmd: walkCommand("test/walk_analysis/work/fp2/real_walk3.json", "local", "true")
-            },
-            work_gen_walk1_rest: {
-                cmd: walkCommand("test/walk_analysis/work/fp2/gen_walk1.json", "rest", "")
-            },
-            work_gen_walk1_local_ni: {
-                cmd: walkCommand("test/walk_analysis/work/fp2/gen_walk1.json", "local", "false")
-            },
-            work_gen_walk1_local_i: {
-                cmd: walkCommand("test/walk_analysis/work/fp2/gen_walk1.json", "local", "true")
-            },
-
+            ...workFullDb, ...workHalfDb, ...work20pDb,
+            ...homeFullDb, ...homeHalfDb, ...home20pDb
         }
     });
 

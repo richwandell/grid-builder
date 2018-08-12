@@ -64,6 +64,13 @@ class Main{
             this.grid.toggleSteps(e);
         });
 
+        $("#toggle_all_options").change((e) => {
+            this.grid.toggleAllOptions(e);
+        });
+        $("#toggle_interpolation").click((e) => {
+            this.grid.toggleInterpolation(e);
+        });
+
         $("#toggle_guess_trail").click((e) => {
             this.grid.toggleGuessTrail(e);
         });

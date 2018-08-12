@@ -91,6 +91,9 @@ class ParticleFilter {
             }
 
             let similarity = csim(particleValues, featureValues);
+            if(isNaN(similarity)){
+                similarity = 0;
+            }
             particle.weight = similarity;
             this.oldParticles.push({x: particle.x, y: particle.y, weight: particle.weight});
         }
@@ -120,73 +123,7 @@ class ParticleFilter {
         return false;
     }
 
-    testresample() {
-        this.uniqueParticles = [];
-        this.particles = this.particles.sort((a, b) => {
-            if(a.weight >= b.weight){
-                return -1;
-            }else{
-                return 1;
-            }
-        });
-
-        let wc = this.getCumulativeNormalizedWeights(this.particles);
-
-        let newParticles = [];
-        let usedXy = [];
-        while (newParticles.length < this.particles.length) {
-            let r = Math.random() * this.particles.length;
-
-            for(let i = 0; i < wc.length; i++) {
-                if(r < wc[i]) {
-                    let key = this.particles[i].x + "_" + this.particles[i].y;
-                    let p = {
-                        x: this.particles[i].x,
-                        y: this.particles[i].y,
-                        weight: 0
-                    };
-                    if(usedXy.indexOf(key) === -1){
-                        this.uniqueParticles.push({
-                            x: p.x,
-                            y: p.y,
-                            distance: p.weight,
-                            weight: p.weight
-                        });
-                        this.particleCoords.push({
-                            x: p.x,
-                            y: p.y
-                        });
-                        usedXy.push(key);
-                    }
-
-                    newParticles.push(p);
-                    break;
-                }
-            }
-        }
-        this.particles = newParticles;
-    }
-
-    getCumulativeNormalizedWeights(particles) {
-        let highest = particles[0].weight;
-        let lowest = particles[particles.length - 1].weight;
-
-        let wn = particles.map((p) => {
-            return (p.weight - lowest) / (highest - lowest);
-        });
-
-        let wc = [];
-        wn.reduce((a, b, i) => wc.push(a+b), 0);
-
-        return wc;
-    }
-
-    resample(){
-        let goodX = [];
-        let goodY = [];
-        let usedXy = [];
-
-
+    resample() {
         //Sort particles by weight
         this.particles = this.particles.sort((a, b) => {
             if(a.weight >= b.weight){
@@ -195,63 +132,72 @@ class ParticleFilter {
                 return 1;
             }
         });
+
+        let maxWeight = this.particles[0].weight;
+        let minWeight = this.particles[this.particles.length - 1].weight;
+        if(minWeight === maxWeight) {
+            minWeight = 0;
+        }
+
+        let particleNorm = (w) =>  (w - minWeight) / (maxWeight - minWeight);
+
         this.uniqueParticles = [];
-        for(let i = 0; i < this.particleCutoff; i++){
-            const old = this.particles[i];
-            let gx = old.x;
-            let gy = old.y;
-            let key = gx + "_" + gy;
-            if(usedXy.indexOf(key) === -1){
+        let usedXy = [];
+        let resamplingList = [];
+        for(let i = 0; i < this.particles.length; i++) {
+            const particle = this.particles[i];
+            const numKeep = Math.round(particleNorm(particle.weight) * 10);
+            if(isNaN(numKeep)) {
+                debugger;
+            }
+
+            for(let j = 0; j < numKeep; j++) {
+                if(i < 3) {
+                    for (let x = particle.x - this.alphaValue; x <= particle.x + this.alphaValue; x++) {
+                        for (let y = particle.y - this.alphaValue; y <= particle.y + this.alphaValue; y++) {
+                            let key = `${x}_${y}`;
+                            if (this.allParticles[key] === undefined) {
+                                continue;
+                            }
+
+                            resamplingList.push([x, y]);
+                        }
+                    }
+                } else {
+                    let key = `${particle.x}_${particle.y}`;
+                    if(this.allParticles[key] === undefined){
+                        continue;
+                    }
+
+                    resamplingList.push([particle.x, particle.y]);
+                }
+            }
+
+            let key = `${particle.x}_${particle.y}`;
+            if(usedXy.indexOf(key) === -1) {
                 this.uniqueParticles.push({
-                    x: gx,
-                    y: gy,
-                    distance: old.weight,
-                    weight: old.weight
+                    x: particle.x,
+                    y: particle.y,
+                    distance: particle.weight,
+                    weight: particle.weight
                 });
                 usedXy.push(key);
-            }
-            if(goodX.indexOf(gx) === -1) {
-                goodX.push(gx);
-                let l, r;
-                l = Math.max(0, gx - this.alphaValue);
-                r = gx + this.alphaValue;
-
-                for(; l <= r; l++) {
-                    if (goodX.indexOf(l) === -1){
-                        goodX.push(l);
-                    }
-                }
-            }
-
-            if(goodY.indexOf(gy) === -1) {
-                goodY.push(gy);
-                let l, r;
-                l = Math.max(0, gy - this.alphaValue);
-                r = gy + this.alphaValue;
-
-                for(; l <= r; l++) {
-                    if (goodY.indexOf(l) === -1){
-                        goodY.push(l);
-                    }
-                }
             }
         }
 
         let newParticles = [];
-        this.particleCoords = [];
         usedXy = [];
         while (newParticles.length < this.particles.length) {
-            let c_x = goodX[Math.floor(Math.random() * goodX.length)];
-            let c_y = goodY[Math.floor(Math.random() * goodY.length)];
-            let key = c_x + "_" + c_y;
-            if(this.allParticles[key] === undefined){
-                continue;
+            let coord = resamplingList[Math.floor(Math.random() * resamplingList.length)];
+            if(typeof(coord) === "undefined") {
+                debugger;
             }
             let p = {
-                x: c_x,
-                y: c_y,
+                x: coord[0],
+                y: coord[1],
                 weight: 0
             };
+            let key = `${coord[0]}_${coord[1]}`;
             if(usedXy.indexOf(key) === -1){
                 usedXy.push(key);
                 this.particleCoords.push({

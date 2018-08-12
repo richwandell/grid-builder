@@ -419,27 +419,30 @@ class Db {
         });
     }
 
-    getScannedCoords(fp_id, cb){
+    getScannedCoords(fp_id, interpolated, cb){
         this.log.debug("Db.getScannedCoords");
-        this.getScannedCoords2(fp_id, cb);
-        // let db = this.db;
-        //
-        // this.createFeaturesCache(fp_id)
-        //     .then(() => {
-        //         let cache = this.getFeaturesCache(fp_id);
-        //
-        //         let results = [];
-        //         for(let key of Object.keys(cache)) {
-        //             let num_features = Object.keys(cache[key]).length;
-        //             let [x, y] = key.split("_");
-        //             results.push({
-        //                 x: x,
-        //                 y: y,
-        //                 num_features: num_features
-        //             })
-        //         }
-        //         cb(null, results);
-        //     });
+        if(interpolated == false) {
+            this.getScannedCoords2(fp_id, cb);
+        } else {
+            let db = this.db;
+
+            this.createFeaturesCache(fp_id)
+                .then(() => {
+                    let cache = this.getFeaturesCache(fp_id);
+
+                    let results = [];
+                    for (let key of Object.keys(cache)) {
+                        let num_features = Object.keys(cache[key]).length;
+                        let [x, y] = key.split("_");
+                        results.push({
+                            x: x,
+                            y: y,
+                            num_features: num_features
+                        })
+                    }
+                    cb(null, results);
+                });
+        }
     }
 
     getFloorPlans(cb) {
