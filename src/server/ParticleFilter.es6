@@ -147,9 +147,9 @@ class ParticleFilter {
         for(let i = 0; i < this.particles.length; i++) {
             const particle = this.particles[i];
             const numKeep = Math.round(particleNorm(particle.weight) * 10);
-            if(isNaN(numKeep)) {
-                debugger;
-            }
+            // if(isNaN(numKeep)) {
+            //     debugger;
+            // }
 
             for(let j = 0; j < numKeep; j++) {
                 if(i < 3) {
@@ -185,13 +185,15 @@ class ParticleFilter {
             }
         }
 
+        if(resamplingList.length === 0) {
+            return;
+        }
+
         let newParticles = [];
         usedXy = [];
         while (newParticles.length < this.particles.length) {
             let coord = resamplingList[Math.floor(Math.random() * resamplingList.length)];
-            if(typeof(coord) === "undefined") {
-                debugger;
-            }
+
             let p = {
                 x: coord[0],
                 y: coord[1],
@@ -207,7 +209,6 @@ class ParticleFilter {
             }
             newParticles.push(p);
         }
-        this.particles = newParticles;
     }
 
     getParticleCoords(){

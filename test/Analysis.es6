@@ -7,45 +7,6 @@ const database = new Db(log);
 
 let db = database.getDatabase();
 
-let goodMarks = [[1,8],[6,8],[6,13],[1,13],[1,10],[3,10],[6,10],[8,16],[8,12],[8,9],[8,6],[10,5],[10,8],[10,11],[10,14],[12,16],[13,14],[12,12],[13,10],[12,8],[13,6],[15,5],[15,7],[15,9],[15,11],[15,13],[15,15],[17,16],[18,14],[17,12],[18,10],[17,8],[18,6],[20,5],[20,3],[21,1],[23,1],[24,3],[22,4],[22,6],[22,9],[22,12],[22,15],[20,13],[20,11],[20,9],[20,7],[16,11]];
-
-let oldId = '6230626FC6FF77D1880E408B3EA8F70F';
-let newId = '29D98534E721A75CBBE2D02E737D7231';
-
-for(let mark of goodMarks) {
-    try {
-        db.exec(`
-        insert or ignore into scan_results
-            select
-              null,
-              '${newId}',
-              ap_id,
-              x,
-              y,
-              value,
-              orig_values,
-              created
-            from scan_results
-            where fp_id = '${oldId}'
-            and x = ${mark[0]}
-            and y = ${mark[1]}
-        `);
-
-        db.exec(`
-        insert or ignore into kalman_estimates
-        select
-          '${newId}',
-          ap_id,
-          x,
-          y,
-          kalman
-        from kalman_estimates
-        where fp_id = '${oldId}'
-        and x = ${mark[0]}
-        and y = ${mark[1]}
-        `);
-    } catch(e) {}
-}
 
 // db.all(`
 //     select * from layout_images where id = '${oldId}'
@@ -83,30 +44,7 @@ for(let mark of goodMarks) {
 //
 // });
 
-// db.all(`
-// select * from (
-// select
-//   case when y % 2 = 0 then x else x + 1 end as x,
-//   case when x % 2 = 0 then y else y + 1 end as y
-// from
-//   kalman_estimates
-// where
-//   fp_id = '5675A64DAA4DB63F216D36A170E72942'
-// group by x, y) a
-// group by a.x, a.y;
-// `, (err, rows) => {
-//     let del = db.prepare(`
-//         delete from
-//         kalman_estimates
-//         where fp_id = '5675A64DAA4DB63F216D36A170E72942'
-//         and x = ? and y = ?
-//     `);
-//
-//     for(let row of rows) {
-//         console.log(row);
-//         del.run(row.x, row.y);
-//     }
-// });
+
 
 // db.all(`select
 //   f.*, count(*) as fnum

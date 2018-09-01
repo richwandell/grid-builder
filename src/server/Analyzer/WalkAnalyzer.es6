@@ -1,5 +1,7 @@
+import Path from 'path';
 const fs = require('fs');
 const uuid = require('uuid');
+
 
 export default class WalkAnalyzer {
 
@@ -25,6 +27,7 @@ export default class WalkAnalyzer {
     constructor(db: Db, walkFile: string, outFile: string, interpolated = true) {
         this.db = db;
         let file = fs.readFileSync(walkFile);
+        this.walkFileName = walkFile.replace("test/walk_analysis/", "");
         this.walkData = JSON.parse(file);
         if(
             typeof(this.walkData.total_time_seconds) !== "undefined"

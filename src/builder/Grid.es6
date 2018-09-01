@@ -673,10 +673,12 @@ class Grid{
                 }
             }
 
-            if(!android && (multi_selected_grid[i] || multi_selected_grid[i] === "")){
-                for(let y = 0; y < multi_selected_grid[i].length; y++){
-                    if(multi_selected_grid[i][y] || multi_selected_grid[i][y] === ""){
-                        co.fillStyle = "blue";
+
+
+            if(this.show_scanned_area && (scanned_grid[i] || scanned_grid[i] == 0)){
+                for(let y = 0; y < scanned_grid[i].length; y++){
+                    if(scanned_grid[i][y] || scanned_grid[i][y] == 0){
+                        co.fillStyle = "brown";
                         co.fillRect(
                             (wi / ho) * i,
                             (he / vi) * y,
@@ -687,10 +689,10 @@ class Grid{
                 }
             }
 
-            if(this.show_scanned_area && (scanned_grid[i] || scanned_grid[i] == 0)){
-                for(let y = 0; y < scanned_grid[i].length; y++){
-                    if(scanned_grid[i][y] || scanned_grid[i][y] == 0){
-                        co.fillStyle = "brown";
+            if(!android && (multi_selected_grid[i] || multi_selected_grid[i] === "")){
+                for(let y = 0; y < multi_selected_grid[i].length; y++){
+                    if(multi_selected_grid[i][y] || multi_selected_grid[i][y] === ""){
+                        co.fillStyle = "blue";
                         co.fillRect(
                             (wi / ho) * i,
                             (he / vi) * y,

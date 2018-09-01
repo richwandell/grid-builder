@@ -2,49 +2,8 @@ import WalkAnalyzer from "./WalkAnalyzer";
 import KMeans from "../KMeans";
 import Features from "../Features";
 import ParticleFilter from "../ParticleFilter";
-
-// average error: 0.4163162231961564 time: 3275
-// average error: 0.5649689967735987 time: 2698
-// average error: 0.31530096874093533 time: 2676
-// average error: 0.5858899409745596 time: 2700
-// average error: 0.3658085959685459 time: 2687
-// 0.4496569451307592
-
-// average error: 0.371936198656182 time: 30620
-// average error: 0.4813824523078241 time: 2166
-// average error: 0.3362219129418963 time: 2151
-// average error: 0.3362219129418963 time: 2160
-// average error: 0.44566816659353836 time: 2189
-// 0.39428612868826746
-
-// average error: 1.855431893886392 time: 5833
-// average error: 1.846465687944609 time: 4103
-// average error: 1.5848161928280775 time: 4105
-// average error: 1.533546256677229 time: 4087
-// average error: 1.7954307331266939 time: 4080
-// 1.7231381528926004
-
-
-// average error: 1.6395651209706374 time: 5650
-// average error: 1.6276399997630664 time: 4728
-// average error: 1.6838911837638917 time: 4752
-// average error: 1.9373637485540904 time: 4694
-// average error: 1.6544484646639004 time: 4862
-// 1.708581703543117
-
-// error: 1.2810943400204517 time: 4813
-// error: 1.2810943400204517 time: 3495
-// error: 1.2810943400204517 time: 3506
-// error: 1.2810943400204517 time: 3514
-// error: 1.2810943400204517 time: 3499
-// average error: 1.2810943400204517
-
-// error: 1.2243561660562468 time: 5123
-// error: 1.1254095684805432 time: 4629
-// error: 1.1198486773895115 time: 4630
-// error: 1.0896952827662574 time: 4640
-// error: 1.274297081687253 time: 4650
-// average error: 1.1667213552759625
+import SimpleLock from "./SimpleLock";
+import File from 'fs';
 
 
 export default class LocalWalkAnalyzer extends WalkAnalyzer {
@@ -54,7 +13,7 @@ export default class LocalWalkAnalyzer extends WalkAnalyzer {
         this.previousState = {};
 
         let particleNumber = 600;
-        let particleCutoff = 20;
+        let particleCutoff = 20; // not used anymore
         let alphaValue = 2;
 
         let allErrors = [];
@@ -69,7 +28,16 @@ export default class LocalWalkAnalyzer extends WalkAnalyzer {
         }
         let averageError = allErrors.reduce((a, b) => a+b) / 5;
         console.log(" average error: " + averageError);
+
+        this.writeData(averageError);
         process.exit(0);
+    }
+
+    writeData(averageError) {
+        SimpleLock.aquire();
+        let data = `${this.walkFileName}, ${this.interpolated}, ${averageError}\n`;
+        File.appendFileSync("db/analysis.csv", data);
+        SimpleLock.release();
     }
 
     async runLocalizer(particleNumber, particleCutoff, alphaValue) {

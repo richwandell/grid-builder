@@ -3,14 +3,14 @@ import {BilinearInterpolator} from "./Interpolation";
 
 let sqlite3 = require('sqlite3').verbose();
 let LinearInterpolate = require('everpolate').linear;
-const {exec} = require('child_process');
+const {exec, execSync} = require('child_process');
 const path = require("path");
 const fs = require('fs');
 
 class Db {
 
     static database_code_version = 6;
-    static query_get_all_floorplans = "select * from layout_images";
+    static query_get_all_floorplans = "select * from layout_images order by floor_plan_name";
     static query_get_database_version = "select value from settings where key = 'database_version';";
     static query_insert_version = "insert or ignore into settings values ('database_version', ?);";
     static query_update_version = "update settings set value = ? where key = 'database_version';";
@@ -190,15 +190,15 @@ class Db {
 
             let cmd = `java -jar fcc.jar -d ${dbFilePath} -f ${fp_id} -o ${outputFilePath} -i ${inter}`;
 
-            let child = exec(cmd, (err, stdout, stderr) => {
-                try {
-                    this.featuresCache[fp_id] = JSON.parse(stdout);
-                }catch(e) {
-                    let data = fs.readFileSync(outputFilePath, "utf8");
-                    this.featuresCache[fp_id] = JSON.parse(data);
-                }
-                resolve();
-            });
+            let stdout = execSync(cmd);
+            try {
+                this.featuresCache[fp_id] = JSON.parse(stdout);
+            }catch(e) {
+                let data = fs.readFileSync(outputFilePath, "utf8");
+                this.featuresCache[fp_id] = JSON.parse(data);
+            }
+            resolve();
+
         });
     }
 

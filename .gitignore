@@ -10,3 +10,4 @@ db/walk_data
 dist
 db/*.sqlite3*
 test/*.js
+db/analysis.csv
