@@ -202,6 +202,13 @@ class Db {
         });
     }
 
+    async createFeaturesCacheAsync(fp_id, interpolate = true ) {
+        this.createFeaturesCache(fp_id, interpolate)
+            .then(() => {
+                return true;
+            });
+    }
+
     createFeaturesCacheOld(fp_id, resolve, reject) {
         this.db.all("select * from kalman_estimates where fp_id = ?;", fp_id, (err, rows) => {
             if (err) {
@@ -760,6 +767,14 @@ class Db {
                     reject(err);
                 }
                 resolve([rows, step]);
+            });
+        });
+    }
+
+    getAllFpIds() {
+        return new Promise((resolve, reject) => {
+            this.db.all('select id as fp_id from layout_images', (err, results) => {
+                resolve(results);
             });
         });
     }

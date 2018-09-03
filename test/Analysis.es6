@@ -1,6 +1,7 @@
 import math from 'mathjs'
 import md5 from 'md5';
 import Db from '../src/server/Db';
+import File from 'fs';
 
 const log = {debug: () => {}, log: () => {}};
 const database = new Db(log);
@@ -8,6 +9,59 @@ const database = new Db(log);
 let db = database.getDatabase();
 
 
+let data = JSON.parse(File.readFileSync('db/cache/fcache-6230626FC6FF77D1880E408B3EA8F70F-true.json', {encoding: 'utf8'}));
+
+let count = {};
+
+let macs = [];
+
+let keys = Object.keys(data);
+for(let key of keys) {
+    let keys2 = Object.keys(data[key]);
+    let _macs = [];
+
+    for(let key2 of keys2) {
+        let m1 = key2.match(/\w+:\w+:\w+:\w+:\w+:\w{2}/)[0];
+        let m2 = key2.replace(m1, "");
+        if(macs.indexOf(m1) === -1) {
+            macs.push(m1);
+        }
+
+        if(macs.indexOf(m2) === -1) {
+            macs.push(m2);
+        }
+
+        if(_macs.indexOf(m1) === -1) {
+            _macs.push(m1);
+            if(typeof count[m1] === "undefined") {
+                count[m1] = 0;
+            }
+            count[m1]++;
+        }
+
+        if(_macs.indexOf(m2) === -1) {
+            _macs.push(m2);
+            if(typeof count[m2] === "undefined") {
+                count[m2] = 0;
+            }
+            count[m2]++;
+        }
+    }
+}
+
+let values = Object.values(count);
+
+count = {};
+
+for(let value of values) {
+    if(typeof count[value + ""] === "undefined") {
+        count[value + ""] = 0;
+    }
+    count[value + ""]++;
+}
+
+console.log(values);
+console.log(count);
 // db.all(`
 //     select * from layout_images where id = '${oldId}'
 // `, (err, rows) => {

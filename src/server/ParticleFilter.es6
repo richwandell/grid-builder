@@ -147,29 +147,18 @@ class ParticleFilter {
         for(let i = 0; i < this.particles.length; i++) {
             const particle = this.particles[i];
             const numKeep = Math.round(particleNorm(particle.weight) * 10);
-            // if(isNaN(numKeep)) {
-            //     debugger;
-            // }
 
             for(let j = 0; j < numKeep; j++) {
-                if(i < 3) {
-                    for (let x = particle.x - this.alphaValue; x <= particle.x + this.alphaValue; x++) {
-                        for (let y = particle.y - this.alphaValue; y <= particle.y + this.alphaValue; y++) {
-                            let key = `${x}_${y}`;
-                            if (this.allParticles[key] === undefined) {
-                                continue;
-                            }
-
-                            resamplingList.push([x, y]);
+                for (let x = particle.x - this.alphaValue; x <= particle.x + this.alphaValue; x++) {
+                    for (let y = particle.y - this.alphaValue; y <= particle.y + this.alphaValue; y++) {
+                        let key = `${x}_${y}`;
+                        if (this.allParticles[key] === undefined) {
+                            resamplingList.push([particle.x, particle.y]);
+                            continue;
                         }
-                    }
-                } else {
-                    let key = `${particle.x}_${particle.y}`;
-                    if(this.allParticles[key] === undefined){
-                        continue;
-                    }
 
-                    resamplingList.push([particle.x, particle.y]);
+                        resamplingList.push([x, y]);
+                    }
                 }
             }
 

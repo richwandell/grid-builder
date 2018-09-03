@@ -18,21 +18,26 @@ module.exports = function (grunt) {
 
     var pkg  = grunt.file.readJSON("./package.json");
 
-
+    function commandLine() {
+        if(isWin) {
+            return ".\\node_modules\\.bin\\babel-node.cmd " +
+                (inspect ? "--inspect " : "") +
+                " .\\src\\server\\CommandLine.es6 ";
+        }
+        return "./node_modules/.bin/babel-node " +
+            (inspect ? "--inspect " : "") +
+            " ./src/server/CommandLine.es6 ";
+    }
 
     function walkCommand(inputFile, localRest, interpolate) {
         inputFile = 'test/walk_analysis/' + inputFile;
         let outputFile = inputFile.replace(".json", "-result.json");
         if(isWin){
-            return ".\\node_modules\\.bin\\babel-node.cmd " +
-                (inspect ? "--inspect " : "") +
-                " .\\src\\server\\CommandLine.es6 " +
+            return commandLine() +
                 "--analyze-walk \"" + localRest + "\" \"" + inputFile + "\" " +
                 "\"" + outputFile +"\" " + interpolate;
         }
-        return "./node_modules/.bin/babel-node " +
-            (inspect ? "--inspect " : "") +
-            " ./src/server/CommandLine.es6 " +
+        return commandLine() +
             "--analyze-walk " + localRest + " " + inputFile + " " + outputFile + " " + interpolate;
     }
 
@@ -439,7 +444,8 @@ module.exports = function (grunt) {
             }
         },
         clean: {
-            temp: ['public/builder/**']
+            temp: ['public/builder/**'],
+            cache: ['db/cache/**']
         },
         less: {
             dev: {
@@ -492,7 +498,10 @@ module.exports = function (grunt) {
         },
         exec: {
             ...workFullDb, ...workHalfDb, ...work20pDb, ...work10pDb,
-            ...homeFullDb, ...homeHalfDb, ...home20pDb, ...home10pDb
+            ...homeFullDb, ...homeHalfDb, ...home20pDb, ...home10pDb,
+            regenerate_cache: {
+                cmd: commandLine() + " --regenerate-cache"
+            }
         },
         concurrent: {
             home_walk1: {
@@ -574,5 +583,9 @@ module.exports = function (grunt) {
 
     grunt.registerMultiTask('run tests', 'runs tests', function(){
         grunt.task.run(this.data);
+    });
+
+    grunt.registerTask('regenerate cache', function() {
+        grunt.task.run(['clean:cache', 'exec:regenerate_cache']);
     });
 };

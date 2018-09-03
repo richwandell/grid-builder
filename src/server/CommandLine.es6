@@ -11,6 +11,7 @@ commands
     .option('--generate-walk', 'Generate Walks from Scan data')
     .option('--reindex', 'Reindex')
     .option('--interpolate', 'Interpolate')
+    .option('--regenerate-cache', 'Regenerate Cache')
     .parse(process.argv);
 
 const log = new Logger({
@@ -57,6 +58,34 @@ if(commands.reindex) {
 
     }catch(e) {
         console.log("missing args for analyzeWalk");
+        process.exit(1);
+    }
+} else if(commands.regenerateCache) {
+    try {
+
+
+        async function runCacheCreator() {
+            let results = await db.getAllFpIds();
+
+            for (let res of results) {
+                await db.createFeaturesCache(res.fp_id, true)
+                    .then(() => {
+                        console.log(res.fp_id + " interpolated cache created");
+                    });
+
+                db.clearFeaturesCache(res.fp_id);
+
+                await db.createFeaturesCache(res.fp_id, false)
+                    .then(() => {
+                        console.log(res.fp_id + " non interpolated cache created for ");
+                    });
+            }
+        }
+
+        runCacheCreator().then(() => {
+            process.exit(1);
+        });
+    }catch(e) {
         process.exit(1);
     }
 }
