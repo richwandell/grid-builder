@@ -11,6 +11,7 @@ const bodyParser = require('body-parser');
 
 const http = require('http');
 const fs = require("fs");
+const pjson = require('../../package.json');
 
 
 /**
@@ -34,7 +35,7 @@ class RestServer extends ServerBase {
         this.app = express();
         this.app.use(bodyParser.json({limit: '50mb'}));
         this.app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
-        this.app.use('/builder', express.static('builder'))
+        this.app.use('/builder', express.static('public/builder'))
     }
 
     /**
@@ -88,7 +89,7 @@ class RestServer extends ServerBase {
                 return;
             }
             file = file.replace(/\{\{UDN\}\}/, "uuid:" + id);
-            file = file.replace(/\{\{END\}\}/, "http://" + Utils.getServerIp() + ":8888/rest/");
+            file = file.replace(/\{\{END\}\}/, "http://"+ pjson.builder_host_name + ":" + pjson.builder_rest_port +"/rest/");
             res.header("Access-Control-Allow-Origin", "*");
             res.header("Content-Type", "text/xml");
             res.send(file);
@@ -306,6 +307,7 @@ class RestServer extends ServerBase {
             res.send({success: true});
         });
 
+	
         this.server = http.createServer(app);
 
     }
