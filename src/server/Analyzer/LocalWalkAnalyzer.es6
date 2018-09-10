@@ -4,30 +4,29 @@ import Features from "../Features";
 import ParticleFilter from "../ParticleFilter";
 import SimpleLock from "./SimpleLock";
 import File from 'fs';
+import NdKalmanFilter from "../NdKalmanFilter";
+import math from 'mathjs';
 
 
 export default class LocalWalkAnalyzer extends WalkAnalyzer {
 
     async run() {
-        this.worker = {particles: {}, previousState: {}};
         this.previousState = {};
 
         let particleNumber = 600;
-        let particleCutoff = 20; // not used anymore
         let alphaValue = 2;
 
         let allErrors = [];
-        let allTimes = [];
+        let allStd = [];
         for(let i = 0; i < 5; i++) {
-            let start = new Date().getTime();
-            let error = await this.runLocalizer(particleNumber, particleCutoff, alphaValue);
-
-            let length = new Date().getTime() - start;
+            let [error, std] = await this.runLocalizer(particleNumber, alphaValue);
             allErrors.push(error);
-            console.log(" error: " + error + " time: " + length);
+            allStd.push(std);
+            console.log(" error: " + error + " std: " + std);
         }
         let averageError = allErrors.reduce((a, b) => a+b) / 5;
-        console.log(" average error: " + averageError);
+        let averageStd = allStd.reduce((a, b) => a+b) / 5;
+        console.log(" average error: " + averageError + " average std: " + averageStd);
 
         this.writeData(averageError);
         process.exit(0);
@@ -40,7 +39,7 @@ export default class LocalWalkAnalyzer extends WalkAnalyzer {
         SimpleLock.release();
     }
 
-    async runLocalizer(particleNumber, particleCutoff, alphaValue) {
+    async runLocalizer(particleNumber, alphaValue) {
 
         const fp_id = this.walkData.fpId;
         const id = this.id;
@@ -50,10 +49,11 @@ export default class LocalWalkAnalyzer extends WalkAnalyzer {
         for(let apIds of this.walkData.walk) {
             let data = {fp_id: fp_id, ap_ids: apIds};
             await this.db.createFeaturesCache(fp_id, this.interpolated)
-                .then(() => this.moveParticles(data, id, particleNumber, particleCutoff, alphaValue))
+                .then(() => this.moveParticles(data, id, particleNumber, alphaValue))
                 .then(this.makeKMeans)
                 .then((args) => {
-                        let [particles, unique, clusters, guess, allParticles] = args;
+                        let [particles, unique, allParticles, clusters, guess] = args;
+                        // guess = [unique[0].x, unique[0].y];
                         this.setPreviousState(id, guess);
                         estimates.push(guess);
                     }
@@ -62,9 +62,9 @@ export default class LocalWalkAnalyzer extends WalkAnalyzer {
 
         delete this.worker.particles[id];
 
-        let error = this.compareResultsToActual(this.walkData.steps, estimates);
+        let [error, std] = this.compareResultsToActual(this.walkData.steps, estimates);
 
-        return error;
+        return [error, std];
     }
 
     setPreviousState(id, newState) {
@@ -77,38 +77,5 @@ export default class LocalWalkAnalyzer extends WalkAnalyzer {
         }
 
         this.previousState[id] = [newState, newState];
-    }
-
-    moveParticles(data, id, particleNumber, particleCutoff, alphaValue) {
-        let stateParticles = [];
-        if (this.worker.particles[id] !== undefined) {
-            stateParticles = this.worker.particles[id];
-        }
-        let previousState = [];
-        if(this.worker.previousState[id] !== undefined) {
-            previousState = this.worker.previousState[id];
-        }
-        let pf = new ParticleFilter(this.db, data.fp_id, particleNumber, particleCutoff, alphaValue);
-        pf.setParticles(stateParticles);
-
-        const f = new Features();
-        const features = f.makeFeatures(data.ap_ids);
-        pf.move(features, previousState);
-        const allParticles = pf.getParticles();
-        this.worker.particles[id] = allParticles;
-
-        const particles = pf.getParticleCoords();
-        const unique = pf.getUniqueParticles();
-        return [particles, unique, allParticles]
-    }
-
-    makeKMeans(args) {
-        let [particles, unique, allParticles] = args;
-        let km = new KMeans(2, unique.slice(0, 5));
-        const largestCluster = km.getLargestClusterIndex();
-        const guess = km.getCentroid(largestCluster);
-        const clusters = km.getClusters();
-
-        return [particles, unique, clusters, guess, allParticles];
     }
 }

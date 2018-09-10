@@ -1,9 +1,11 @@
 import Path from 'path';
 const fs = require('fs');
 const uuid = require('uuid');
+import math from 'mathjs';
+import ServerBase from "../ServerBase";
 
 
-export default class WalkAnalyzer {
+export default class WalkAnalyzer extends ServerBase {
 
     makeSteps(walkData) {
         let steps = [];
@@ -25,6 +27,7 @@ export default class WalkAnalyzer {
     }
 
     constructor(db: Db, walkFile: string, outFile: string, interpolated = true) {
+        super({particles: {}, previousState: {}});
         this.db = db;
         let file = fs.readFileSync(walkFile);
         this.walkFileName = walkFile.replace("test/walk_analysis/", "");
@@ -67,8 +70,6 @@ export default class WalkAnalyzer {
         }
 
         let averageError = errors.reduce((a, b) => a+b) / errors.length;
-
-
-        return averageError;
+        return [averageError, math.std(errors)];
     }
 }

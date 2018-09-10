@@ -3,7 +3,7 @@ import csim from 'compute-cosine-similarity';
 
 class ParticleFilter {
 
-    constructor(db: Db, fp_id: string, particleNumber, particleCutoff, alphaValue){
+    constructor(db: Db, fp_id: string, particleNumber, alphaValue = 1){
         this.fp_id = fp_id;
         this.db = db;
         this.particles = [];
@@ -13,7 +13,6 @@ class ParticleFilter {
         this.guess = [0,0];
         this.oldParticles = [];
         this.numParticles = particleNumber;
-        this.particleCutoff = particleCutoff;
         this.alphaValue = alphaValue;
     }
 
@@ -82,12 +81,6 @@ class ParticleFilter {
                     particleValues.push(testValue);
                     featureValues.push(featureValue);
                 }
-                // if(testValue !== false){
-                //     let diff = testValue - featureValue;
-                //     particle.weight += Math.pow(diff, 2);
-                // } else {
-                //     particle.weight += Math.pow(featureValue, 2);
-                // }
             }
 
             let similarity = csim(particleValues, featureValues);
@@ -198,6 +191,7 @@ class ParticleFilter {
             }
             newParticles.push(p);
         }
+        this.particles = newParticles;
     }
 
     getParticleCoords(){

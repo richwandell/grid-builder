@@ -14,11 +14,11 @@ export default class RestWalkAnalyzer extends WalkAnalyzer {
         this.guesses = [];
         this.experimentResults = [];
         this.particleNumbers = [
-            100, 200, 300, 400, 500
+            600, 600, 600, 600, 600
         ];
-
+        // no longer used
         this.particleCutoff = [
-            20
+            0
         ];
 
         this.alphaValues = [
@@ -72,20 +72,21 @@ export default class RestWalkAnalyzer extends WalkAnalyzer {
         }, (error, res, body) => {
             this.guesses[this.index] = body.guess;
             this.index++;
-            //setTimeout(() => {
+            setTimeout(() => {
                 this.requestLocalization();
-            //}, 100);
+            }, 100);
         });
     }
 
     finishALocalizer(){
-        let error = this.compareResultsToActual(this.steps, this.guesses);
-        console.log(this.index1 + " " + this.index2 + " " + this.index3 + " average error: " + error);
+        let [error, std] = this.compareResultsToActual(this.steps, this.guesses);
+        console.log(`${this.index1} ${this.index2} ${this.index3} average error: ${error} std: ${std}`);
         this.experimentResults.push([
             this.particleNumbers[this.index1],
             this.particleCutoff[this.index2],
             this.alphaValues[this.index3],
-            error
+            error,
+            std
         ]);
 
         this.index1++;
@@ -138,7 +139,8 @@ export default class RestWalkAnalyzer extends WalkAnalyzer {
             console.log(r[0] + ", " + r[1] + ", " + r[2] + ", " + r[3]);
         }
         let error = this.experimentResults.map((i) => i[3]).reduce((a, b) => a+b) / this.experimentResults.length;
-        console.log("average error: " + error);
+        let std = this.experimentResults.map((i) => i[4]).reduce((a, b) => a+b) / this.experimentResults.length;
+        console.log(`average error: ${error} av std: ${std}`);
         process.exit();
     }
 

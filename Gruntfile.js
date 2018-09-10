@@ -321,6 +321,15 @@ module.exports = function (grunt) {
         home_gen_walk2_local_i: {
             cmd: walkCommand("home/full_db/walk2.json", "local", "true")
         },
+        home_stationary1_rest: {
+            cmd: walkCommand("home/full_db/stationary1.json", "rest", "")
+        },
+        home_stationary1_local_ni: {
+            cmd: walkCommand("home/full_db/stationary1.json", "local", "false")
+        },
+        home_stationary1_local_i: {
+            cmd: walkCommand("home/full_db/stationary1.json", "local", "true")
+        }
     };
 
     var homeHalfDb = {
@@ -343,6 +352,15 @@ module.exports = function (grunt) {
         home_gen_walk2_half_local_i: {
             cmd: walkCommand("home/half_db/walk2.json", "local", "true")
         },
+        home_stationary1_half_rest: {
+            cmd: walkCommand("home/half_db/stationary1.json", "rest", "")
+        },
+        home_stationary1_half_local_ni: {
+            cmd: walkCommand("home/half_db/stationary1.json", "local", "false")
+        },
+        home_stationary1_half_local_i: {
+            cmd: walkCommand("home/half_db/stationary1.json", "local", "true")
+        }
     };
 
     var home20pDb = {
@@ -365,6 +383,15 @@ module.exports = function (grunt) {
         home_gen_walk2_20p_local_i: {
             cmd: walkCommand("home/20p/walk2.json", "local", "true")
         },
+        home_stationary1_20p_rest: {
+            cmd: walkCommand("home/20p/stationary1.json", "rest", "")
+        },
+        home_stationary1_20p_local_ni: {
+            cmd: walkCommand("home/20p/stationary1.json", "local", "false")
+        },
+        home_stationary1_20p_local_i: {
+            cmd: walkCommand("home/20p/stationary1.json", "local", "true")
+        }
     };
 
     var home10pDb = {
@@ -387,6 +414,15 @@ module.exports = function (grunt) {
         home_gen_walk2_10p_local_i: {
             cmd: walkCommand("home/10p/walk2.json", "local", "true")
         },
+        home_stationary1_10p_rest: {
+            cmd: walkCommand("home/10p/stationary1.json", "rest", "")
+        },
+        home_stationary1_10p_local_ni: {
+            cmd: walkCommand("home/10p/stationary1.json", "local", "false")
+        },
+        home_stationary1_10p_local_i: {
+            cmd: walkCommand("home/10p/stationary1.json", "local", "true")
+        }
     };
 
     grunt.initConfig({
@@ -445,7 +481,8 @@ module.exports = function (grunt) {
         },
         clean: {
             temp: ['public/builder/**'],
-            cache: ['db/cache/**']
+            cache: ['db/cache/**'],
+            analysis: ['db/analysis.csv']
         },
         less: {
             dev: {
@@ -528,6 +565,18 @@ module.exports = function (grunt) {
                     'exec:home_gen_walk2_10p_local_i'
                 ]
             },
+            home_stationary1: {
+                tasks: [
+                    'exec:home_stationary1_local_ni',
+                    'exec:home_stationary1_local_i',
+                    'exec:home_stationary1_half_local_ni',
+                    'exec:home_stationary1_half_local_i',
+                    'exec:home_stationary1_20p_local_ni',
+                    'exec:home_stationary1_20p_local_i',
+                    'exec:home_stationary1_10p_local_ni',
+                    'exec:home_stationary1_10p_local_i'
+                ]
+            },
             work_walk1: {
                 tasks: [
                     'exec:work_gen_walk1_full_local_ni',
@@ -563,10 +612,23 @@ module.exports = function (grunt) {
                     'exec:work_stationary_10p_local_ni',
                     'exec:work_stationary_10p_local_i'
                 ]
+            },
+            work_real_walk2: {
+                tasks: [
+                    'exec:work_real_walk2_full_local_ni',
+                    'exec:work_real_walk2_full_local_i',
+                    'exec:work_real_walk2_half_local_ni',
+                    'exec:work_real_walk2_half_local_i',
+                    'exec:work_real_walk2_20p_local_ni',
+                    'exec:work_real_walk2_20p_local_i',
+                    'exec:work_real_walk2_10p_local_ni',
+                    'exec:work_real_walk2_10p_local_i'
+                ]
             }
         },
         "run tests": {
-            "home": ['concurrent:home_walk1', 'concurrent:home_walk2'],
+            "clean": ['clean:analysis'],
+            "home": ['concurrent:home_walk1', 'concurrent:home_walk2', 'concurrent:home_stationary1'],
             "work": ['concurrent:work_walk1', 'concurrent:work_walk2', 'concurrent:work_stationary']
         }
     });

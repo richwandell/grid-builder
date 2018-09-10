@@ -3,6 +3,8 @@ import KMeans from './KMeans';
 import ParticleFilter from './ParticleFilter';
 import Features from './Features';
 import Utils from './Utils';
+import NdKalmanFilter from "./NdKalmanFilter";
+import ServerBase from "./ServerBase";
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -21,10 +23,10 @@ const fs = require("fs");
  *
  * @author Rich Wandell <richwandell@gmail.com>
  */
-class RestServer{
+class RestServer extends ServerBase {
 
     constructor(server: Server){
-        this.worker = server;
+        super(server);
         this.id = server.id;
         this.log = server.log;
         this.db = server.db;
@@ -165,40 +167,6 @@ class RestServer{
         res.header("Cache-Control", "no-cache");
     }
 
-    moveParticles(data, id, particleNumber, particleCutoff, alphaValue) {
-        let stateParticles = [];
-        if (this.worker.particles[id] !== undefined) {
-            stateParticles = this.worker.particles[id];
-        }
-        let previousState = [];
-        if(this.worker.previousState[id] !== undefined) {
-            previousState = this.worker.previousState[id];
-        }
-        let pf = new ParticleFilter(this.db, data.fp_id, particleNumber, particleCutoff, alphaValue);
-        pf.setParticles(stateParticles);
-        this.worker.trackingLog.debug(data.ap_ids);
-
-        const f = new Features();
-        const features = f.makeFeatures(data.ap_ids);
-        pf.move(features, previousState);
-        const allParticles = pf.getParticles();
-        this.worker.particles[id] = allParticles;
-
-        const particles = pf.getParticleCoords();
-        const unique = pf.getUniqueParticles();
-        return [particles, unique, allParticles]
-    }
-
-    makeKMeans(args) {
-        let [particles, unique, allParticles] = args;
-        let km = new KMeans(2, unique.slice(0, 5));
-        const largestCluster = km.getLargestClusterIndex();
-        const guess = km.getCentroid(largestCluster);
-        const clusters = km.getClusters();
-
-        return [particles, unique, clusters, guess, allParticles];
-    }
-
     localize(req, res) {
         this.log.log("/rest/localize");
         const data = req.body;
@@ -212,10 +180,7 @@ class RestServer{
         if(data.particleNumber) {
             particleNumber = Number(data.particleNumber);
         }
-        let particleCutoff = 20;
-        if(data.particleCutoff) {
-            particleCutoff = data.particleCutoff;
-        }
+
         let alphaValue = 2;
         if(data.alphaValue) {
             alphaValue = data.alphaValue;
@@ -226,10 +191,10 @@ class RestServer{
         }
 
         this.db.createFeaturesCache(fp_id)
-            .then(() => this.moveParticles(data, id, particleNumber, particleCutoff, alphaValue))
+            .then(() => this.moveParticles(data, id, particleNumber, alphaValue))
             .then(this.makeKMeans)
             .then((args) => {
-                let [particles, unique, clusters, guess, allParticles] = args;
+                let [particles, unique, allParticles, clusters, guess] = args;
                 this.worker.setPreviousState(id, guess);
                 res.send({
                     success: true,

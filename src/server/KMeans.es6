@@ -30,7 +30,7 @@ class KMeans {
 
         let c = [];
         for(let i = 0; i < knn.length; i++){
-            c.push([knn[i].x, knn[i].y, knn[i].distance]);
+            c.push([knn[i].x, knn[i].y, knn[i].weight]);
             if(i > 0 && i % Math.floor(knn.length / k) === 0){
                 clusters.push(c);
                 c = [];
@@ -44,7 +44,7 @@ class KMeans {
         cc[0]
             .forEach((c) => {
                 c.sort((a, b) => {
-                    return a[2] > b[2];
+                    return a[2] < b[2];
                 });
             });
 
