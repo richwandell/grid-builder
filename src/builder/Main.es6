@@ -164,6 +164,10 @@ class Main{
             this.grid.clearMultiSelection(event);
         });
 
+        $("#builder_ignore_selected").click((event) => {
+            this.grid.saveIgnoreSelected(event);
+        });
+
         $("#builder_delete_existing").click((event) => {
             this.db.deleteExisting(event);
         });

@@ -74,7 +74,7 @@ export default class RestWalkAnalyzer extends WalkAnalyzer {
             this.index++;
             setTimeout(() => {
                 this.requestLocalization();
-            }, 100);
+            }, 10);
         });
     }
 

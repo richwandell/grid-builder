@@ -2,7 +2,7 @@ import Path from 'path';
 const fs = require('fs');
 const uuid = require('uuid');
 import math from 'mathjs';
-import ServerBase from "../ServerBase";
+import {ServerBase} from "../ServerBase";
 
 
 export default class WalkAnalyzer extends ServerBase {

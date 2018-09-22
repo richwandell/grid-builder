@@ -173,7 +173,7 @@ class ParticleFilter {
 
         let newParticles = [];
         usedXy = [];
-        while (newParticles.length < this.particles.length) {
+        while (newParticles.length < this.numParticles) {
             let coord = resamplingList[Math.floor(Math.random() * resamplingList.length)];
 
             let p = {

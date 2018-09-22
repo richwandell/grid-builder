@@ -60,6 +60,7 @@ class Grid{
         this.showSteps = false;
         this.trail = [];
         this.showTrail = false;
+        this.ignore_selected = [];
         this.setAndroidSize();
     }
 
@@ -329,6 +330,10 @@ class Grid{
         return this.grid_color;
     }
 
+    getIgnoreSelected() {
+        return this.ignore_selected;
+    }
+
     setGridColor(color) {
         debug("Grid.setGridColor");
         this.grid_color = color;
@@ -340,6 +345,20 @@ class Grid{
         this.multi_selected_grid = [];
         this.selected_grid = [];
         this.redraw();
+    }
+
+    saveIgnoreSelected(){
+        let ignore_selected = [];
+        for(let x = 0; x < this.multi_selected_grid.length; x++ ){
+            if(typeof(this.multi_selected_grid[x]) !== "undefined") {
+                for(let y = 0; y < this.multi_selected_grid[x].length; y++) {
+                    if(typeof(this.multi_selected_grid[x][y]) !== "undefined") {
+                        ignore_selected.push([x, y]);
+                    }
+                }
+            }
+        }
+        this.ignore_selected = ignore_selected;
     }
 
     redraw() {

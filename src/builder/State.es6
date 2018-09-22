@@ -20,7 +20,8 @@ class State {
             "id": this.getId(),
             "image": this.container.grid.getImageString(),
             "name": this.container.grid.getImageName(),
-            "rotation": this.container.compass.getRotation()
+            "rotation": this.container.compass.getRotation(),
+            "ignore": this.container.grid.getIgnoreSelected()
         };
     }
 }

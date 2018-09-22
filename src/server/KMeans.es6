@@ -41,12 +41,11 @@ class KMeans {
         this.old_error = clusters.map(() => {return Infinity;});
 
         let cc = this.kmeans(clusters);
-        cc[0]
-            .forEach((c) => {
-                c.sort((a, b) => {
-                    return a[2] < b[2];
-                });
-            });
+
+        for(let i = 0; i < cc[0].length; i++) {
+            let sorted = cc[0][i].sort((a, b) => b[2] - a[2]);
+            cc[0][i] = sorted;
+        }
 
         cc[1] = cc[1].map((c) => {
             return [Math.round(c[0]), Math.round(c[1])];
@@ -67,15 +66,55 @@ class KMeans {
         return this.centroids[clusterIndex];
     }
 
+    dropSmallestCluster() {
+        let clusters = [];
+
+        let smallestLength = Infinity;
+        let smallestCluster = 0;
+
+        for(let i = 0; i < this.clusters.length; i++) {
+            if(
+                this.clusters[i].length < smallestLength
+                || (
+                    this.clusters[i].length === smallestLength
+                    && this.clusters[smallestCluster][0][2] > this.clusters[i][0][2]
+                )
+            ) {
+                smallestCluster = i;
+                smallestLength = this.clusters[i].length;
+            }
+        }
+
+        for(let i = 0; i < this.clusters.length; i++) {
+            if(i !== smallestCluster) {
+                clusters = clusters.concat(this.clusters[i]);
+            }
+        }
+        return clusters.sort((a, b) => b[2] - a[2]);
+    }
+
     getLargestClusterIndex(){
         let largestLength = 0;
         let largestCluster = 0;
-        this.clusters.forEach((clu, i) => {
-            if(clu.length > largestLength){
-                largestLength = clu.length;
+
+        for(let i = 0; i < this.clusters.length; i++) {
+            if(this.clusters[i].length > largestLength) {
                 largestCluster = i;
+                largestLength = this.clusters[i].length;
+            } else if(this.clusters[i].length === largestLength) {
+                if(
+                    typeof(this.clusters[largestCluster][0]) === "undefined"
+                    || typeof(this.clusters[i][0]) === "undefined"
+                ) continue;
+
+
+                if(this.clusters[largestCluster][0][2] < this.clusters[i][0][2]) {
+                    largestCluster = i;
+                    largestLength = this.clusters[i].length;
+                }
             }
-        });
+        }
+
         return largestCluster;
     }
 

@@ -14,7 +14,7 @@ module.exports = function (grunt) {
         fs.writeFileSync(".uuid", id);
     }
 
-    var grunt_watch_tasks = ['clean', 'webpack', 'less:dev', 'copy:first'];
+    var grunt_watch_tasks = ['clean:temp', 'webpack', 'less:dev', 'copy:first'];
 
     var pkg  = grunt.file.readJSON("./package.json");
 
@@ -425,6 +425,58 @@ module.exports = function (grunt) {
         }
     };
 
+    var schoolFullDb = {
+        school_gen_walk1_full_rest: {
+            cmd: walkCommand("school/full_db/walk1.json", "rest", "")
+        },
+        school_gen_walk1_full_local_ni: {
+            cmd: walkCommand("school/full_db/walk1.json", "local", "false")
+        },
+        school_gen_walk1_full_local_i: {
+            cmd: walkCommand("school/full_db/walk1.json", "local", "true")
+        },
+
+        school_stationary_08_03_full_rest: {
+            cmd: walkCommand("school/full_db/stationary_08_03.json", "rest", "")
+        },
+        school_stationary_08_03_full_local_ni: {
+            cmd: walkCommand("school/full_db/stationary_08_03.json", "local", "false")
+        },
+        school_stationary_08_03_full_local_i: {
+            cmd: walkCommand("school/full_db/stationary_08_03.json", "local", "true")
+        },
+
+        school_stationary_21_10_full_rest: {
+            cmd: walkCommand("school/full_db/stationary_21_10.json", "rest", "")
+        },
+        school_stationary_21_10_full_local_ni: {
+            cmd: walkCommand("school/full_db/stationary_21_10.json", "local", "false")
+        },
+        school_stationary_21_10_full_local_i: {
+            cmd: walkCommand("school/full_db/stationary_21_10.json", "local", "true")
+        },
+
+        school_stationary_25_09_full_rest: {
+            cmd: walkCommand("school/full_db/stationary_25_09.json", "rest", "")
+        },
+        school_stationary_25_09_full_local_ni: {
+            cmd: walkCommand("school/full_db/stationary_25_09.json", "local", "false")
+        },
+        school_stationary_25_09_full_local_i: {
+            cmd: walkCommand("school/full_db/stationary_25_09.json", "local", "true")
+        },
+
+        school_stationary_26_12_full_rest: {
+            cmd: walkCommand("school/full_db/stationary_26_12.json", "rest", "")
+        },
+        school_stationary_26_12_full_local_ni: {
+            cmd: walkCommand("school/full_db/stationary_26_12.json", "local", "false")
+        },
+        school_stationary_26_12_full_local_i: {
+            cmd: walkCommand("school/full_db/stationary_26_12.json", "local", "true")
+        },
+    };
+
     grunt.initConfig({
         pkg: pkg,
         copy: {
@@ -536,6 +588,7 @@ module.exports = function (grunt) {
         exec: {
             ...workFullDb, ...workHalfDb, ...work20pDb, ...work10pDb,
             ...homeFullDb, ...homeHalfDb, ...home20pDb, ...home10pDb,
+            ...schoolFullDb,
             regenerate_cache: {
                 cmd: commandLine() + " --regenerate-cache"
             }

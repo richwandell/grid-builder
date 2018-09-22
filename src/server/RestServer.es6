@@ -1,10 +1,4 @@
-import Knn from './Knn';
-import KMeans from './KMeans';
-import ParticleFilter from './ParticleFilter';
-import Features from './Features';
-import Utils from './Utils';
-import NdKalmanFilter from "./NdKalmanFilter";
-import ServerBase from "./ServerBase";
+import {ServerBase, LargeClusterResponse, FinalResponse, ParticleFilterResponse} from "./ServerBase";
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -193,9 +187,23 @@ class RestServer extends ServerBase {
 
         this.db.createFeaturesCache(fp_id)
             .then(() => this.moveParticles(data, id, particleNumber, alphaValue))
-            .then(this.makeKMeans)
-            .then((args) => {
-                let [particles, unique, allParticles, clusters, guess] = args;
+            .then(this.doubleCluster)
+            .then((lc: LargeClusterResponse) => {
+                return new FinalResponse(lc)
+            })
+            .then((fr: FinalResponse) => {
+
+
+                let particles = fr.particles;
+                let unique = fr.unique;
+                let allParticles = fr.all;
+                let largeClusters = fr.largeClusters;
+                let guess = fr.guess;
+                let neighbors = fr.largestCluster.slice(0, 5)
+                    .map((i) => {
+                        return {x: i[0], y: i[1], weight: i[2]};
+                    });
+
                 this.worker.setPreviousState(id, guess);
                 res.send({
                     success: true,
@@ -203,8 +211,8 @@ class RestServer extends ServerBase {
                     guess: guess,
                     type: data.type,
                     particles: particles,
-                    neighbors: unique.slice(0, 5),
-                    clusters: clusters
+                    neighbors: neighbors,
+                    clusters: largeClusters
                 });
                 this.notifyListeners({
                     action: 'LOCALIZE',
@@ -212,9 +220,9 @@ class RestServer extends ServerBase {
                     guess: guess,
                     type: data.type,
                     particles: particles,
-                    clusters: clusters,
+                    clusters: largeClusters,
                     fp_id: data.fp_id,
-                    neighbors: unique.slice(0, 5),
+                    neighbors: neighbors,
                     all_particles: allParticles,
                     steps: steps
                 });

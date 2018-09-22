@@ -6,6 +6,7 @@ import SimpleLock from "./SimpleLock";
 import File from 'fs';
 import NdKalmanFilter from "../NdKalmanFilter";
 import math from 'mathjs';
+import {FinalResponse, LargeClusterResponse} from "../ServerBase";
 
 
 export default class LocalWalkAnalyzer extends WalkAnalyzer {
@@ -50,14 +51,20 @@ export default class LocalWalkAnalyzer extends WalkAnalyzer {
             let data = {fp_id: fp_id, ap_ids: apIds};
             await this.db.createFeaturesCache(fp_id, this.interpolated)
                 .then(() => this.moveParticles(data, id, particleNumber, alphaValue))
-                .then(this.makeKMeans)
-                .then((args) => {
-                        let [particles, unique, allParticles, clusters, guess] = args;
-                        // guess = [unique[0].x, unique[0].y];
-                        this.setPreviousState(id, guess);
-                        estimates.push(guess);
-                    }
-                );
+                .then(this.doubleCluster)
+                .then((lc: LargeClusterResponse) => {
+                    return new FinalResponse(lc)
+                })
+                .then((fr: FinalResponse) => {
+                    let guess = fr.guess;
+                    let neighbors = fr.largestCluster.slice(0, 5)
+                        .map((i) => {
+                            return {x: i[0], y: i[1], weight: i[2]};
+                        });
+
+                    this.setPreviousState(id, guess);
+                    estimates.push(guess);
+                });
         }
 
         delete this.worker.particles[id];
