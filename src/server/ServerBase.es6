@@ -23,6 +23,8 @@ class LargeClusterResponse {
     }
 }
 
+
+
 class FinalResponse {
 
     constructor(cl: LargeClusterResponse, km: KMeans = null) {
@@ -107,27 +109,24 @@ class ServerBase {
      */
     largeCluster(pf: ParticleFilterResponse) {
         let km = new KMeans(2, pf.uniqueParticles);
-        return new LargeClusterResponse(pf, km);
+        return new FinalResponse(new LargeClusterResponse(pf, km));
     }
 
-    smallCluster(pf: LargeClusterResponse) {
+    smallCluster(pf: ParticleFilterResponse) {
         let km = new KMeans(2, pf.uniqueParticles.slice(0, 5));
-        return new LargeClusterResponse(pf, km);
+        return new FinalResponse(new LargeClusterResponse(pf, km));
     }
 
     doubleCluster(pf: ParticleFilterResponse) {
         let km = new KMeans(2, pf.uniqueParticles);
-        const largestCluster = km.getLargestClusterIndex();
         const clusters = km.getClusters();
 
         let best = [];
         for(let c of clusters) {
             best.push(
-                c.slice(0, 10)
+                c.slice(0, 20)
                     .map(a => a[2])
-                    .reduce((a, b) => {
-                        return a + b
-                    })
+                    .reduce((a, b) => a + b)
             );
         }
 
@@ -137,7 +136,7 @@ class ServerBase {
                 return {x: i[0], y: i[1], weight: i[2]};
             });
         let km1 = new KMeans(2, p);
-        return new LargeClusterResponse(pf, km1);
+        return new FinalResponse(new LargeClusterResponse(pf, km), km1);
     }
 
 

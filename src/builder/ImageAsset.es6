@@ -10,9 +10,18 @@ class ImageAsset {
 
     static Macbook = Symbol.for("macbook");
 
-    static COLORS = ['red', 'green', 'blue', 'purple', '#ff8282'];
+    static COLORS = [
+        //particles
+        '#ff8282',
+        //large clusters
+        '#00fdcb',
+        '#22fd34',
+        //small clusters
+        'purple',
+        'blue'
+    ];
 
-    constructor(container: Main, x, y, id, type: Symbol, particles = [], neighbors = [], clusters = []){
+    constructor(container: Main, x, y, id, type: Symbol, particles = [], neighbors = [], clusters = [], large_clusters = []){
         this.container = container;
         this.x = x;
         this.y = y;
@@ -21,6 +30,7 @@ class ImageAsset {
         this.particles = particles;
         this.neighbors = neighbors;
         this.clusters = clusters;
+        this.large_clusters = large_clusters;
         this.animating = false;
         this.oldX = 0;
         this.oldY = 0;
@@ -207,10 +217,25 @@ class ImageAsset {
 
     drawClusters(){
         const ctx = this.container.grid.overlay_context;
+        let currentColor = 1;
+        this.large_clusters.forEach((clu, i) => {
+            clu.forEach((p) => {
+                let [x, y, w, h] = this.container.grid.getCanvasCoordinates(p[0], p[1]);
+                ctx.fillStyle = ImageAsset.COLORS[currentColor + i];
+                ctx.fillRect(
+                    x,
+                    y,
+                    w,
+                    h
+                );
+            });
+        });
+        currentColor = currentColor + this.large_clusters.length;
+
         this.clusters.forEach((clu, i) => {
             clu.forEach((p) => {
                 let [x, y, w, h] = this.container.grid.getCanvasCoordinates(p[0], p[1]);
-                ctx.fillStyle = ImageAsset.COLORS[2 + i];
+                ctx.fillStyle = ImageAsset.COLORS[currentColor + i];
                 ctx.fillRect(
                     x,
                     y,

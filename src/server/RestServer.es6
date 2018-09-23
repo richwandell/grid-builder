@@ -187,13 +187,8 @@ class RestServer extends ServerBase {
 
         this.db.createFeaturesCache(fp_id)
             .then(() => this.moveParticles(data, id, particleNumber, alphaValue))
-            .then(this.doubleCluster)
-            .then((lc: LargeClusterResponse) => {
-                return new FinalResponse(lc)
-            })
+            .then(this.smallCluster)
             .then((fr: FinalResponse) => {
-
-
                 let particles = fr.particles;
                 let unique = fr.unique;
                 let allParticles = fr.all;
@@ -212,7 +207,8 @@ class RestServer extends ServerBase {
                     type: data.type,
                     particles: particles,
                     neighbors: neighbors,
-                    clusters: largeClusters
+                    clusters: fr.clusters,
+                    large_clusters: largeClusters
                 });
                 this.notifyListeners({
                     action: 'LOCALIZE',
@@ -220,11 +216,12 @@ class RestServer extends ServerBase {
                     guess: guess,
                     type: data.type,
                     particles: particles,
-                    clusters: largeClusters,
+                    clusters: fr.clusters,
                     fp_id: data.fp_id,
                     neighbors: neighbors,
                     all_particles: allParticles,
-                    steps: steps
+                    steps: steps,
+                    large_clusters: largeClusters
                 });
             }
         );

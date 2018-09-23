@@ -72,9 +72,9 @@ export default class RestWalkAnalyzer extends WalkAnalyzer {
         }, (error, res, body) => {
             this.guesses[this.index] = body.guess;
             this.index++;
-            setTimeout(() => {
+            //setTimeout(() => {
                 this.requestLocalization();
-            }, 10);
+            //}, 10);
         });
     }
 

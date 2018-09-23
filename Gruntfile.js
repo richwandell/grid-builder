@@ -446,14 +446,14 @@ module.exports = function (grunt) {
             cmd: walkCommand("school/full_db/stationary_08_03.json", "local", "true")
         },
 
-        school_stationary_21_10_full_rest: {
-            cmd: walkCommand("school/full_db/stationary_21_10.json", "rest", "")
+        school_stationary_19_12_full_rest: {
+            cmd: walkCommand("school/full_db/stationary_19_12.json", "rest", "")
         },
-        school_stationary_21_10_full_local_ni: {
-            cmd: walkCommand("school/full_db/stationary_21_10.json", "local", "false")
+        school_stationary_19_12_full_local_ni: {
+            cmd: walkCommand("school/full_db/stationary_19_12.json", "local", "false")
         },
-        school_stationary_21_10_full_local_i: {
-            cmd: walkCommand("school/full_db/stationary_21_10.json", "local", "true")
+        school_stationary_19_12_full_local_i: {
+            cmd: walkCommand("school/full_db/stationary_19_12.json", "local", "true")
         },
 
         school_stationary_25_09_full_rest: {
@@ -474,6 +474,162 @@ module.exports = function (grunt) {
         },
         school_stationary_26_12_full_local_i: {
             cmd: walkCommand("school/full_db/stationary_26_12.json", "local", "true")
+        },
+    };
+
+    var schoolHalfDb = {
+        school_gen_walk1_half_rest: {
+            cmd: walkCommand("school/half_db/walk1.json", "rest", "")
+        },
+        school_gen_walk1_half_local_ni: {
+            cmd: walkCommand("school/half_db/walk1.json", "local", "false")
+        },
+        school_gen_walk1_half_local_i: {
+            cmd: walkCommand("school/half_db/walk1.json", "local", "true")
+        },
+
+        school_stationary_08_03_half_rest: {
+            cmd: walkCommand("school/half_db/stationary_08_03.json", "rest", "")
+        },
+        school_stationary_08_03_half_local_ni: {
+            cmd: walkCommand("school/half_db/stationary_08_03.json", "local", "false")
+        },
+        school_stationary_08_03_half_local_i: {
+            cmd: walkCommand("school/half_db/stationary_08_03.json", "local", "true")
+        },
+
+        school_stationary_19_12_half_rest: {
+            cmd: walkCommand("school/full_db/stationary_19_12.json", "rest", "")
+        },
+        school_stationary_19_12_half_local_ni: {
+            cmd: walkCommand("school/half_db/stationary_19_12.json", "local", "false")
+        },
+        school_stationary_19_12_half_local_i: {
+            cmd: walkCommand("school/half_db/stationary_19_12.json", "local", "true")
+        },
+
+        school_stationary_25_09_half_rest: {
+            cmd: walkCommand("school/half_db/stationary_25_09.json", "rest", "")
+        },
+        school_stationary_25_09_half_local_ni: {
+            cmd: walkCommand("school/half_db/stationary_25_09.json", "local", "false")
+        },
+        school_stationary_25_09_half_local_i: {
+            cmd: walkCommand("school/half_db/stationary_25_09.json", "local", "true")
+        },
+
+        school_stationary_26_12_half_rest: {
+            cmd: walkCommand("school/half_db/stationary_26_12.json", "rest", "")
+        },
+        school_stationary_26_12_half_local_ni: {
+            cmd: walkCommand("school/half_db/stationary_26_12.json", "local", "false")
+        },
+        school_stationary_26_12_half_local_i: {
+            cmd: walkCommand("school/half_db/stationary_26_12.json", "local", "true")
+        },
+    };
+
+    var school20pDb = {
+        school_gen_walk1_20p_rest: {
+            cmd: walkCommand("school/20p/walk1.json", "rest", "")
+        },
+        school_gen_walk1_20p_local_ni: {
+            cmd: walkCommand("school/20p/walk1.json", "local", "false")
+        },
+        school_gen_walk1_20p_local_i: {
+            cmd: walkCommand("school/20p/walk1.json", "local", "true")
+        },
+
+        school_stationary_08_03_20p_rest: {
+            cmd: walkCommand("school/20p/stationary_08_03.json", "rest", "")
+        },
+        school_stationary_08_03_20p_local_ni: {
+            cmd: walkCommand("school/20p/stationary_08_03.json", "local", "false")
+        },
+        school_stationary_08_03_20p_local_i: {
+            cmd: walkCommand("school/20p/stationary_08_03.json", "local", "true")
+        },
+
+        school_stationary_19_12_20p_rest: {
+            cmd: walkCommand("school/20p/stationary_19_12.json", "rest", "")
+        },
+        school_stationary_19_12_20p_local_ni: {
+            cmd: walkCommand("school/20p/stationary_19_12.json", "local", "false")
+        },
+        school_stationary_19_12_20p_local_i: {
+            cmd: walkCommand("school/20p/stationary_19_12.json", "local", "true")
+        },
+
+        school_stationary_25_09_20p_rest: {
+            cmd: walkCommand("school/20p/stationary_25_09.json", "rest", "")
+        },
+        school_stationary_25_09_20p_local_ni: {
+            cmd: walkCommand("school/20p/stationary_25_09.json", "local", "false")
+        },
+        school_stationary_25_09_20p_local_i: {
+            cmd: walkCommand("school/20p/stationary_25_09.json", "local", "true")
+        },
+
+        school_stationary_26_12_20p_rest: {
+            cmd: walkCommand("school/20p/stationary_26_12.json", "rest", "")
+        },
+        school_stationary_26_12_20p_local_ni: {
+            cmd: walkCommand("school/20p/stationary_26_12.json", "local", "false")
+        },
+        school_stationary_26_12_20p_local_i: {
+            cmd: walkCommand("school/20p/stationary_26_12.json", "local", "true")
+        },
+    };
+
+    var school10pDb = {
+        school_gen_walk1_10p_rest: {
+            cmd: walkCommand("school/10p/walk1.json", "rest", "")
+        },
+        school_gen_walk1_10p_local_ni: {
+            cmd: walkCommand("school/10p/walk1.json", "local", "false")
+        },
+        school_gen_walk1_10p_local_i: {
+            cmd: walkCommand("school/10p/walk1.json", "local", "true")
+        },
+
+        school_stationary_08_03_10p_rest: {
+            cmd: walkCommand("school/10p/stationary_08_03.json", "rest", "")
+        },
+        school_stationary_08_03_10p_local_ni: {
+            cmd: walkCommand("school/10p/stationary_08_03.json", "local", "false")
+        },
+        school_stationary_08_03_10p_local_i: {
+            cmd: walkCommand("school/10p/stationary_08_03.json", "local", "true")
+        },
+
+        school_stationary_19_12_10p_rest: {
+            cmd: walkCommand("school/10p/stationary_19_12.json", "rest", "")
+        },
+        school_stationary_19_12_10p_local_ni: {
+            cmd: walkCommand("school/10p/stationary_19_12.json", "local", "false")
+        },
+        school_stationary_19_12_10p_local_i: {
+            cmd: walkCommand("school/10p/stationary_19_12.json", "local", "true")
+        },
+
+        school_stationary_25_09_10p_rest: {
+            cmd: walkCommand("school/10p/stationary_25_09.json", "rest", "")
+        },
+        school_stationary_25_09_10p_local_ni: {
+            cmd: walkCommand("school/10p/stationary_25_09.json", "local", "false")
+        },
+        school_stationary_25_09_10p_local_i: {
+            cmd: walkCommand("school/10p/stationary_25_09.json", "local", "true")
+        },
+
+        school_stationary_26_12_10p_rest: {
+            cmd: walkCommand("school/10p/stationary_26_12.json", "rest", "")
+        },
+        school_stationary_26_12_10p_local_ni: {
+            cmd: walkCommand("school/10p/stationary_26_12.json", "local", "false")
+        },
+        school_stationary_26_12_10p_local_i: {
+            cmd: walkCommand("school/10p/stationary_26_12.json", "local", "true")
         },
     };
 
@@ -588,7 +744,7 @@ module.exports = function (grunt) {
         exec: {
             ...workFullDb, ...workHalfDb, ...work20pDb, ...work10pDb,
             ...homeFullDb, ...homeHalfDb, ...home20pDb, ...home10pDb,
-            ...schoolFullDb,
+            ...schoolFullDb, ...schoolHalfDb, ...school20pDb, ...school10pDb,
             regenerate_cache: {
                 cmd: commandLine() + " --regenerate-cache"
             }
@@ -677,12 +833,79 @@ module.exports = function (grunt) {
                     'exec:work_real_walk2_10p_local_ni',
                     'exec:work_real_walk2_10p_local_i'
                 ]
+            },
+            school_walk1: {
+                tasks: [
+                    'exec:school_gen_walk1_full_local_ni',
+                    'exec:school_gen_walk1_full_local_i',
+                    'exec:school_gen_walk1_half_local_ni',
+                    'exec:school_gen_walk1_half_local_i',
+                    'exec:school_gen_walk1_20p_local_ni',
+                    'exec:school_gen_walk1_20p_local_i',
+                    'exec:school_gen_walk1_10p_local_ni',
+                    'exec:school_gen_walk1_10p_local_i'
+                ]
+            },
+            school_stationary1: {
+                tasks: [
+                    'exec:school_stationary_08_03_full_local_ni',
+                    'exec:school_stationary_08_03_full_local_i',
+                    'exec:school_stationary_08_03_half_local_ni',
+                    'exec:school_stationary_08_03_half_local_i',
+                    'exec:school_stationary_08_03_20p_local_ni',
+                    'exec:school_stationary_08_03_20p_local_i',
+                    'exec:school_stationary_08_03_10p_local_ni',
+                    'exec:school_stationary_08_03_10p_local_i'
+                ]
+            },
+            school_stationary2: {
+                tasks: [
+                    'exec:school_stationary_19_12_full_local_ni',
+                    'exec:school_stationary_19_12_full_local_i',
+                    'exec:school_stationary_19_12_half_local_ni',
+                    'exec:school_stationary_19_12_half_local_i',
+                    'exec:school_stationary_19_12_20p_local_ni',
+                    'exec:school_stationary_19_12_20p_local_i',
+                    'exec:school_stationary_19_12_10p_local_ni',
+                    'exec:school_stationary_19_12_10p_local_i'
+                ]
+            },
+            school_stationary3: {
+                tasks: [
+                    'exec:school_stationary_25_09_full_local_ni',
+                    'exec:school_stationary_25_09_full_local_i',
+                    'exec:school_stationary_25_09_half_local_ni',
+                    'exec:school_stationary_25_09_half_local_i',
+                    'exec:school_stationary_25_09_20p_local_ni',
+                    'exec:school_stationary_25_09_20p_local_i',
+                    'exec:school_stationary_25_09_10p_local_ni',
+                    'exec:school_stationary_25_09_10p_local_i'
+                ]
+            },
+            school_stationary4: {
+                tasks: [
+                    'exec:school_stationary_26_12_full_local_ni',
+                    'exec:school_stationary_26_12_full_local_i',
+                    'exec:school_stationary_26_12_half_local_ni',
+                    'exec:school_stationary_26_12_half_local_i',
+                    'exec:school_stationary_26_12_20p_local_ni',
+                    'exec:school_stationary_26_12_20p_local_i',
+                    'exec:school_stationary_26_12_10p_local_ni',
+                    'exec:school_stationary_26_12_10p_local_i'
+                ]
             }
         },
         "run tests": {
             "clean": ['clean:analysis'],
             "home": ['concurrent:home_walk1', 'concurrent:home_walk2', 'concurrent:home_stationary1'],
-            "work": ['concurrent:work_walk1', 'concurrent:work_walk2', 'concurrent:work_stationary']
+            "work": ['concurrent:work_walk1', 'concurrent:work_walk2', 'concurrent:work_stationary', 'concurrent:work_real_walk2'],
+            "school": [
+                'concurrent:school_walk1',
+                'concurrent:school_stationary1',
+                'concurrent:school_stationary2',
+                "concurrent:school_stationary3",
+                "concurrent:school_stationary4"
+            ]
         }
     });
 

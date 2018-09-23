@@ -116,7 +116,8 @@ class Server {
                     particles: message.particles,
                     neighbors: message.neighbors,
                     clusters: message.clusters,
-                    steps: message.steps
+                    steps: message.steps,
+                    large_clusters: message.large_clusters
                 });
                 if(!this.debug) {
                     this.messageWorkers(message);

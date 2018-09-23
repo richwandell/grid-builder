@@ -83,7 +83,7 @@ if(commands.reindex) {
         }
 
         runCacheCreator().then(() => {
-            process.exit(1);
+            process.exit(0);
         });
     }catch(e) {
         process.exit(1);

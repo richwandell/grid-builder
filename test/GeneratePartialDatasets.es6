@@ -111,6 +111,18 @@ let datasets = [
             id: '0A3820B30E873EA1A6115479B175E8AF',
             coords: [[22,16],[8,16],[8,5],[22,5],[15,11],[22,11],[8,11],[1,8],[6,8],[6,13],[1,13],[24,1],[21,1],[15,5],[19,8],[11,8],[11,14],[19,14],[3,11],[15,15],[20,5],[20,16],[10,16],[10,6]]
         }
+    },
+    {
+        full: '2295874152d66417bceb0daab1d7b19d',
+        half: '3CC0542325DEAD60E5A2409297C8FD72',
+        twenty: {
+            id: '197C69B9597C6A8E382530C15DF698B8',
+            coords: [[26,7],[19,7],[19,11],[21,11],[26,11],[26,13],[22,13],[19,13],[14,13],[11,13],[8,13],[5,13],[25,9],[7,10],[6,7],[7,4],[6,1],[9,1],[9,4],[4,1],[5,4],[6,12],[9,12],[13,12],[17,12]]
+        },
+        ten: {
+            id: '8ECD6A0BD7F8AE2210144C81C102B0A9',
+            coords: [[5,1],[5,4],[9,4],[9,1],[19,7],[19,11],[26,11],[26,7],[5,13],[9,13],[19,13],[26,13]]
+        }
     }
 ];
 
@@ -208,8 +220,12 @@ function create50pDb(oldId, newId){
     });
 }
 
-for(let dataset of datasets) {
-    create50pDb(dataset.full, dataset.half);
-    generateSpecificCoords(dataset.full, dataset.twenty.id, dataset.twenty.coords);
-    generateSpecificCoords(dataset.full, dataset.ten.id, dataset.ten.coords);
-}
+// for(let dataset of datasets) {
+//     create50pDb(dataset.full, dataset.half);
+//     generateSpecificCoords(dataset.full, dataset.twenty.id, dataset.twenty.coords);
+//     generateSpecificCoords(dataset.full, dataset.ten.id, dataset.ten.coords);
+// }
+let dataset = datasets[2];
+// create50pDb(dataset.full, dataset.half);
+generateSpecificCoords(dataset.full, dataset.twenty.id, dataset.twenty.coords);
+// generateSpecificCoords(dataset.full, dataset.ten.id, dataset.ten.coords);

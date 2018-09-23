@@ -2,8 +2,8 @@ import ImageAsset from './ImageAsset';
 
 class Macbook extends ImageAsset {
 
-    constructor(container: Main, x, y, id, particles = [], neighbors = [], clusters = []){
-        super(container, x, y, id, ImageAsset.Macbook, particles, neighbors, clusters);
+    constructor(container: Main, x, y, id, particles = [], neighbors = [], clusters = [], large_clusters = []){
+        super(container, x, y, id, ImageAsset.Macbook, particles, neighbors, clusters, large_clusters);
     }
 
     draw(){
