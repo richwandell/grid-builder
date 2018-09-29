@@ -20,6 +20,30 @@ class LargeClusterResponse {
         this.clusters = clusters;
         this.largestCluster = clusters[largestCluster];
         this.guess = this.largestCluster[0];
+
+        if(clusters.length > 1) {
+            if(clusters[0].length > 0 && clusters[1].length > 0) {
+                if(this.largestCluster[0].weight < clusters[0][0].weight
+                    || this.largestCluster[0].weight < clusters[1][0].weight) {
+                    debugger;
+                }
+            }
+        }
+
+
+        // let best = [];
+        // for(let c of clusters) {
+        //     if(c.length > 0) {
+        //         best.push(
+        //             c.map(a => a[2]).reduce((a, b) => a + b)
+        //         );
+        //     } else {
+        //         best.push(-1);
+        //     }
+        // }
+        // error: 0.46945099860763123 average std: 0.7207840273301789
+
+        // this.guess = clusters[best.indexOf(Math.max(...best))][0];
     }
 }
 
@@ -100,6 +124,16 @@ class ServerBase {
         const particles = pf.getParticleCoords();
         const unique = pf.getUniqueParticles();
         return new ParticleFilterResponse(particles, unique, allParticles);
+    }
+
+    pfOnly(pf: ParticleFilterResponse) {
+        let guess = pf.uniqueParticles[0];
+        return new FinalResponse({
+            particleFilterResponse: pf,
+            guess: [guess.x, guess.y],
+            clusters: [],
+            largestCluster: pf.uniqueParticles
+        })
     }
 
     /**

@@ -46,11 +46,12 @@ export default class LocalWalkAnalyzer extends WalkAnalyzer {
             // let startTime = new Date().getTime();
             await this.db.createFeaturesCache(fp_id, this.interpolated)
                 .then(() => this.moveParticles(data, id, particleNumber, alphaValue))
-                .then(this.smallCluster)
+                .then(this.pfOnly)
                 .then((fr: FinalResponse) => {
                     let guess = fr.guess;
                     // let endTime = new Date().getTime();
                     // console.log(endTime - startTime);
+                    // 0.5588362701190673 average std: 0.7369824686927283
                     this.setPreviousState(id, guess);
                     estimates.push(guess);
                 });

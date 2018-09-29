@@ -7,101 +7,141 @@ import KalmanFilter from "../src/server/KalmanFilter";
 const log = {debug: () => {}, log: () => {}};
 const database = new Db(log);
 
-let db = database.getDatabase();
+// let base64Image = File.readFileSync("test/school_floor_plan_image.base64", "utf8");
+//
+// let query = `
+//   select
+//       *
+//   from
+//        layout_images
+//   where
+//       id in ('2295874152d66417bceb0daab1d7b19d',
+//              '3CC0542325DEAD60E5A2409297C8FD72',
+//              '197C69B9597C6A8E382530C15DF698B8',
+//              '8ECD6A0BD7F8AE2210144C81C102B0A9');
+//   `;
+//
+// let update = `
+//     update
+//         layout_images
+//     set
+//         layout_image = ?
+//     where
+//         id = ?;
+// `;
+// //async/await with database wrapper class
+// (async () => {
+//     let rows = await database.all(query);
+//
+//     for(let row of rows) {
+//         let layoutImage = JSON.parse(row.layout_image);
+//         console.log(layoutImage.image);
+//         layoutImage.image = base64Image;
+//         let newLayoutImage = JSON.stringify(layoutImage);
+//         await database.run(update, newLayoutImage, row.id);
+//     }
+// })();
 
-db.all(`
-select * from scan_results where fp_id = '2295874152d66417bceb0daab1d7b19d';
-`, (err, rows) => {
 
 
 
-    for(let row of rows) {
-        let values = eval(row.orig_values);
 
-        values = values.filter((v) => v !== 0);
-        values = values.slice(-5);
+// db.all(`
+// select * from scan_results where fp_id = '2295874152d66417bceb0daab1d7b19d';
+// `, (err, rows) => {
+//
+//
+//
+//     for(let row of rows) {
+//         let values = eval(row.orig_values);
+//
+//         values = values.filter((v) => v !== 0);
+//         values = values.slice(-5);
+//
+//         let k = new KalmanFilter(values[0]);
+//
+//         for(let i = 0; i < values.length; i++) {
+//             k.addSample(values[i]);
+//         }
+//
+//         let est = k.getEstimate();
+//
+//
+//
+//         db.run(`
+//         update
+//             scan_results set value = ?
+//             where
+//             s_id = ? and fp_id = ? and ap_id = ? and x = ? and y = ?;
+//         `, est, row.s_id, row.fp_id, row.ap_id, row.x, row.y);
+//
+//         db.run(`
+//         update
+//             kalman_estimates set kalman = ?
+//             where
+//             fp_id = ? and ap_id = ? and x = ? and y = ?
+//         `, est, row.fp_id, row.ap_id, row.x, row.y);
+//
+//     }
+// });
 
-        let k = new KalmanFilter(values[0]);
 
-        for(let i = 0; i < values.length; i++) {
-            k.addSample(values[i]);
+let data = JSON.parse(File.readFileSync('db/cache/fcache-2295874152d66417bceb0daab1d7b19d-false.json', {encoding: 'utf8'}));
+
+let count = {};
+
+let macs = [];
+
+let keys = Object.keys(data);
+for(let key of keys) {
+    let keys2 = Object.keys(data[key]);
+    let _macs = [];
+
+    for(let key2 of keys2) {
+        let m1 = key2.match(/\w+:\w+:\w+:\w+:\w+:\w{2}/)[0];
+        let m2 = key2.replace(m1, "");
+        if(macs.indexOf(m1) === -1) {
+            macs.push(m1);
         }
 
-        let est = k.getEstimate();
+        if(macs.indexOf(m2) === -1) {
+            macs.push(m2);
+        }
 
+        if(_macs.indexOf(m1) === -1) {
+            _macs.push(m1);
+            if(typeof count[m1] === "undefined") {
+                count[m1] = 0;
+            }
+            count[m1]++;
+        }
 
-
-        db.run(`
-        update
-            scan_results set value = ?
-            where 
-            s_id = ? and fp_id = ? and ap_id = ? and x = ? and y = ?;
-        `, est, row.s_id, row.fp_id, row.ap_id, row.x, row.y);
-
-        db.run(`
-        update
-            kalman_estimates set kalman = ?
-            where 
-            fp_id = ? and ap_id = ? and x = ? and y = ?
-        `, est, row.fp_id, row.ap_id, row.x, row.y);
-
+        if(_macs.indexOf(m2) === -1) {
+            _macs.push(m2);
+            if(typeof count[m2] === "undefined") {
+                count[m2] = 0;
+            }
+            count[m2]++;
+        }
     }
-});
+}
+
+let values = Object.values(count);
+
+count = {};
+
+for(let value of values) {
+    if(typeof count[value + ""] === "undefined") {
+        count[value + ""] = 0;
+    }
+    count[value + ""]++;
+}
+
+console.log(values);
+console.log(count);
 
 
-// let data = JSON.parse(File.readFileSync('db/cache/fcache-6230626FC6FF77D1880E408B3EA8F70F-true.json', {encoding: 'utf8'}));
-//
-// let count = {};
-//
-// let macs = [];
-//
-// let keys = Object.keys(data);
-// for(let key of keys) {
-//     let keys2 = Object.keys(data[key]);
-//     let _macs = [];
-//
-//     for(let key2 of keys2) {
-//         let m1 = key2.match(/\w+:\w+:\w+:\w+:\w+:\w{2}/)[0];
-//         let m2 = key2.replace(m1, "");
-//         if(macs.indexOf(m1) === -1) {
-//             macs.push(m1);
-//         }
-//
-//         if(macs.indexOf(m2) === -1) {
-//             macs.push(m2);
-//         }
-//
-//         if(_macs.indexOf(m1) === -1) {
-//             _macs.push(m1);
-//             if(typeof count[m1] === "undefined") {
-//                 count[m1] = 0;
-//             }
-//             count[m1]++;
-//         }
-//
-//         if(_macs.indexOf(m2) === -1) {
-//             _macs.push(m2);
-//             if(typeof count[m2] === "undefined") {
-//                 count[m2] = 0;
-//             }
-//             count[m2]++;
-//         }
-//     }
-// }
-//
-// let values = Object.values(count);
-//
-// count = {};
-//
-// for(let value of values) {
-//     if(typeof count[value + ""] === "undefined") {
-//         count[value + ""] = 0;
-//     }
-//     count[value + ""]++;
-// }
-//
-// console.log(values);
-// console.log(count);
+
 // db.all(`
 //     select * from layout_images where id = '${oldId}'
 // `, (err, rows) => {

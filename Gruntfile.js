@@ -4,7 +4,10 @@ var fs = require('fs');
 
 var isWin = process.platform === "win32";
 var inspect = false;
-
+//4.531514073166825 average std: 3.2788161430234113
+//3.9992458234313317 average std: 2.4713608575083272
+//4.11431961367712 average std: 2.511207425597001
+//3.968338939938744 average std: 2.4519497235489327
 module.exports = function (grunt) {
     var id = uuid.v4();
     try {
@@ -475,6 +478,29 @@ module.exports = function (grunt) {
         school_stationary_26_12_full_local_i: {
             cmd: walkCommand("school/full_db/stationary_26_12.json", "local", "true")
         },
+
+        school_stationary_25_09_full_rest_2weeks: {
+            cmd: walkCommand("school/full_db/stationary_25_09_2weeks.json", "rest", "")
+        },
+        school_stationary_25_09_full_local_ni_2weeks: {
+            cmd: walkCommand("school/full_db/stationary_25_09_2weeks.json", "local", "false")
+        },
+        school_stationary_25_09_full_local_i_2weeks: {
+            cmd: walkCommand("school/full_db/stationary_25_09_2weeks.json", "local", "true")
+        },
+
+        school_stationary_21_09_full_rest_2weeks: {
+            cmd: walkCommand("school/full_db/stationary_21_09_2weeks.json", "rest", "")
+        },
+        school_stationary_21_09_full_local_ni_2weeks: {
+            cmd: walkCommand("school/full_db/stationary_21_09_2weeks.json", "local", "false")
+        },
+        school_stationary_21_09_full_local_i_2weeks: {
+            cmd: walkCommand("school/full_db/stationary_21_09_2weeks.json", "local", "true")
+        },
+        school_test: {
+            cmd: walkCommand("school/new-thing.json", "rest", "")
+        },
     };
 
     var schoolHalfDb = {
@@ -526,6 +552,26 @@ module.exports = function (grunt) {
         },
         school_stationary_26_12_half_local_i: {
             cmd: walkCommand("school/half_db/stationary_26_12.json", "local", "true")
+        },
+
+        school_stationary_25_09_half_rest_2weeks: {
+            cmd: walkCommand("school/half_db/stationary_25_09_2weeks.json", "rest", "")
+        },
+        school_stationary_25_09_half_local_ni_2weeks: {
+            cmd: walkCommand("school/half_db/stationary_25_09_2weeks.json", "local", "false")
+        },
+        school_stationary_25_09_half_local_i_2weeks: {
+            cmd: walkCommand("school/half_db/stationary_25_09_2weeks.json", "local", "true")
+        },
+
+        school_stationary_21_09_half_rest_2weeks: {
+            cmd: walkCommand("school/half_db/stationary_21_09_2weeks.json", "rest", "")
+        },
+        school_stationary_21_09_half_local_ni_2weeks: {
+            cmd: walkCommand("school/half_db/stationary_21_09_2weeks.json", "local", "false")
+        },
+        school_stationary_21_09_half_local_i_2weeks: {
+            cmd: walkCommand("school/half_db/stationary_21_09_2weeks.json", "local", "true")
         },
     };
 
@@ -579,6 +625,26 @@ module.exports = function (grunt) {
         school_stationary_26_12_20p_local_i: {
             cmd: walkCommand("school/20p/stationary_26_12.json", "local", "true")
         },
+
+        school_stationary_25_09_20p_rest_2weeks: {
+            cmd: walkCommand("school/20p/stationary_25_09_2weeks.json", "rest", "")
+        },
+        school_stationary_25_09_20p_local_ni_2weeks: {
+            cmd: walkCommand("school/20p/stationary_25_09_2weeks.json", "local", "false")
+        },
+        school_stationary_25_09_20p_local_i_2weeks: {
+            cmd: walkCommand("school/20p/stationary_25_09_2weeks.json", "local", "true")
+        },
+
+        school_stationary_21_09_20p_rest_2weeks: {
+            cmd: walkCommand("school/20p/stationary_21_09_2weeks.json", "rest", "")
+        },
+        school_stationary_21_09_20p_local_ni_2weeks: {
+            cmd: walkCommand("school/20p/stationary_21_09_2weeks.json", "local", "false")
+        },
+        school_stationary_21_09_20p_local_i_2weeks: {
+            cmd: walkCommand("school/20p/stationary_21_09_2weeks.json", "local", "true")
+        },
     };
 
     var school10pDb = {
@@ -630,6 +696,26 @@ module.exports = function (grunt) {
         },
         school_stationary_26_12_10p_local_i: {
             cmd: walkCommand("school/10p/stationary_26_12.json", "local", "true")
+        },
+
+        school_stationary_25_09_10p_rest_2weeks: {
+            cmd: walkCommand("school/10p/stationary_25_09_2weeks.json", "rest", "")
+        },
+        school_stationary_25_09_10p_local_ni_2weeks: {
+            cmd: walkCommand("school/10p/stationary_25_09_2weeks.json", "local", "false")
+        },
+        school_stationary_25_09_10p_local_i_2weeks: {
+            cmd: walkCommand("school/10p/stationary_25_09_2weeks.json", "local", "true")
+        },
+
+        school_stationary_21_09_10p_rest_2weeks: {
+            cmd: walkCommand("school/10p/stationary_21_09_2weeks.json", "rest", "")
+        },
+        school_stationary_21_09_10p_local_ni_2weeks: {
+            cmd: walkCommand("school/10p/stationary_21_09_2weeks.json", "local", "false")
+        },
+        school_stationary_21_09_10p_local_i_2weeks: {
+            cmd: walkCommand("school/10p/stationary_21_09_2weeks.json", "local", "true")
         },
     };
 
@@ -893,6 +979,30 @@ module.exports = function (grunt) {
                     'exec:school_stationary_26_12_10p_local_ni',
                     'exec:school_stationary_26_12_10p_local_i'
                 ]
+            },
+            school_2weeks1: {
+                tasks: [
+                    'exec:school_stationary_25_09_full_local_ni_2weeks',
+                    'exec:school_stationary_25_09_full_local_i_2weeks',
+                    'exec:school_stationary_25_09_half_local_ni_2weeks',
+                    'exec:school_stationary_25_09_half_local_i_2weeks',
+                    'exec:school_stationary_25_09_20p_local_ni_2weeks',
+                    'exec:school_stationary_25_09_20p_local_i_2weeks',
+                    'exec:school_stationary_25_09_10p_local_ni_2weeks',
+                    'exec:school_stationary_25_09_10p_local_i_2weeks'
+                ]
+            },
+            school_2weeks2: {
+                tasks: [
+                    'exec:school_stationary_21_09_full_local_ni_2weeks',
+                    'exec:school_stationary_21_09_full_local_i_2weeks',
+                    'exec:school_stationary_21_09_half_local_ni_2weeks',
+                    'exec:school_stationary_21_09_half_local_i_2weeks',
+                    'exec:school_stationary_21_09_20p_local_ni_2weeks',
+                    'exec:school_stationary_21_09_20p_local_i_2weeks',
+                    'exec:school_stationary_21_09_10p_local_ni_2weeks',
+                    'exec:school_stationary_21_09_10p_local_i_2weeks'
+                ]
             }
         },
         "run tests": {
@@ -904,7 +1014,9 @@ module.exports = function (grunt) {
                 'concurrent:school_stationary1',
                 'concurrent:school_stationary2',
                 "concurrent:school_stationary3",
-                "concurrent:school_stationary4"
+                "concurrent:school_stationary4",
+                "concurrent:school_2weeks1",
+                "concurrent:school_2weeks2"
             ]
         }
     });

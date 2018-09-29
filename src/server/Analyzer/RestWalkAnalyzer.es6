@@ -1,6 +1,7 @@
 import WalkAnalyzer from "./WalkAnalyzer";
 
-const request = require('request');
+const request = require('request')
+const pjson = require('../../../package.json');
 
 export default class RestWalkAnalyzer extends WalkAnalyzer {
 
@@ -33,7 +34,7 @@ export default class RestWalkAnalyzer extends WalkAnalyzer {
                 fp_id: this.fpId
             };
             request({
-                url: 'http://localhost:8888/rest/resetLocalizer',
+                url: 'http://localhost:'+pjson.builder_rest_port+'/rest/resetLocalizer',
                 json: true,
                 method: "POST",
                 body: data
@@ -65,7 +66,7 @@ export default class RestWalkAnalyzer extends WalkAnalyzer {
             alphaValue: this.alphaValues[this.index3]
         };
         request({
-            url: 'http://localhost:8888/rest/localize',
+            url: 'http://localhost:'+pjson.builder_rest_port+'/rest/localize',
             json: true,
             method: "POST",
             body: data

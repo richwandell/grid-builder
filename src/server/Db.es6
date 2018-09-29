@@ -778,6 +778,50 @@ class Db {
             });
         });
     }
+
+    all(query, ...params) {
+        return new Promise((resolve, reject) => {
+            if(params.length > 0) {
+                this.db.all(query, ...params, (err, res) => {
+                    if(err !== null) {
+                        reject(err);
+                    } else {
+                        resolve(res);
+                    }
+                });
+            } else {
+                this.db.all(query, (err, res) => {
+                    if(err !== null) {
+                        reject(err);
+                    } else {
+                        resolve(res);
+                    }
+                });
+            }
+        });
+    }
+
+    run(query, ...params) {
+        return new Promise((resolve, reject) => {
+            if(params.length > 0) {
+                this.db.run(query, ...params, (err, res) => {
+                    if(err !== null) {
+                        reject(err);
+                    } else {
+                        resolve(res);
+                    }
+                });
+            } else {
+                this.db.run(query, (err, res) => {
+                    if(err !== null) {
+                        reject(err);
+                    } else {
+                        resolve(res);
+                    }
+                });
+            }
+        });
+    }
 }
 
 

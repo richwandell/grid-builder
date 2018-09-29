@@ -62,8 +62,8 @@
   "builder_log_folder": "log",
   "builder_protocol": "http",
   "builder_host_name": "localhost",
-  "builder_rest_port": 8888,
-  "builder_ws_port": 8889,
+  "builder_rest_port": 8890,
+  "builder_ws_port": 8891,
   "builder_db_name": "db.sqlite3",
   "devDependencies": {
     "grunt-concurrent": "^2.3.1"

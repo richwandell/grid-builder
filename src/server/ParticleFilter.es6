@@ -191,7 +191,7 @@ class ParticleFilter {
             }
             newParticles.push(p);
         }
-        this.particles = newParticles;
+        // this.particles = newParticles;
     }
 
     getParticleCoords(){

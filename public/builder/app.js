@@ -10989,14 +10989,14 @@ var Main = function () {
 
         this.state = new _State2.default(this);
         this.grid = new _Grid2.default(this);
-        this.db = new _Db2.default(this, "http" + "://" + "localhost" + ":" + 8888);
+        this.db = new _Db2.default(this, "http" + "://" + "localhost" + ":" + 8890);
         this.layout = new _LayoutManager2.default(this);
         this.contextMenu = new _ContextMenu2.default(this);
         this.compass = new _Compass2.default(this);
         if (this.isAndroid) {
             this.localizationFinishedHandler = new _LocalizationFinishedHandler2.default(this);
         } else {
-            this.webSocket = new _WebSocketClient2.default(this, "ws://" + "localhost" + ":" + 8889, ['echo-protocol']);
+            this.webSocket = new _WebSocketClient2.default(this, "ws://" + "localhost" + ":" + 8891, ['echo-protocol']);
             this.localizationFinishedHandler = this.webSocket;
         }
 
