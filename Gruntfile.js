@@ -4,10 +4,7 @@ var fs = require('fs');
 
 var isWin = process.platform === "win32";
 var inspect = false;
-//4.531514073166825 average std: 3.2788161430234113
-//3.9992458234313317 average std: 2.4713608575083272
-//4.11431961367712 average std: 2.511207425597001
-//3.968338939938744 average std: 2.4519497235489327
+
 module.exports = function (grunt) {
     var id = uuid.v4();
     try {

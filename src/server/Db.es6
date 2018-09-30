@@ -9,7 +9,7 @@ const fs = require('fs');
 
 class Db {
 
-    static database_code_version = 6;
+    static database_code_version = 7;
     static query_get_all_floorplans = "select * from layout_images order by floor_plan_name";
     static query_get_database_version = "select value from settings where key = 'database_version';";
     static query_insert_version = "insert or ignore into settings values ('database_version', ?);";
@@ -129,6 +129,12 @@ class Db {
     static migration6 = [
         "ALTER TABLE features ADD interpolated INTEGER DEFAULT 0 NOT NULL;",
         "CREATE INDEX features_interpolated_index ON features (interpolated);",
+        "update settings set value = '" + Db.database_code_version + "' where key = 'database_code_version';"
+    ];
+
+    static migration7 = [
+        "alter table layout_images add x_size INTEGER DEFAULT 0 NOT NULL;",
+        "alter table layout_images add y_size INTEGER DEFAULT 0 NOT NULL;",
         "update settings set value = '" + Db.database_code_version + "' where key = 'database_code_version';"
     ];
 
@@ -358,6 +364,14 @@ class Db {
             case 5:
                 db.serialize(() => {
                     Db.migration6.forEach((mig) => {
+                        db.run(mig);
+                    });
+                    this.createTables(db, cb);
+                });
+                break;
+            case 6:
+                db.serialize(() => {
+                    Db.migration7.forEach((mig) => {
                         db.run(mig);
                     });
                     this.createTables(db, cb);

@@ -24,13 +24,13 @@ export default class LocalWalkAnalyzer extends WalkAnalyzer {
         let averageStd = allStd.reduce((a, b) => a+b) / 5;
         console.log(" average error: " + averageError + " average std: " + averageStd);
 
-        this.writeData(averageError);
+        this.writeData(averageError, averageStd);
         process.exit(0);
     }
 
-    writeData(averageError) {
+    writeData(averageError, averageStd) {
         SimpleLock.aquire();
-        let data = `${this.walkFileName}, ${this.interpolated}, ${averageError}\n`;
+        let data = `${this.walkFileName}, ${this.interpolated}, ${averageError}, ${averageStd}\n`;
         File.appendFileSync("db/analysis.csv", data);
         SimpleLock.release();
     }
@@ -46,19 +46,16 @@ export default class LocalWalkAnalyzer extends WalkAnalyzer {
             // let startTime = new Date().getTime();
             await this.db.createFeaturesCache(fp_id, this.interpolated)
                 .then(() => this.moveParticles(data, id, particleNumber, alphaValue))
-                .then(this.pfOnly)
+                .then(this.smallCluster)
                 .then((fr: FinalResponse) => {
                     let guess = fr.guess;
-                    // let endTime = new Date().getTime();
-                    // console.log(endTime - startTime);
-                    // 0.5588362701190673 average std: 0.7369824686927283
                     this.setPreviousState(id, guess);
                     estimates.push(guess);
                 });
         }
         delete this.worker.particles[id];
 
-        let [error, std] = this.compareResultsToActual(this.walkData.steps, estimates);
+        let [error, std] = await this.compareResultsToActual(this.walkData.steps, estimates);
 
         return [error, std];
     }
