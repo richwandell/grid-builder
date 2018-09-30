@@ -448,14 +448,14 @@ module.exports = function (grunt) {
             cmd: walkCommand("school/full_db/stationary_08_03.json", "local", "true")
         },
 
-        school_stationary_19_12_full_rest: {
-            cmd: walkCommand("school/full_db/stationary_19_12.json", "rest", "")
+        school_stationary_21_10_full_rest: {
+            cmd: walkCommand("school/full_db/stationary_21_10.json", "rest", "")
         },
-        school_stationary_19_12_full_local_ni: {
-            cmd: walkCommand("school/full_db/stationary_19_12.json", "local", "false")
+        school_stationary_21_10_full_local_ni: {
+            cmd: walkCommand("school/full_db/stationary_21_10.json", "local", "false")
         },
-        school_stationary_19_12_full_local_i: {
-            cmd: walkCommand("school/full_db/stationary_19_12.json", "local", "true")
+        school_stationary_21_10_full_local_i: {
+            cmd: walkCommand("school/full_db/stationary_21_10.json", "local", "true")
         },
 
         school_stationary_25_09_full_rest: {
@@ -544,14 +544,14 @@ module.exports = function (grunt) {
             cmd: walkCommand("school/half_db/stationary_08_03.json", "local", "true")
         },
 
-        school_stationary_19_12_half_rest: {
-            cmd: walkCommand("school/full_db/stationary_19_12.json", "rest", "")
+        school_stationary_21_10_half_rest: {
+            cmd: walkCommand("school/full_db/stationary_21_10.json", "rest", "")
         },
-        school_stationary_19_12_half_local_ni: {
-            cmd: walkCommand("school/half_db/stationary_19_12.json", "local", "false")
+        school_stationary_21_10_half_local_ni: {
+            cmd: walkCommand("school/half_db/stationary_21_10.json", "local", "false")
         },
-        school_stationary_19_12_half_local_i: {
-            cmd: walkCommand("school/half_db/stationary_19_12.json", "local", "true")
+        school_stationary_21_10_half_local_i: {
+            cmd: walkCommand("school/half_db/stationary_21_10.json", "local", "true")
         },
 
         school_stationary_25_09_half_rest: {
@@ -636,14 +636,14 @@ module.exports = function (grunt) {
             cmd: walkCommand("school/20p/stationary_08_03.json", "local", "true")
         },
 
-        school_stationary_19_12_20p_rest: {
-            cmd: walkCommand("school/20p/stationary_19_12.json", "rest", "")
+        school_stationary_21_10_20p_rest: {
+            cmd: walkCommand("school/20p/stationary_21_10.json", "rest", "")
         },
-        school_stationary_19_12_20p_local_ni: {
-            cmd: walkCommand("school/20p/stationary_19_12.json", "local", "false")
+        school_stationary_21_10_20p_local_ni: {
+            cmd: walkCommand("school/20p/stationary_21_10.json", "local", "false")
         },
-        school_stationary_19_12_20p_local_i: {
-            cmd: walkCommand("school/20p/stationary_19_12.json", "local", "true")
+        school_stationary_21_10_20p_local_i: {
+            cmd: walkCommand("school/20p/stationary_21_10.json", "local", "true")
         },
 
         school_stationary_25_09_20p_rest: {
@@ -728,14 +728,14 @@ module.exports = function (grunt) {
             cmd: walkCommand("school/10p/stationary_08_03.json", "local", "true")
         },
 
-        school_stationary_19_12_10p_rest: {
-            cmd: walkCommand("school/10p/stationary_19_12.json", "rest", "")
+        school_stationary_21_10_10p_rest: {
+            cmd: walkCommand("school/10p/stationary_21_10.json", "rest", "")
         },
-        school_stationary_19_12_10p_local_ni: {
-            cmd: walkCommand("school/10p/stationary_19_12.json", "local", "false")
+        school_stationary_21_10_10p_local_ni: {
+            cmd: walkCommand("school/10p/stationary_21_10.json", "local", "false")
         },
-        school_stationary_19_12_10p_local_i: {
-            cmd: walkCommand("school/10p/stationary_19_12.json", "local", "true")
+        school_stationary_21_10_10p_local_i: {
+            cmd: walkCommand("school/10p/stationary_21_10.json", "local", "true")
         },
 
         school_stationary_25_09_10p_rest: {
@@ -1029,14 +1029,14 @@ module.exports = function (grunt) {
             },
             school_stationary2: {
                 tasks: [
-                    'exec:school_stationary_19_12_full_local_ni',
-                    'exec:school_stationary_19_12_full_local_i',
-                    'exec:school_stationary_19_12_half_local_ni',
-                    'exec:school_stationary_19_12_half_local_i',
-                    'exec:school_stationary_19_12_20p_local_ni',
-                    'exec:school_stationary_19_12_20p_local_i',
-                    'exec:school_stationary_19_12_10p_local_ni',
-                    'exec:school_stationary_19_12_10p_local_i'
+                    'exec:school_stationary_21_10_full_local_ni',
+                    'exec:school_stationary_21_10_full_local_i',
+                    'exec:school_stationary_21_10_half_local_ni',
+                    'exec:school_stationary_21_10_half_local_i',
+                    'exec:school_stationary_21_10_20p_local_ni',
+                    'exec:school_stationary_21_10_20p_local_i',
+                    'exec:school_stationary_21_10_10p_local_ni',
+                    'exec:school_stationary_21_10_10p_local_i'
                 ]
             },
             school_stationary3: {
