@@ -6,6 +6,8 @@ var isWin = process.platform === "win32";
 var inspect = false;
 
 module.exports = function (grunt) {
+    const numCPUs = require('os').cpus().length;
+
     var id = uuid.v4();
     try {
         var oldUUID = fs.readFileSync(".uuid", "utf8");
@@ -495,8 +497,29 @@ module.exports = function (grunt) {
         school_stationary_21_09_full_local_i_2weeks: {
             cmd: walkCommand("school/full_db/stationary_21_09_2weeks.json", "local", "true")
         },
+
+        school_stationary_25_09_full_rest_3weeks: {
+            cmd: walkCommand("school/full_db/stationary_25_09_3weeks.json", "rest", "")
+        },
+        school_stationary_25_09_full_local_ni_3weeks: {
+            cmd: walkCommand("school/full_db/stationary_25_09_3weeks.json", "local", "false")
+        },
+        school_stationary_25_09_full_local_i_3weeks: {
+            cmd: walkCommand("school/full_db/stationary_25_09_3weeks.json", "local", "true")
+        },
+
+        school_walk2_full_rest_3weeks: {
+            cmd: walkCommand("school/full_db/walk2_3weeks.json", "rest", "")
+        },
+        school_walk2_full_local_ni_3weeks: {
+            cmd: walkCommand("school/full_db/walk2_3weeks.json", "local", "false")
+        },
+        school_walk2_full_local_i_3weeks: {
+            cmd: walkCommand("school/full_db/walk2_3weeks.json", "local", "true")
+        },
+
         school_test: {
-            cmd: walkCommand("school/new-thing.json", "rest", "")
+            cmd: walkCommand("school/2.json", "rest", "")
         },
     };
 
@@ -570,6 +593,26 @@ module.exports = function (grunt) {
         school_stationary_21_09_half_local_i_2weeks: {
             cmd: walkCommand("school/half_db/stationary_21_09_2weeks.json", "local", "true")
         },
+
+        school_stationary_25_09_half_rest_3weeks: {
+            cmd: walkCommand("school/half_db/stationary_25_09_3weeks.json", "rest", "")
+        },
+        school_stationary_25_09_half_local_ni_3weeks: {
+            cmd: walkCommand("school/half_db/stationary_25_09_3weeks.json", "local", "false")
+        },
+        school_stationary_25_09_half_local_i_3weeks: {
+            cmd: walkCommand("school/half_db/stationary_25_09_3weeks.json", "local", "true")
+        },
+
+        school_walk2_half_rest_3weeks: {
+            cmd: walkCommand("school/half_db/walk2_3weeks.json", "rest", "")
+        },
+        school_walk2_half_local_ni_3weeks: {
+            cmd: walkCommand("school/half_db/walk2_3weeks.json", "local", "false")
+        },
+        school_walk2_half_local_i_3weeks: {
+            cmd: walkCommand("school/half_db/walk2_3weeks.json", "local", "true")
+        },
     };
 
     var school20pDb = {
@@ -642,6 +685,26 @@ module.exports = function (grunt) {
         school_stationary_21_09_20p_local_i_2weeks: {
             cmd: walkCommand("school/20p/stationary_21_09_2weeks.json", "local", "true")
         },
+
+        school_stationary_25_09_20p_rest_3weeks: {
+            cmd: walkCommand("school/20p/stationary_25_09_3weeks.json", "rest", "")
+        },
+        school_stationary_25_09_20p_local_ni_3weeks: {
+            cmd: walkCommand("school/20p/stationary_25_09_3weeks.json", "local", "false")
+        },
+        school_stationary_25_09_20p_local_i_3weeks: {
+            cmd: walkCommand("school/20p/stationary_25_09_3weeks.json", "local", "true")
+        },
+
+        school_walk2_20p_rest_3weeks: {
+            cmd: walkCommand("school/20p/walk2_3weeks.json", "rest", "")
+        },
+        school_walk2_20p_local_ni_3weeks: {
+            cmd: walkCommand("school/20p/walk2_3weeks.json", "local", "false")
+        },
+        school_walk2_20p_local_i_3weeks: {
+            cmd: walkCommand("school/20p/walk2_3weeks.json", "local", "true")
+        },
     };
 
     var school10pDb = {
@@ -713,6 +776,26 @@ module.exports = function (grunt) {
         },
         school_stationary_21_09_10p_local_i_2weeks: {
             cmd: walkCommand("school/10p/stationary_21_09_2weeks.json", "local", "true")
+        },
+
+        school_stationary_25_09_10p_rest_3weeks: {
+            cmd: walkCommand("school/10p/stationary_25_09_3weeks.json", "rest", "")
+        },
+        school_stationary_25_09_10p_local_ni_3weeks: {
+            cmd: walkCommand("school/10p/stationary_25_09_3weeks.json", "local", "false")
+        },
+        school_stationary_25_09_10p_local_i_3weeks: {
+            cmd: walkCommand("school/10p/stationary_25_09_3weeks.json", "local", "true")
+        },
+
+        school_walk2_10p_rest_3weeks: {
+            cmd: walkCommand("school/10p/walk2_3weeks.json", "rest", "")
+        },
+        school_walk2_10p_local_ni_3weeks: {
+            cmd: walkCommand("school/10p/walk2_3weeks.json", "local", "false")
+        },
+        school_walk2_10p_local_i_3weeks: {
+            cmd: walkCommand("school/10p/walk2_3weeks.json", "local", "true")
         },
     };
 
@@ -833,6 +916,9 @@ module.exports = function (grunt) {
             }
         },
         concurrent: {
+            options: {
+                limit: numCPUs
+            },
             home_walk1: {
                 tasks: [
                     'exec:home_gen_walk1_local_ni',
@@ -1000,6 +1086,30 @@ module.exports = function (grunt) {
                     'exec:school_stationary_21_09_10p_local_ni_2weeks',
                     'exec:school_stationary_21_09_10p_local_i_2weeks'
                 ]
+            },
+            school_3weeks1: {
+                tasks: [
+                    'exec:school_stationary_25_09_full_local_ni_3weeks',
+                    'exec:school_stationary_25_09_full_local_i_3weeks',
+                    'exec:school_stationary_25_09_half_local_ni_3weeks',
+                    'exec:school_stationary_25_09_half_local_i_3weeks',
+                    'exec:school_stationary_25_09_20p_local_ni_3weeks',
+                    'exec:school_stationary_25_09_20p_local_i_3weeks',
+                    'exec:school_stationary_25_09_10p_local_ni_3weeks',
+                    'exec:school_stationary_25_09_10p_local_i_3weeks'
+                ]
+            },
+            school_3weeks2: {
+                tasks: [
+                    'exec:school_walk2_full_local_ni_3weeks',
+                    'exec:school_walk2_full_local_i_3weeks',
+                    'exec:school_walk2_half_local_ni_3weeks',
+                    'exec:school_walk2_half_local_i_3weeks',
+                    'exec:school_walk2_20p_local_ni_3weeks',
+                    'exec:school_walk2_20p_local_i_3weeks',
+                    'exec:school_walk2_10p_local_ni_3weeks',
+                    'exec:school_walk2_10p_local_i_3weeks'
+                ]
             }
         },
         "run tests": {
@@ -1013,7 +1123,9 @@ module.exports = function (grunt) {
                 "concurrent:school_stationary3",
                 "concurrent:school_stationary4",
                 "concurrent:school_2weeks1",
-                "concurrent:school_2weeks2"
+                "concurrent:school_2weeks2",
+                "concurrent:school_3weeks1",
+                "concurrent:school_3weeks2"
             ]
         }
     });

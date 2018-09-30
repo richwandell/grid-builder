@@ -39,17 +39,33 @@ function createLatexTableFromData() {
 
     let text = "";
 
-    for (let row of data) {
-        let split = row.split("\t");
-
+    for (let i = 0; i < data.length; i++) {
+        let row = data[i].split("\t");
+        let lastRow = [];
+        if((i+1) % 2 === 0){
+            lastRow = data[i-1].split("\t");
+        }
         text += `\\hline
-\\multicolumn{2}{|c|}{${split[0]}} & ${split[1]} & ${split[2]} & ${split[3]} & ${split[4]} & ${split[5]} & ${split[6]} & ${split[7]} & ${split[8]} \\\\
+\\multicolumn{2}{|c|}{${row[0]}}`;
+
+        for(let j = 1; j < row.length; j++){
+            if(typeof(lastRow[j]) !== "undefined"){
+                if(Number(row[j]) < Number(lastRow[j])) {
+                    text += ` & \\cellcolor{mygreen}${row[j]}`;
+                } else if(Number(row[j]) > Number(lastRow[j])) {
+                    text += ` & \\cellcolor{myred}${row[j]}`;
+                }
+            } else {
+                text += ` & ${row[j]}`;
+            }
+        }
+        text += `\\\\
 `;
     }
 
     console.log(text);
 }
-
+createLatexTableFromData();
 function updateImage() {
     let base64Image = File.readFileSync("test/school_floor_plan_image.base64", "utf8");
 
