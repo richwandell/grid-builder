@@ -35,7 +35,7 @@
     "grunt-webpack": "^2.0.1",
     "image-size": "^0.6.3",
     "jquery": "^3.1.0",
-    "mathjs": "^3.12.0",
+    "mathjs": "^7.5.1",
     "md5": "^2.2.1",
     "memored": "^1.1.1",
     "node-debug": "^0.1.0",
